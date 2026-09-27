@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { useStore } from "@/lib/store";
 import { signInWithGoogle } from "@/lib/supabase/browser";
+
+function afterAuth(): string {
+  const next = new URLSearchParams(window.location.search).get("next") || "/";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -17,6 +22,11 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [authSearch, setAuthSearch] = useState("");
+
+  useEffect(() => {
+    setAuthSearch(window.location.search);
+  }, []);
 
   function create(nextName: string, nextEmail: string, nextPhone: string) {
     setBusy(true);
@@ -29,7 +39,7 @@ export default function SignupPage() {
       });
       markIntro();
       showToast("Account created");
-      router.push("/");
+      router.push(afterAuth());
     }, 500);
   }
 
@@ -64,7 +74,7 @@ export default function SignupPage() {
               type="button"
               disabled={busy}
               onClick={async () => {
-                const started = await signInWithGoogle();
+                const started = await signInWithGoogle(afterAuth());
                 if (!started) showToast("Google sign-in is not turned on yet. Add the Google client in Supabase first.");
               }}
             >
@@ -114,7 +124,7 @@ export default function SignupPage() {
           </div>
           <p className="tiny center mt-lg">
             Already have an account?{" "}
-            <Link className="inline-link" href="/login">
+            <Link className="inline-link" href={`/login${authSearch}`}>
               Sign in
             </Link>
           </p>

@@ -16,13 +16,44 @@ function bucket(status: Booking["status"]): (typeof TABS)[number] {
 }
 
 export default function TripsPage() {
-  const { bookings } = useStore();
+  const { bookings, user } = useStore();
   const { properties } = useCatalog();
   const propertyFor = (id: string) => properties.find((item) => item.id === id);
   const [tab, setTab] = useState<(typeof TABS)[number]>("Upcoming");
-  const [open, setOpen] = useState<string | null>(bookings[0]?.id ?? null);
-  const list = useMemo(() => bookings.filter((b) => bucket(b.status) === tab), [bookings, tab]);
-  const selected = bookings.find((b) => b.id === open);
+
+  const userBookings = useMemo(() => {
+    if (!user) return [];
+    const email = user.email?.trim().toLowerCase();
+    const phone = user.phone ? user.phone.replace(/\D/g, "") : "";
+    return bookings.filter((b) => {
+      const matchEmail = email && b.guestEmail?.trim().toLowerCase() === email;
+      const matchPhone = phone && b.guestPhone?.replace(/\D/g, "") === phone;
+      return matchEmail || matchPhone;
+    });
+  }, [bookings, user]);
+
+  const [open, setOpen] = useState<string | null>(null);
+  const list = useMemo(() => userBookings.filter((b) => bucket(b.status) === tab), [userBookings, tab]);
+  const selected = userBookings.find((b) => b.id === open);
+
+  if (!user) {
+    return (
+      <Shell nav="trips">
+        <header className="page-head">
+          <h1>Trips</h1>
+        </header>
+        <div className="empty">
+          <h3>Sign in to view your booked farmhouses and trips.</h3>
+          <Link className="btn" href="/login?next=/trips">
+            Sign in
+          </Link>
+          <Link className="btn outline mt" href="/">
+            Explore farmhouses
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell nav="trips">
@@ -41,8 +72,9 @@ export default function TripsPage() {
 
       {list.length === 0 ? (
         <div className="empty">
-          <h3>{tab === "Upcoming" ? "Your next escape starts here." : tab === "Cancelled" ? "Nothing cancelled so far — when you book a farmhouse, it shows up under Trips." : "Past stays will gather here."}</h3>
-          <Link className="btn" href="/">
+          <h3>{tab === "Upcoming" ? "No upcoming trips booked yet." : tab === "Cancelled" ? "No cancelled trips." : "Past stays will gather here."}</h3>
+          <p className="muted">Book a farmhouse getaway and it will appear here with directions and check-in instructions.</p>
+          <Link className="btn mt" href="/">
             Explore farmhouses
           </Link>
         </div>

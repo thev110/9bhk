@@ -9,6 +9,7 @@ import { VIBES } from "@/lib/properties";
 import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { BaseSheet } from "@/components/base-sheet";
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -19,7 +20,7 @@ function greeting(): string {
 
 export default function HomePage() {
   const router = useRouter();
-  const { city, setCity, showToast, ready, seenIntro, sessionChecked } = useStore();
+  const { city, setCity, showToast } = useStore();
   const { properties } = useCatalog();
   const [q, setQ] = useState("");
   const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
@@ -30,10 +31,6 @@ export default function HomePage() {
     setHello(greeting());
   }, []);
 
-  useEffect(() => {
-    if (ready && sessionChecked && !seenIntro) router.replace("/splash");
-  }, [ready, sessionChecked, seenIntro, router]);
-
   const featured = properties.filter((p) => p.group === "featured");
   const nearby = useMemo(() => {
     if (city === "Chennai") return properties.filter((p) => p.group === "nearby");
@@ -41,8 +38,6 @@ export default function HomePage() {
     return (near.length ? near : properties.filter((p) => p.group === "nearby")).slice(0, 3);
   }, [city, properties]);
   const popular = properties.filter((p) => p.group === "popular");
-
-  if (!ready || !sessionChecked || !seenIntro) return null;
 
   function search(e?: FormEvent) {
     e?.preventDefault();
@@ -70,6 +65,15 @@ export default function HomePage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          <button
+            type="button"
+            className="cmdk-trigger-btn"
+            onClick={() => window.dispatchEvent(new Event("open-command-menu"))}
+            aria-label="Open command palette"
+            title="Press ⌘K or Ctrl+K to search"
+          >
+            <kbd>⌘K</kbd>
+          </button>
           <button className="search-submit" type="submit" aria-label="Search">
             <Icon name="arrow" />
           </button>
@@ -171,70 +175,72 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className={`scrim${sheet ? " is-open" : ""}`} onClick={() => setSheet(null)} />
-      <div className={`sheet${sheet ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-hidden={!sheet}>
-        <div className="sheet-grab" />
-        {sheet === "where" ? (
-          <>
-            <div className="sheet-head">
-              <h2>Where to?</h2>
-            </div>
-            <div className="stack">
-              {CITIES.map((c) => (
-                <button
-                  key={c}
-                  className="mi"
-                  type="button"
-                  onClick={() => {
-                    setCity(c);
-                    setSheet(null);
-                    showToast(`Showing escapes around ${c}`);
-                  }}
-                >
-                  <Icon name="pin" />
-                  <span className="lb">{c}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        ) : null}
-        {sheet === "when" ? (
-          <>
-            <div className="sheet-head">
-              <h2>When are you going?</h2>
-            </div>
-            <p className="muted">Pick dates on a farmhouse when you check availability. Minimum stay is 2 nights.</p>
-            <button className="btn block mt" type="button" onClick={() => search()}>
-              Browse available stays
+      <BaseSheet
+        open={sheet === "where"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="Where to?"
+      >
+        <div className="stack">
+          {CITIES.map((c) => (
+            <button
+              key={c}
+              className="mi"
+              type="button"
+              onClick={() => {
+                setCity(c);
+                setSheet(null);
+                showToast(`Showing escapes around ${c}`);
+              }}
+            >
+              <Icon name="pin" />
+              <span className="lb">{c}</span>
             </button>
-          </>
-        ) : null}
-        {sheet === "guests" ? (
-          <>
-            <div className="sheet-head">
-              <h2>Guests</h2>
-            </div>
-            <div className="between">
-              <div>
-                <strong>Guests</strong>
-                <p className="muted">Any age counts here</p>
-              </div>
-              <div className="stepper">
-                <button type="button" aria-label="Fewer guests" onClick={() => setGuests((n) => Math.max(1, n - 1))}>
-                  <Icon name="minus" />
-                </button>
-                <span className="val num">{guests}</span>
-                <button type="button" aria-label="More guests" onClick={() => setGuests((n) => Math.min(16, n + 1))}>
-                  <Icon name="plus" />
-                </button>
-              </div>
-            </div>
-            <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
-              Done
+          ))}
+        </div>
+      </BaseSheet>
+
+      <BaseSheet
+        open={sheet === "when"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="When are you going?"
+      >
+        <p className="muted">Pick dates on a farmhouse when you check availability. Minimum stay is 2 nights.</p>
+        <button
+          className="btn block mt"
+          type="button"
+          onClick={() => {
+            setSheet(null);
+            search();
+          }}
+        >
+          Browse available stays
+        </button>
+      </BaseSheet>
+
+      <BaseSheet
+        open={sheet === "guests"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="Guests"
+      >
+        <div className="between">
+          <div>
+            <strong>Guests</strong>
+            <p className="muted">Any age counts here</p>
+          </div>
+          <div className="stepper">
+            <button type="button" aria-label="Fewer guests" onClick={() => setGuests((n) => Math.max(1, n - 1))}>
+              <Icon name="minus" />
             </button>
-          </>
-        ) : null}
-      </div>
+            <span className="val num">{guests}</span>
+            <button type="button" aria-label="More guests" onClick={() => setGuests((n) => Math.min(16, n + 1))}>
+              <Icon name="plus" />
+            </button>
+          </div>
+        </div>
+        <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
+          Done
+        </button>
+      </BaseSheet>
     </Shell>
   );
 }

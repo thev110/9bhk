@@ -8,12 +8,13 @@ import { Icon } from "@/components/icon";
 import { Rating } from "@/components/cards";
 import { useCatalog } from "@/lib/catalog";
 import { inr } from "@/lib/format";
+import NumberFlow from "@number-flow/react";
 
 export default function PropertyPage() {
   const params = useParams<{ slug: string }>();
   const { properties } = useCatalog();
   const property = properties.find((item) => item.id === params.slug);
-  const { isSaved, toggleSaved, showToast } = useStore();
+  const { user, isSaved, toggleSaved, showToast } = useStore();
 
   if (!property) {
     return (
@@ -49,8 +50,8 @@ export default function PropertyPage() {
           </button>
         }
       />
-      <div className="gal">
-        <img src={property.image} alt={property.alt} style={{ gridColumn: "1 / -1", width: "100%", aspectRatio: "4/3", objectFit: "cover" }} />
+      <div className="gal" style={{ marginTop: 12 }}>
+        <img src={property.image} alt={property.alt} style={{ gridColumn: "1 / -1", width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: "var(--r-lg)", boxShadow: "var(--sh-sm)" }} />
       </div>
       <p className="pad muted" style={{ marginTop: 8, fontSize: 13, fontWeight: 700 }}>
         + 18 photos
@@ -133,14 +134,21 @@ export default function PropertyPage() {
       <div className="stickybar">
         <div>
           <p className="p-price num" style={{ margin: 0 }}>
-            {inr(property.price)} <span className="per">/ night</span>
+            <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
           </p>
           <p className="muted" style={{ fontSize: 12 }}>
             No charge yet
           </p>
         </div>
-        <Link className="btn" href={`/book/${property.id}`}>
-          Check availability
+        <Link
+          className="btn"
+          href={
+            user
+              ? `/book/${property.id}`
+              : `/login?next=${encodeURIComponent(`/book/${property.id}`)}`
+          }
+        >
+          Book now
         </Link>
       </div>
     </Shell>

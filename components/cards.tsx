@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "motion/react";
+import NumberFlow from "@number-flow/react";
 import type { Property } from "@/lib/properties";
 import { inr } from "@/lib/format";
 import { Icon } from "./icon";
@@ -17,7 +19,12 @@ export function Rating({ rating, reviews }: { rating: number; reviews: number })
 
 export function RailCard({ property }: { property: Property }) {
   return (
-    <article className="p-card">
+    <motion.article
+      className="p-card"
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+    >
       <div className="media">
         <Link href={`/property/${property.id}`}>
           <img src={property.image} width={800} height={1000} alt={property.alt} />
@@ -40,17 +47,22 @@ export function RailCard({ property }: { property: Property }) {
             <span className="p-amen">{property.highlights}</span>
           </div>
           <p className="p-price num">
-            {inr(property.price)} <span className="per">/ night</span>
+            <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
           </p>
         </div>
       </Link>
-    </article>
+    </motion.article>
   );
 }
 
 export function FeatureCard({ property }: { property: Property }) {
   return (
-    <article className="f-card">
+    <motion.article
+      className="f-card"
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+    >
       <div className="media">
         <Link href={`/property/${property.id}`}>
           <img src={property.image} width={1080} height={720} alt={property.alt} />
@@ -67,11 +79,11 @@ export function FeatureCard({ property }: { property: Property }) {
             <span className="p-amen">{property.highlights}</span>
           </div>
           <p className="p-price num">
-            {inr(property.price)} <span className="per">/ night</span>
+            <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
           </p>
         </div>
       </Link>
-    </article>
+    </motion.article>
   );
 }
 
@@ -86,7 +98,7 @@ export function NearbyCard({ property }: { property: Property }) {
         <p className="p-loc">{property.location}</p>
         <Rating rating={property.rating} reviews={property.reviews} />
         <p className="p-price num">
-          {inr(property.price)} <span className="per">/ night</span>
+          <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
         </p>
       </div>
     </Link>
@@ -113,7 +125,7 @@ export function ResultCard({ property }: { property: Property }) {
         <div className="between" style={{ marginTop: 7 }}>
           <Rating rating={property.rating} reviews={property.reviews} />
           <span className="p-price num" style={{ margin: 0 }}>
-            {inr(property.price)} <span className="per">/ night</span>
+            <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
           </span>
         </div>
       </div>

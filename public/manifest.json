@@ -1,0 +1,24 @@
+{
+  "name": "9bhk.app · Farmhouse Marketplace",
+  "short_name": "9bhk",
+  "description": "Find and book private farmhouses for slow weekends near Chennai, ECR and Pondicherry.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#193527",
+  "theme_color": "#193527",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo-mark.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

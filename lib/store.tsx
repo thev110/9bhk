@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { toast as sonnerToast } from "sonner";
 import { persistBooking, persistConfirmation, persistProfile } from "@/lib/supabase/sync";
+import { signOutSupabase } from "@/lib/supabase/browser";
 
 export type BookingStatus = "confirmed" | "awaiting" | "completed" | "cancelled";
 
@@ -67,70 +69,18 @@ type Persisted = {
   bookings: Booking[];
   draft: ListingDraft | null;
   seenIntro: boolean;
+  signedIn: boolean;
   notes: AppNote[];
 };
 
 const STORAGE_KEY = "9bhk-state";
 
-const defaultUser: User = {
-  name: "Aarav Kumar",
-  email: "aarav.kumar@email.com",
-  phone: "98400 12021",
+export const defaultUser: User = {
+  name: "Guest Explorer",
+  email: "guest@9bhk.app",
+  phone: "",
   city: "Chennai",
-  upiId: "9bhk@okhdfcbank",
 };
-
-const seedBookings: Booking[] = [
-  {
-    id: "b1",
-    code: "9B-40218",
-    propertyId: "palm-grove",
-    propertyName: "Palm Grove",
-    checkIn: "2026-06-12",
-    checkOut: "2026-06-14",
-    adults: 2,
-    children: 0,
-    total: 20384,
-    status: "confirmed",
-    guestName: "Aarav Kumar",
-    guestEmail: "aarav.kumar@email.com",
-    guestPhone: "98400 12021",
-    upiId: "9bhk@okhdfcbank",
-    paymentRef: "UPI-40218",
-  },
-  {
-    id: "b2",
-    code: "9B-40244",
-    propertyId: "verde-meadow",
-    propertyName: "Verde Meadow",
-    checkIn: "2026-07-03",
-    checkOut: "2026-07-06",
-    adults: 6,
-    children: 0,
-    total: 15600,
-    status: "awaiting",
-    guestName: "Karthik M",
-    guestEmail: "karthik.m@email.com",
-    guestPhone: "98840 22110",
-    upiId: "9bhk@okhdfcbank",
-  },
-  {
-    id: "b3",
-    code: "9B-39810",
-    propertyId: "guava-house",
-    propertyName: "The Guava House",
-    checkIn: "2026-02-02",
-    checkOut: "2026-02-04",
-    adults: 4,
-    children: 0,
-    total: 11900,
-    status: "completed",
-    guestName: "Rahul V",
-    guestEmail: "rahul.v@email.com",
-    guestPhone: "98410 77821",
-    upiId: "9bhk@okhdfcbank",
-  },
-];
 
 const emptyDraft = (): ListingDraft => ({
   name: "",
@@ -176,10 +126,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<Persisted>({
     city: "Chennai",
     saved: [],
-    user: defaultUser,
-    bookings: seedBookings,
+    user: null,
+    bookings: [],
     draft: null,
-    seenIntro: false,
+    seenIntro: true,
+    signedIn: false,
     notes: [],
   });
   const [ready, setReady] = useState(false);
@@ -191,33 +142,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Persisted;
-        const byId = Object.fromEntries(seedBookings.map((booking) => [booking.id, booking]));
+        // Purge legacy mock seed bookings so logged-in users never see Aarav Kumar's fake data
+        const realBookings = (parsed.bookings || []).filter(
+          (b) => b.id !== "b1" && b.id !== "b2" && b.id !== "b3" && b.guestName !== "Aarav Kumar" && !b.guestEmail?.includes("aarav")
+        );
         setState({
           city: parsed.city || "Chennai",
           saved: parsed.saved || [],
-          user: parsed.user ?? defaultUser,
-          bookings: (parsed.bookings?.length ? parsed.bookings : seedBookings).map((booking) => {
-            const seed = byId[booking.id];
-            return {
-              ...booking,
-              propertyName:
-                booking.propertyName && booking.propertyName !== booking.propertyId
-                  ? booking.propertyName
-                  : seed?.propertyName || booking.propertyName,
-              guestName: booking.guestEmail ? booking.guestName : seed?.guestName || booking.guestName,
-              guestEmail: booking.guestEmail || seed?.guestEmail || "",
-              guestPhone: booking.guestPhone || seed?.guestPhone || "",
-              upiId: booking.upiId || seed?.upiId,
-              paymentRef: booking.paymentRef || seed?.paymentRef,
-            };
-          }),
+          user: parsed.signedIn ? parsed.user ?? null : null,
+          bookings: realBookings,
           draft: parsed.draft ?? null,
-          seenIntro: parsed.seenIntro === true,
+          seenIntro: true,
+          signedIn: parsed.signedIn === true,
           notes: parsed.notes ?? [],
         });
       }
     } catch {
-      /* keep seed */
+      /* ignore */
     }
     setReady(true);
   }, []);
@@ -229,6 +170,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = useCallback((message: string) => {
     setToast(message);
+    sonnerToast(message);
     window.setTimeout(() => setToast(""), 2200);
   }, []);
 
@@ -248,10 +190,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         })),
       isSaved: (id) => state.saved.includes(id),
       signIn: (user) => {
-        setState((s) => ({ ...s, user }));
+        setState((s) => ({ ...s, user, signedIn: true }));
         void persistProfile(user);
       },
-      signOut: () => setState((s) => ({ ...s, user: null })),
+      signOut: () => {
+        void signOutSupabase();
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            parsed.user = null;
+            parsed.signedIn = false;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          }
+        } catch {
+          /* ignore */
+        }
+        setState((s) => ({ ...s, user: null, signedIn: false }));
+      },
       updateUser: (patch) =>
         setState((s) => {
           const user = s.user ? { ...s.user, ...patch } : { ...defaultUser, ...patch };
@@ -309,4 +265,4 @@ export function useStore(): Store {
   return ctx;
 }
 
-export { emptyDraft, defaultUser };
+export { emptyDraft };

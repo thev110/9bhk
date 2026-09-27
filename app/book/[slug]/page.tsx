@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { useCatalog } from "@/lib/catalog";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import NumberFlow from "@number-flow/react";
 
 const BLOCKED = new Set(["2026-10-04", "2026-10-05", "2026-10-18"]);
 const BOOKED = new Set(["2026-10-11", "2026-10-12"]);
@@ -30,8 +31,13 @@ export default function BookPage() {
   const router = useRouter();
   const { properties } = useCatalog();
   const property = properties.find((item) => item.id === params.slug);
-  const { user, addBooking, showToast } = useStore();
+  const { user, addBooking, showToast, ready, sessionChecked } = useStore();
   const upiId = user?.upiId || "9bhk@okhdfcbank";
+
+  useEffect(() => {
+    if (!ready || !sessionChecked || user) return;
+    router.replace(`/login?next=${encodeURIComponent(`/book/${params.slug}`)}`);
+  }, [ready, sessionChecked, user, router, params.slug]);
   const [step, setStep] = useState(0);
   const [cursor, setCursor] = useState(new Date(2026, 9, 1));
   const [checkIn, setCheckIn] = useState<string | null>(null);
@@ -46,6 +52,14 @@ export default function BookPage() {
   const [paying, setPaying] = useState(false);
   const [done, setDone] = useState<{ code: string; total: number } | null>(null);
 
+  useEffect(() => {
+    if (user) {
+      if (user.name && !name) setName(user.name);
+      if (user.email && !email) setEmail(user.email);
+      if (user.phone && !phone) setPhone(user.phone);
+    }
+  }, [user]);
+
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
   const totals = property && nights >= 2 ? quote(property.price, property.cleaning, nights) : null;
   const days = useMemo(() => monthMatrix(cursor), [cursor]);
@@ -59,6 +73,17 @@ export default function BookPage() {
           <Link className="btn" href="/">
             Back to explore
           </Link>
+        </div>
+      </Shell>
+    );
+  }
+
+  if (!ready || !sessionChecked || !user) {
+    return (
+      <Shell>
+        <PageBar title="Book your stay" backHref={`/property/${property.id}`} />
+        <div className="pad mt stack" style={{ textAlign: "center", paddingTop: 64 }}>
+          <p className="muted">Redirecting to sign in…</p>
         </div>
       </Shell>
     );
@@ -245,15 +270,15 @@ export default function BookPage() {
           <div className="card">
             <div className="sumline">
               <span className="k">Nightly stay</span>
-              <span className="num">{inr(totals.stay)}</span>
+              <span className="num"><NumberFlow value={totals.stay} prefix="₹" /></span>
             </div>
             <div className="sumline">
               <span className="k">Cleaning fee</span>
-              <span className="num">{inr(totals.cleaning)}</span>
+              <span className="num"><NumberFlow value={totals.cleaning} prefix="₹" /></span>
             </div>
             <div className="sumline">
               <span className="k">Taxes (12%)</span>
-              <span className="num">{inr(totals.tax)}</span>
+              <span className="num"><NumberFlow value={totals.tax} prefix="₹" /></span>
             </div>
             <div className="sumline">
               <span className="k">Discount</span>
@@ -261,7 +286,7 @@ export default function BookPage() {
             </div>
             <div className="sumline total">
               <span className="k">Total</span>
-              <span className="num">{inr(totals.total)}</span>
+              <span className="num"><NumberFlow value={totals.total} prefix="₹" /></span>
             </div>
           </div>
           <p className="muted">Pay the host on UPI, then send the stay for confirmation. Nothing is charged inside the app.</p>

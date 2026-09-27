@@ -8,6 +8,8 @@ import { ResultCard } from "@/components/cards";
 import { FILTERS, matchesFilter } from "@/lib/properties";
 import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
+import { BaseSheet } from "@/components/base-sheet";
+import { Icon } from "@/components/icon";
 
 function SearchScreen() {
   const params = useSearchParams();
@@ -15,13 +17,14 @@ function SearchScreen() {
   const initialQ = params.get("q") ?? "";
   const initialVibe = params.get("vibe") ?? "";
   const initialCity = params.get("city") ?? "";
-  const guestCount = Number(params.get("guests") || 0);
+  const initialGuests = Number(params.get("guests") || 2);
 
   const [q, setQ] = useState(initialQ);
   const [sort, setSort] = useState("recommended");
   const [active, setActive] = useState<string[]>(initialVibe ? [initialVibe] : []);
   const [city, setCity] = useState(initialCity);
-  const [whereOpen, setWhereOpen] = useState(false);
+  const [guests, setGuests] = useState(initialGuests);
+  const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
   const { properties } = useCatalog();
 
   const results = useMemo(() => {
@@ -30,14 +33,14 @@ function SearchScreen() {
       const matchesQ = !query || `${p.name} ${p.location} ${p.city}`.toLowerCase().includes(query);
       const matchesCity = !city || p.city === city || p.location.includes(city);
       const matchesFilters = active.every((f) => matchesFilter(p, f));
-      const matchesGuests = !guestCount || p.guests >= guestCount;
+      const matchesGuests = !guests || p.guests >= guests;
       return matchesQ && matchesCity && matchesFilters && matchesGuests;
     });
     if (sort === "low") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
     if (sort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
     return list;
-  }, [q, sort, active, city, guestCount, properties]);
+  }, [q, sort, active, city, guests, properties]);
 
   function toggle(filter: string) {
     setActive((curr) => (curr.includes(filter) ? curr.filter((f) => f !== filter) : [...curr, filter]));
@@ -54,6 +57,7 @@ function SearchScreen() {
             e.preventDefault();
           }}
         >
+          <Icon name="search" className="ico s-ico" />
           <input
             type="search"
             value={q}
@@ -61,19 +65,37 @@ function SearchScreen() {
             aria-label="Search places, areas or farmhouses"
             onChange={(e) => setQ(e.target.value)}
           />
+          {q ? (
+            <button
+              type="button"
+              className="ctrl-act"
+              style={{ position: "static", transform: "none" }}
+              onClick={() => setQ("")}
+              aria-label="Clear search"
+            >
+              <Icon name="close" />
+            </button>
+          ) : null}
         </form>
-        <div className="summary" role="group" aria-label="Trip details">
-          <button className="sum-cell" type="button" onClick={() => setWhereOpen(true)}>
-            <span className="k">Where</span>
+
+        <div className="summary mt" role="group" aria-label="Trip details">
+          <button className="sum-cell" type="button" onClick={() => setSheet("where")}>
+            <span className="k">
+              <Icon name="pin" /> Where
+            </span>
             <span className="v">{city || "Anywhere"}</span>
           </button>
-          <button className="sum-cell" type="button" onClick={() => router.push("/search")}>
-            <span className="k">When</span>
+          <button className="sum-cell" type="button" onClick={() => setSheet("when")}>
+            <span className="k">
+              <Icon name="calendar" /> When
+            </span>
             <span className="v">Add dates</span>
           </button>
-          <button className="sum-cell" type="button">
-            <span className="k">Guests</span>
-            <span className="v">{guestCount ? `${guestCount} guests` : "2 guests"}</span>
+          <button className="sum-cell" type="button" onClick={() => setSheet("guests")}>
+            <span className="k">
+              <Icon name="users" /> Guests
+            </span>
+            <span className="v">{guests} guests</span>
           </button>
         </div>
       </div>
@@ -92,30 +114,36 @@ function SearchScreen() {
         ))}
       </div>
 
-      <div className="between pad mt">
-        <p className="muted">{results.length} stays</p>
-        <label className="sr" htmlFor="sort">
-          Sort results
-        </label>
-        <select id="sort" className="ctrl" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort results">
-          <option value="recommended">Recommended</option>
-          <option value="low">Price: low to high</option>
-          <option value="high">Price: high to low</option>
-          <option value="rating">Top rated</option>
-        </select>
+      <div className="between pad mt" style={{ alignItems: "center" }}>
+        <p className="muted" style={{ fontWeight: 600, fontSize: 13.5 }}>
+          {results.length} {results.length === 1 ? "stay" : "stays"}
+        </p>
+        <div className="sort-dropdown-wrap">
+          <label className="sr" htmlFor="sort">
+            Sort results
+          </label>
+          <select id="sort" className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort results">
+            <option value="recommended">Recommended</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="rating">Top rated</option>
+          </select>
+          <Icon name="chev" className="sort-chevron" />
+        </div>
       </div>
 
       {results.length === 0 ? (
         <div className="empty">
-          <h3>No farmhouses match those filters yet.</h3>
-          <p>Try widening the price range or clearing a filter or two.</p>
+          <h3>No farmhouses match those filters.</h3>
+          <p>Try widening the search or clearing a filter or two.</p>
           <button
-            className="btn sm"
+            className="btn sm mt"
             type="button"
             onClick={() => {
               setActive([]);
               setCity("");
               setQ("");
+              setGuests(2);
             }}
           >
             Clear all filters
@@ -129,38 +157,94 @@ function SearchScreen() {
         </div>
       )}
 
-      <div className={`scrim${whereOpen ? " is-open" : ""}`} onClick={() => setWhereOpen(false)} />
-      <div className={`sheet${whereOpen ? " is-open" : ""}`} role="dialog" aria-modal="true">
-        <div className="sheet-grab" />
-        <div className="sheet-head">
-          <h2>Where to?</h2>
-        </div>
-        <button
-          className="mi"
-          type="button"
-          onClick={() => {
-            setCity("");
-            setWhereOpen(false);
-          }}
-        >
-          <span className="lb">Anywhere</span>
-          <span className="meta">{properties.length} stays</span>
-        </button>
-        {CITIES.map((c) => (
+      {/* Where Sheet */}
+      <BaseSheet
+        open={sheet === "where"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="Where to?"
+      >
+        <div className="stack">
           <button
-            key={c}
             className="mi"
             type="button"
             onClick={() => {
-              setCity(c);
-              setWhereOpen(false);
+              setCity("");
+              setSheet(null);
             }}
           >
-            <span className="lb">{c}</span>
-            <span className="meta">{properties.filter((p) => p.city === c || p.location.includes(c)).length} stays</span>
+            <Icon name="compass" />
+            <span className="lb">Anywhere</span>
+            <span className="meta">{properties.length} stays</span>
           </button>
-        ))}
-      </div>
+          {CITIES.map((c) => (
+            <button
+              key={c}
+              className="mi"
+              type="button"
+              onClick={() => {
+                setCity(c);
+                setSheet(null);
+              }}
+            >
+              <Icon name="pin" />
+              <span className="lb">{c}</span>
+              <span className="meta">{properties.filter((p) => p.city === c || p.location.includes(c)).length} stays</span>
+            </button>
+          ))}
+        </div>
+      </BaseSheet>
+
+      {/* When Sheet */}
+      <BaseSheet
+        open={sheet === "when"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="When are you going?"
+      >
+        <div className="stack">
+          <p className="muted" style={{ lineHeight: 1.6 }}>
+            Farmhouses maintain custom availability calendars. Pick your check-in dates directly on any stay page to see live weekend rates and lock in your reservation.
+          </p>
+          <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
+            View all available dates
+          </button>
+        </div>
+      </BaseSheet>
+
+      {/* Guests Sheet */}
+      <BaseSheet
+        open={sheet === "guests"}
+        onOpenChange={(open) => !open && setSheet(null)}
+        title="Number of guests"
+      >
+        <div className="stack">
+          <div className="between" style={{ alignItems: "center", padding: "12px 0" }}>
+            <div>
+              <strong style={{ fontSize: 16 }}>Total guests</strong>
+              <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>Adults, kids and visitors</p>
+            </div>
+            <div className="stepper">
+              <button
+                type="button"
+                aria-label="Fewer guests"
+                onClick={() => setGuests((n) => Math.max(1, n - 1))}
+              >
+                <Icon name="minus" />
+              </button>
+              <span className="val num">{guests}</span>
+              <button
+                type="button"
+                aria-label="More guests"
+                onClick={() => setGuests((n) => Math.min(24, n + 1))}
+              >
+                <Icon name="plus" />
+              </button>
+            </div>
+          </div>
+          <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
+            Apply {guests} {guests === 1 ? "guest" : "guests"}
+          </button>
+        </div>
+      </BaseSheet>
     </Shell>
   );
 }

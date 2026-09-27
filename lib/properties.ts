@@ -21,6 +21,7 @@ export type Property = {
   type: string;
   guestFavourite?: boolean;
   group: "featured" | "nearby" | "popular";
+  status?: "published" | "draft";
 };
 
 export const PROPERTIES: Property[] = [

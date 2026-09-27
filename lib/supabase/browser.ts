@@ -13,12 +13,24 @@ export function browserSupabase(): SupabaseClient | null {
   );
 }
 
-export async function signInWithGoogle(): Promise<boolean> {
+export async function signInWithGoogle(nextPath = "/"): Promise<boolean> {
   const supabase = browserSupabase();
   if (!supabase) return false;
+  const next = nextPath.startsWith("/") ? nextPath : "/";
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${window.location.origin}/auth/callback` },
+    options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
   });
   return !error;
 }
+
+export async function signOutSupabase(): Promise<void> {
+  const supabase = browserSupabase();
+  if (!supabase) return;
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.error("Supabase signOut error", err);
+  }
+}
+

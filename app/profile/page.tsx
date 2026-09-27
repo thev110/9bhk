@@ -44,15 +44,39 @@ export default function ProfilePage() {
           {user.avatarUrl ? (
             <img src={user.avatarUrl} alt="" className="avatar" style={{ objectFit: "cover" }} />
           ) : (
-            <span className="avatar">{user.name.slice(0, 2).toUpperCase()}</span>
+            <span className="avatar">{user.name ? user.name.slice(0, 2).toUpperCase() : "ME"}</span>
           )}
           <div>
-            <strong>{user.name}</strong>
+            <strong>{user.name || "Explorer"}</strong>
             <p className="muted"><a href={`mailto:${user.email}`}>{user.email}</a></p>
-            {user.phone ? <p className="muted"><a href={`tel:${user.phone.replace(/\s/g, "")}`}>{user.phone}</a></p> : null}
-            <p className="muted">Guest account</p>
+            {user.phone ? <p className="muted"><a href={`tel:${user.phone.replace(/\s/g, "")}`}>{user.phone}</a></p> : (
+              <p className="muted" style={{ color: "var(--moss)", fontWeight: 600 }}>Phone not added</p>
+            )}
+            <p className="muted">Verified member</p>
           </div>
         </div>
+
+        {!user.phone ? (
+          <div className="card" style={{ border: "1px solid color-mix(in oklch, var(--moss) 40%, transparent)", background: "color-mix(in oklch, var(--moss) 6%, var(--surface))" }}>
+            <div className="between">
+              <strong>Add your phone number</strong>
+              <span className="pill warn">Action needed</span>
+            </div>
+            <p className="muted mt" style={{ fontSize: 13 }}>
+              Your Google account is connected, but we need your mobile number to send check-in pin codes and gate directions.
+            </p>
+            <button
+              className="btn sm mt"
+              type="button"
+              onClick={() => {
+                setForm(user);
+                setEditing(true);
+              }}
+            >
+              Add mobile number
+            </button>
+          </div>
+        ) : null}
 
         <Link href="/host" className="card" style={{ textDecoration: "none" }}>
           <strong>Become a host</strong>
@@ -89,7 +113,14 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        <button className="btn outline" type="button" onClick={signOut}>
+        <button
+          className="btn outline"
+          type="button"
+          onClick={() => {
+            signOut();
+            showToast("Signed out successfully");
+          }}
+        >
           Sign out
         </button>
         <p className="muted center">
