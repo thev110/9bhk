@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { BrandBar, Shell } from "@/components/shell";
 import { Icon, vibeIcon } from "@/components/icon";
 import { FeatureCard, NearbyCard, RailCard } from "@/components/cards";
-import { PROPERTIES, VIBES } from "@/lib/properties";
+import { VIBES } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
 import { useStore } from "@/lib/store";
 
@@ -18,7 +19,8 @@ function greeting(): string {
 
 export default function HomePage() {
   const router = useRouter();
-  const { city, setCity, showToast, ready, seenIntro } = useStore();
+  const { city, setCity, showToast, ready, seenIntro, sessionChecked } = useStore();
+  const { properties } = useCatalog();
   const [q, setQ] = useState("");
   const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
   const [guests, setGuests] = useState(2);
@@ -29,18 +31,18 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (ready && !seenIntro) router.replace("/splash");
-  }, [ready, seenIntro, router]);
+    if (ready && sessionChecked && !seenIntro) router.replace("/splash");
+  }, [ready, sessionChecked, seenIntro, router]);
 
-  const featured = PROPERTIES.filter((p) => p.group === "featured");
+  const featured = properties.filter((p) => p.group === "featured");
   const nearby = useMemo(() => {
-    if (city === "Chennai") return PROPERTIES.filter((p) => p.group === "nearby");
-    const near = PROPERTIES.filter((p) => p.city === city || p.location.includes(city));
-    return (near.length ? near : PROPERTIES.filter((p) => p.group === "nearby")).slice(0, 3);
-  }, [city]);
-  const popular = PROPERTIES.filter((p) => p.group === "popular");
+    if (city === "Chennai") return properties.filter((p) => p.group === "nearby");
+    const near = properties.filter((p) => p.city === city || p.location.includes(city));
+    return (near.length ? near : properties.filter((p) => p.group === "nearby")).slice(0, 3);
+  }, [city, properties]);
+  const popular = properties.filter((p) => p.group === "popular");
 
-  if (!ready || !seenIntro) return null;
+  if (!ready || !sessionChecked || !seenIntro) return null;
 
   function search(e?: FormEvent) {
     e?.preventDefault();

@@ -154,6 +154,7 @@ const emptyDraft = (): ListingDraft => ({
 
 type Store = Persisted & {
   ready: boolean;
+  sessionChecked: boolean;
   toast: string;
   showToast: (message: string) => void;
   setCity: (city: string) => void;
@@ -165,6 +166,7 @@ type Store = Persisted & {
   addBooking: (booking: Booking) => void;
   setDraft: (draft: ListingDraft | null) => void;
   markIntro: () => void;
+  markSessionChecked: () => void;
   confirmBooking: (id: string) => void;
 };
 
@@ -181,6 +183,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     notes: [],
   });
   const [ready, setReady] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -233,6 +236,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return {
       ...state,
       ready,
+      sessionChecked,
+      markSessionChecked: () => setSessionChecked(true),
       toast,
       showToast,
       setCity: (city) => setState((s) => ({ ...s, city })),
@@ -293,7 +298,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           };
         }),
     };
-  }, [state, ready, toast, showToast]);
+  }, [state, ready, sessionChecked, toast, showToast]);
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }

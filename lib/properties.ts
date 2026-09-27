@@ -251,9 +251,3 @@ export function matchesFilter(property: Property, filter: string): boolean {
   if (key === "wi-fi") return blob.includes("wi-fi");
   return blob.includes(key);
 }
-
-export const REVIEWS = [
-  { initials: "RS", name: "Rhea S.", when: "May 2026 · 2 nights", text: "Woke up to birdsong and the pool. The verandah is where we spent every evening. Exactly the reset we needed." },
-  { initials: "AK", name: "Arjun K.", when: "April 2026 · 3 nights", text: "Booking for ten people and it still felt spacious. The caretaker was on hand without ever being in the way." },
-  { initials: "ML", name: "Meera L.", when: "March 2026 · 2 nights", text: "Clean, calm and genuinely private. We drove down from Chennai in under an hour." },
-];

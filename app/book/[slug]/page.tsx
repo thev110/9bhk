@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
-import { getProperty } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
 
@@ -28,7 +28,8 @@ function monthMatrix(cursor: Date) {
 export default function BookPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
-  const property = getProperty(params.slug);
+  const { properties } = useCatalog();
+  const property = properties.find((item) => item.id === params.slug);
   const { user, addBooking, showToast } = useStore();
   const upiId = user?.upiId || "9bhk@okhdfcbank";
   const [step, setStep] = useState(0);

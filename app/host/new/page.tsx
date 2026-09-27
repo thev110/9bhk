@@ -7,6 +7,8 @@ import { Icon } from "@/components/icon";
 import { CITIES, inr } from "@/lib/format";
 import { PROPERTIES } from "@/lib/properties";
 import { emptyDraft, useStore, type ListingDraft } from "@/lib/store";
+import { useCatalog } from "@/lib/catalog";
+import { saveProperty, uploadPropertyPhotos } from "@/lib/supabase/properties";
 
 const AMENITIES = ["Pool", "BBQ", "Bonfire", "Wi-Fi", "AC", "Parking", "Kitchen", "Pet friendly", "Indoor games", "Outdoor games", "Projector & music", "Caretaker", "Power backup"];
 const TYPES = ["Private farmhouse", "Farm stay", "Orchard retreat", "Pool villa"];
@@ -27,26 +29,48 @@ const TITLES = [
 export default function ListingWizard() {
   const router = useRouter();
   const { draft, setDraft, showToast } = useStore();
+  const { reload } = useCatalog();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ListingDraft>(draft ?? emptyDraft());
   const [done, setDone] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   function patch(partial: Partial<ListingDraft>) {
     setForm((f) => ({ ...f, ...partial }));
   }
 
-  function next() {
+  async function next() {
     if (step === 0 && form.name.trim().length < 3) {
       showToast("Add a property name guests will recognise.");
       return;
     }
     if (step === 8) {
-      setDraft({ ...form, status: "pending" });
-      setDone(true);
+      try {
+        await saveProperty(form);
+        setDraft(null);
+        reload();
+        setDone(true);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : "Could not save the listing");
+      }
       return;
     }
     setDraft(form);
     setStep((s) => s + 1);
+  }
+
+  async function addPhotos(list: FileList | null) {
+    const files = [...(list ?? [])].filter((file) => file.type.startsWith("image/"));
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const urls = await uploadPropertyPhotos(files);
+      patch({ photos: [...form.photos, ...urls] });
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Photo upload failed");
+    } finally {
+      setUploading(false);
+    }
   }
 
   if (done) {
@@ -55,7 +79,7 @@ export default function ListingWizard() {
         <PageBar title="New listing" backHref="/host" />
         <div className="pad mt stack">
           <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36 }}>Submitted for review</h1>
-          <p>Guests will see {form.name || "your farmhouse"} after the listing is verified.</p>
+          <p>{form.name || "Your farmhouse"} is saved, including its photos. Guests can see it on Explore.</p>
           <button className="btn block" type="button" onClick={() => router.push("/host")}>
             Back to hosting
           </button>
@@ -178,7 +202,28 @@ export default function ListingWizard() {
 
         {step === 4 ? (
           <>
-            <p className="muted">Guests decide with their eyes — lead with the pool and the lawn.</p>
+            <p className="muted">Upload photos from your phone. They are stored with the listing.</p>
+            <label className="btn block">
+              {uploading ? "Uploading…" : "Upload photos"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                hidden
+                disabled={uploading}
+                onChange={(event) => {
+                  void addPhotos(event.target.files);
+                  event.target.value = "";
+                }}
+              />
+            </label>
+            {form.photos.length ? (
+              <div className="gal" style={{ padding: 0 }}>
+                {form.photos.map((photo) => (
+                  <img key={photo} src={photo} alt="" style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
+                ))}
+              </div>
+            ) : null}
             <div className="gal" style={{ padding: 0 }}>
               {PHOTOS.map((photo) => {
                 const on = form.photos.includes(photo.image);

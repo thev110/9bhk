@@ -6,12 +6,13 @@ import { PageBar, Shell } from "@/components/shell";
 import { useStore } from "@/lib/store";
 import { Icon } from "@/components/icon";
 import { Rating } from "@/components/cards";
-import { getProperty, REVIEWS } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { inr } from "@/lib/format";
 
 export default function PropertyPage() {
   const params = useParams<{ slug: string }>();
-  const property = getProperty(params.slug);
+  const { properties } = useCatalog();
+  const property = properties.find((item) => item.id === params.slug);
   const { isSaved, toggleSaved, showToast } = useStore();
 
   if (!property) {
@@ -100,38 +101,6 @@ export default function PropertyPage() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div>
-          <h3 className="sec-title">Reviews</h3>
-          <p className="muted">One of the most loved farmhouses near Mahabalipuram</p>
-          <div className="stats mt">
-            <div className="stat">
-              <p className="lb">Cleanliness</p>
-              <p className="nb">5.0</p>
-            </div>
-            <div className="stat">
-              <p className="lb">Accuracy</p>
-              <p className="nb">4.9</p>
-            </div>
-            <div className="stat">
-              <p className="lb">Check-in</p>
-              <p className="nb">4.8</p>
-            </div>
-          </div>
-          {REVIEWS.map((review) => (
-            <article className="review" key={review.name}>
-              <div className="row">
-                <span className="avatar">{review.initials}</span>
-                <div>
-                  <strong>{review.name}</strong>
-                  <p className="muted">{review.when}</p>
-                </div>
-              </div>
-              <p className="mt">{review.text}</p>
-            </article>
-          ))}
-          <p className="muted">Show all {property.reviews} reviews</p>
         </div>
 
         <div>

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { Shell } from "@/components/shell";
 import { ResultCard } from "@/components/cards";
 import { Icon } from "@/components/icon";
-import { PROPERTIES } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 
 export default function SavedPage() {
   const { saved } = useStore();
-  const places = PROPERTIES.filter((p) => saved.includes(p.id));
-  const popular = PROPERTIES.filter((p) => p.id === "blue-horizon" || p.id === "terracotta");
+  const { properties } = useCatalog();
+  const places = properties.filter((p) => saved.includes(p.id));
+  const popular = properties.filter((p) => p.id === "blue-horizon" || p.id === "terracotta");
 
   return (
     <Shell nav="saved">

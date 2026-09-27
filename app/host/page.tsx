@@ -4,16 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { PageBar, Shell } from "@/components/shell";
 import { useStore } from "@/lib/store";
-
-const PROPERTIES = [
-  { name: "Palm Grove", status: "Published", place: "ECR · Near Mahabalipuram", note: "Next booking · 12–14 Jun · 2 guests", href: "/host/bookings" },
-  { name: "Verde Meadow", status: "Published", place: "Kanchipuram", note: "Next booking · 3–6 Jul · 6 guests", href: "/host/bookings" },
-  { name: "The Guava House", status: "Pending review", place: "Chennai", note: "Submitted 2 days ago · under verification", href: "/host/new" },
-  { name: "Terracotta Courtyard", status: "Draft", place: "Pondicherry", note: "5 of 9 steps complete", href: "/host/new" },
-];
+import { useCatalog } from "@/lib/catalog";
 
 export default function HostPage() {
   const { draft, user, updateUser, showToast } = useStore();
+  const { properties } = useCatalog();
   const [upi, setUpi] = useState(user?.upiId ?? "");
   return (
     <Shell>
@@ -80,23 +75,22 @@ export default function HostPage() {
         </Link>
       </div>
       <div className="stack pad mt">
-        {PROPERTIES.map((item) => (
-          <article className="card" key={item.name}>
-            <div className="between">
+        {properties.map((item) => (
+          <article className="card" key={item.id}>
+            <img src={item.image} alt="" style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 12 }} />
+            <div className="between mt">
               <h3>{item.name}</h3>
-              <span className={`pill ${item.status === "Published" ? "ok" : "warn"}`}>{item.status}</span>
+              <span className="pill ok">Published</span>
             </div>
-            <p className="muted">{item.place}</p>
-            <p>{item.note}</p>
+            <p className="muted">{item.location}</p>
+            <p>{item.highlights}</p>
             <div className="row mt">
-              <Link className="btn outline sm" href={item.href}>
-                {item.status === "Draft" ? "Resume" : item.status === "Pending review" ? "Withdraw" : "Edit"}
+              <Link className="btn outline sm" href={`/property/${item.id}`}>
+                View
               </Link>
-              {item.status === "Published" ? (
-                <Link className="btn ghost sm" href="/host/bookings">
-                  Calendar
-                </Link>
-              ) : null}
+              <Link className="btn ghost sm" href="/host/bookings">
+                Bookings
+              </Link>
             </div>
           </article>
         ))}

@@ -48,7 +48,8 @@ export default function ProfilePage() {
           )}
           <div>
             <strong>{user.name}</strong>
-            <p className="muted">{user.email}</p>
+            <p className="muted"><a href={`mailto:${user.email}`}>{user.email}</a></p>
+            {user.phone ? <p className="muted"><a href={`tel:${user.phone.replace(/\s/g, "")}`}>{user.phone}</a></p> : null}
             <p className="muted">Guest account</p>
           </div>
         </div>
@@ -75,11 +76,11 @@ export default function ProfilePage() {
           </Link>
           <Link className="mi" href="/notifications">
             <Icon name="bell" />
-            <span className="lb">Settings</span>
+            <span className="lb">Notifications</span>
           </Link>
-          <Link className="mi" href="/notifications">
-            <Icon name="bell" />
-            <span className="lb">Help</span>
+          <Link className="mi" href="/legal/privacy">
+            <Icon name="award" />
+            <span className="lb">Privacy, terms and refunds</span>
           </Link>
           <Link className="mi" href="/admin">
             <Icon name="award" />
@@ -91,7 +92,9 @@ export default function ProfilePage() {
         <button className="btn outline" type="button" onClick={signOut}>
           Sign out
         </button>
-        <p className="muted center">9bhk.app · Prototype build</p>
+        <p className="muted center">
+          <a href="mailto:hello@9bhk.app">hello@9bhk.app</a>
+        </p>
       </div>
 
       <div className={`scrim${editing ? " is-open" : ""}`} onClick={() => setEditing(false)} />
@@ -109,7 +112,7 @@ export default function ProfilePage() {
             <label className="field">
               Email
               <input className="ctrl" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <span className="help">Changing this re-sends a verification link.</span>
+              <span className="help">Used for booking updates.</span>
             </label>
             <label className="field">
               Mobile number

@@ -144,8 +144,8 @@ function HostBookings() {
                   <span className="avatar">{row.guestName.slice(0, 2).toUpperCase()}</span>
                   <div>
                     <strong>{row.guestName}</strong>
-                    <p className="muted">{row.guestEmail || "No email yet"}</p>
-                    <p className="muted">{row.guestPhone || "No phone yet"}</p>
+                    {row.guestEmail ? <a className="muted" href={`mailto:${row.guestEmail}`}>{row.guestEmail}</a> : <p className="muted">No email yet</p>}
+                    {row.guestPhone ? <a className="muted" href={`tel:${row.guestPhone.replace(/\s/g, "")}`}>{row.guestPhone}</a> : <p className="muted">No phone yet</p>}
                   </div>
                 </div>
                 <button className="btn outline sm mt" type="button" onClick={() => setOpenId(row.id)}>
@@ -164,8 +164,8 @@ function HostBookings() {
                   <p className="muted">Booking #{open.code}</p>
                 </div>
                 <div className="card">
-                  <div className="sumline"><span className="k">Email</span><span>{open.guestEmail || "—"}</span></div>
-                  <div className="sumline"><span className="k">Phone</span><span>{open.guestPhone || "—"}</span></div>
+                  <div className="sumline"><span className="k">Email</span><span>{open.guestEmail ? <a href={`mailto:${open.guestEmail}`}>{open.guestEmail}</a> : "—"}</span></div>
+                  <div className="sumline"><span className="k">Phone</span><span>{open.guestPhone ? <a href={`tel:${open.guestPhone.replace(/\s/g, "")}`}>{open.guestPhone}</a> : "—"}</span></div>
                   <div className="sumline"><span className="k">UPI</span><span>{open.upiId || "—"}</span></div>
                   <div className="sumline"><span className="k">Reference</span><span>{open.paymentRef || "Not added"}</span></div>
                   <div className="sumline total"><span className="k">Total</span><span className="num">{inr(open.total)}</span></div>

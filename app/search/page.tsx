@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { PageBar, Shell } from "@/components/shell";
 import { ResultCard } from "@/components/cards";
-import { FILTERS, PROPERTIES, matchesFilter } from "@/lib/properties";
+import { FILTERS, matchesFilter } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
 
 function SearchScreen() {
@@ -21,9 +22,10 @@ function SearchScreen() {
   const [active, setActive] = useState<string[]>(initialVibe ? [initialVibe] : []);
   const [city, setCity] = useState(initialCity);
   const [whereOpen, setWhereOpen] = useState(false);
+  const { properties } = useCatalog();
 
   const results = useMemo(() => {
-    let list = PROPERTIES.filter((p) => {
+    let list = properties.filter((p) => {
       const query = q.trim().toLowerCase();
       const matchesQ = !query || `${p.name} ${p.location} ${p.city}`.toLowerCase().includes(query);
       const matchesCity = !city || p.city === city || p.location.includes(city);
@@ -35,7 +37,7 @@ function SearchScreen() {
     if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
     if (sort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
     return list;
-  }, [q, sort, active, city, guestCount]);
+  }, [q, sort, active, city, guestCount, properties]);
 
   function toggle(filter: string) {
     setActive((curr) => (curr.includes(filter) ? curr.filter((f) => f !== filter) : [...curr, filter]));
@@ -142,7 +144,7 @@ function SearchScreen() {
           }}
         >
           <span className="lb">Anywhere</span>
-          <span className="meta">{PROPERTIES.length} stays</span>
+          <span className="meta">{properties.length} stays</span>
         </button>
         {CITIES.map((c) => (
           <button
@@ -155,7 +157,7 @@ function SearchScreen() {
             }}
           >
             <span className="lb">{c}</span>
-            <span className="meta">{PROPERTIES.filter((p) => p.city === c || p.location.includes(c)).length} stays</span>
+            <span className="meta">{properties.filter((p) => p.city === c || p.location.includes(c)).length} stays</span>
           </button>
         ))}
       </div>

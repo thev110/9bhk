@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
 import { StoreProvider } from "@/lib/store";
 import { AuthSync } from "@/components/auth-sync";
+import { CatalogProvider } from "@/lib/catalog";
 import "./design.css";
 
 const manrope = Manrope({
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <StoreProvider>
           <AuthSync />
-          {children}
+          <CatalogProvider>{children}</CatalogProvider>
         </StoreProvider>
       </body>
     </html>

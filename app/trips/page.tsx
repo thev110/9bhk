@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Shell } from "@/components/shell";
 import { formatRange, inr } from "@/lib/format";
-import { getProperty } from "@/lib/properties";
+import { useCatalog } from "@/lib/catalog";
 import { useStore, type Booking } from "@/lib/store";
 
 const TABS = ["Upcoming", "Past", "Cancelled"] as const;
@@ -17,6 +17,8 @@ function bucket(status: Booking["status"]): (typeof TABS)[number] {
 
 export default function TripsPage() {
   const { bookings } = useStore();
+  const { properties } = useCatalog();
+  const propertyFor = (id: string) => properties.find((item) => item.id === id);
   const [tab, setTab] = useState<(typeof TABS)[number]>("Upcoming");
   const [open, setOpen] = useState<string | null>(bookings[0]?.id ?? null);
   const list = useMemo(() => bookings.filter((b) => bucket(b.status) === tab), [bookings, tab]);
@@ -47,7 +49,7 @@ export default function TripsPage() {
       ) : (
         <div className="stack pad mt">
           {list.map((booking) => {
-            const property = getProperty(booking.propertyId);
+            const property = propertyFor(booking.propertyId);
             if (!property) return null;
             return (
               <article className="card" key={booking.id}>
@@ -81,7 +83,7 @@ export default function TripsPage() {
         </div>
       )}
 
-      {selected && getProperty(selected.propertyId) ? (
+      {selected && propertyFor(selected.propertyId) ? (
         <TripSheet booking={selected} onClose={() => setOpen(null)} />
       ) : null}
     </Shell>
@@ -89,7 +91,8 @@ export default function TripsPage() {
 }
 
 function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void }) {
-  const property = getProperty(booking.propertyId);
+  const { properties } = useCatalog();
+  const property = properties.find((item) => item.id === booking.propertyId);
   if (!property) return null;
   return (
     <>

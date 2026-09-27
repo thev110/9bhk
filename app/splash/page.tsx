@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 
 export default function SplashPage() {
   const router = useRouter();
-  const { markIntro } = useStore();
+  const { markIntro, seenIntro, sessionChecked } = useStore();
+
+  useEffect(() => {
+    if (sessionChecked && seenIntro) router.replace("/");
+  }, [sessionChecked, seenIntro, router]);
 
   return (
     <div className="app">
@@ -21,9 +26,6 @@ export default function SplashPage() {
           <p className="splash-sub">Farmhouses, pools and open fields — a short drive from the city.</p>
         </div>
         <div className="splash-foot stack">
-          <div className="splash-bar" role="progressbar" aria-label="Loading 9bhk.app">
-            <i />
-          </div>
           <Link className="btn block lg solid" href="/login">
             Get started
           </Link>

@@ -55,7 +55,7 @@
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
-html{ -webkit-text-size-adjust:100%; }
+html{ -webkit-text-size-adjust:100%; overflow-x:clip; }
 body{
   margin:0;
   background:var(--bg);
@@ -116,7 +116,7 @@ p{ text-wrap:pretty; }
 
 /* ── app bar ───────────────────────────────────────────────────────── */
 .appbar{
-  position:sticky; top:0; z-index:30;
+  position:relative; z-index:30;
   background:color-mix(in oklch, var(--surface) 88%, transparent);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);

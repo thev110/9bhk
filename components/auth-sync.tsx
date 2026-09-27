@@ -5,14 +5,17 @@ import { browserSupabase } from "@/lib/supabase/browser";
 import { useStore } from "@/lib/store";
 
 export function AuthSync() {
-  const { signIn, markIntro, user } = useStore();
+  const { signIn, markIntro, markSessionChecked, user } = useStore();
   const started = useRef(false);
 
   useEffect(() => {
     if (started.current) return;
-    const supabase = browserSupabase();
-    if (!supabase) return;
     started.current = true;
+    const supabase = browserSupabase();
+    if (!supabase) {
+      markSessionChecked();
+      return;
+    }
     supabase.auth.getUser().then(({ data }) => {
       const account = data.user;
       if (!account) return;
@@ -26,8 +29,8 @@ export function AuthSync() {
         upiId: user?.upiId,
       });
       markIntro();
-    });
-  }, [markIntro, signIn, user?.city, user?.phone, user?.upiId]);
+    }).finally(() => markSessionChecked());
+  }, [markIntro, markSessionChecked, signIn, user?.city, user?.phone, user?.upiId]);
 
   return null;
 }
