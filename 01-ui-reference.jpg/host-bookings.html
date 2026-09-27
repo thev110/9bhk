@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Bookings · Hosting · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .bk-guest{ display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .earn-hero{ background:var(--primary); color:var(--on-primary); border:0; }
+  .earn-hero .k{ color:color-mix(in oklch, var(--on-primary) 74%, transparent); }
+  .earn-hero .v{ color:var(--on-primary); }
+  .earn-hero .nb{ font-family:var(--font-display); font-weight:400; font-size:38px; line-height:1; letter-spacing:-.01em; }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="host.html" aria-label="Back to hosting">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <h1 class="bar-title">Bookings</h1>
+      <button class="icon-btn" type="button" data-toast="Opening the bookings filter">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-sliders" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="page-head" data-od-id="heading">
+    <p class="eyebrow">Host workspace</p>
+    <h1>Manage your stays</h1>
+    <p class="sub">Every reservation, calendar block and payout in one place.</p>
+  </section>
+
+  <div data-tabs-root class="mt">
+    <div class="tabs" role="tablist" aria-label="Host operations">
+      <button type="button" role="tab" data-tab="bookings" aria-selected="true">Bookings</button>
+      <button type="button" role="tab" data-tab="calendar" aria-selected="false">Calendar</button>
+      <button type="button" role="tab" data-tab="earnings" aria-selected="false">Earnings</button>
+    </div>
+
+    <!-- ── bookings ─────────────────────────────────────────────────── -->
+    <div data-panel="bookings">
+      <div class="pad mt">
+        <div class="seg" id="bkSeg" role="tablist" aria-label="Booking status">
+          <button type="button" role="tab" data-bseg="upcoming" aria-selected="true">Upcoming</button>
+          <button type="button" role="tab" data-bseg="past" aria-selected="false">Past</button>
+          <button type="button" role="tab" data-bseg="cancelled" aria-selected="false">Cancelled</button>
+        </div>
+      </div>
+
+      <div class="list-stack mt" data-blist="upcoming">
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Palm Grove Private Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill ok"><span class="pt"></span>Confirmed</span>
+              <span class="tiny num">₹20,384</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Palm Grove Private Farmhouse</h3>
+            <p class="p-loc">12–14 Jun 2026 · 2 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm">AR</span>
+              <span class="tiny">Ananya R · 2 nights</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="Palm Grove Private Farmhouse" data-loc="ECR · Near Mahabalipuram"
+              data-img="assets/prop-palm-grove.jpg" data-ref="Booking #9B-40218"
+              data-guest="Ananya R (AR)" data-dates="12–14 Jun 2026" data-guests="2 guests · 2 nights"
+              data-total="₹20,384" data-status="Confirmed" data-pill="ok"
+              data-in="12 Jun 2026 · 2:00 PM" data-out="14 Jun 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Verde Meadow Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill ok"><span class="pt"></span>Confirmed</span>
+              <span class="tiny num">₹15,600</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Verde Meadow Farmhouse</h3>
+            <p class="p-loc">3–6 Jul 2026 · 6 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm alt">KM</span>
+              <span class="tiny">Karthik M · 3 nights</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="Verde Meadow Farmhouse" data-loc="Kanchipuram"
+              data-img="assets/prop-verde-meadow.jpg" data-ref="Booking #9B-40233"
+              data-guest="Karthik M (KM)" data-dates="3–6 Jul 2026" data-guests="6 guests · 3 nights"
+              data-total="₹15,600" data-status="Confirmed" data-pill="ok"
+              data-in="3 Jul 2026 · 2:00 PM" data-out="6 Jul 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-blue-horizon.jpg" width="1080" height="720" alt="Blue Horizon Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill warn"><span class="pt"></span>Awaiting</span>
+              <span class="tiny num">₹18,900</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Blue Horizon Farmhouse</h3>
+            <p class="p-loc">20–22 Jul 2026 · 4 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm">PS</span>
+              <span class="tiny">Priya S · 2 nights</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="Blue Horizon Farmhouse" data-loc="Covelong"
+              data-img="assets/prop-blue-horizon.jpg" data-ref="Booking #9B-40247"
+              data-guest="Priya S (PS)" data-dates="20–22 Jul 2026" data-guests="4 guests · 2 nights"
+              data-total="₹18,900" data-status="Awaiting" data-pill="warn"
+              data-in="20 Jul 2026 · 2:00 PM" data-out="22 Jul 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="list-stack mt hidden" data-blist="past">
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="The Guava House" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill muted"><span class="pt"></span>Completed</span>
+              <span class="tiny num">₹11,900</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">The Guava House</h3>
+            <p class="p-loc">2–4 Feb 2026 · 4 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm alt">RV</span>
+              <span class="tiny">Rahul V · 2 nights</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="The Guava House" data-loc="Chennai"
+              data-img="assets/prop-guava-house.jpg" data-ref="Booking #9B-31077"
+              data-guest="Rahul V (RV)" data-dates="2–4 Feb 2026" data-guests="4 guests · 2 nights"
+              data-total="₹11,900" data-status="Completed" data-pill="muted"
+              data-in="2 Feb 2026 · 2:00 PM" data-out="4 Feb 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-sunset-fields.jpg" width="1080" height="720" alt="Sunset Fields Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill muted"><span class="pt"></span>Completed</span>
+              <span class="tiny num">₹26,500</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Sunset Fields Farmhouse</h3>
+            <p class="p-loc">18–20 Jan 2026 · 8 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm">MN</span>
+              <span class="tiny">Meera N · 2 nights</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="Sunset Fields Farmhouse" data-loc="Thiruvallur"
+              data-img="assets/prop-sunset-fields.jpg" data-ref="Booking #9B-30881"
+              data-guest="Meera N (MN)" data-dates="18–20 Jan 2026" data-guests="8 guests · 2 nights"
+              data-total="₹26,500" data-status="Completed" data-pill="muted"
+              data-in="18 Jan 2026 · 2:00 PM" data-out="20 Jan 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="list-stack mt hidden" data-blist="cancelled">
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-coconut-grove.jpg" width="1080" height="720" alt="Coconut Grove Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill danger"><span class="pt"></span>Cancelled</span>
+              <span class="tiny num">₹9,800</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Coconut Grove Farmhouse</h3>
+            <p class="p-loc">9–11 Mar 2026 · 3 guests</p>
+            <div class="bk-guest">
+              <span class="avatar sm alt">DP</span>
+              <span class="tiny">Dev P · cancelled 6 days before check-in</span>
+            </div>
+            <button class="btn sm outline mt" type="button"
+              data-sheet-open="sheet-booking"
+              data-prop="Coconut Grove Farmhouse" data-loc="Mahabalipuram"
+              data-img="assets/prop-coconut-grove.jpg" data-ref="Booking #9B-39904"
+              data-guest="Dev P (DP)" data-dates="9–11 Mar 2026" data-guests="3 guests · 2 nights"
+              data-total="₹9,800" data-status="Cancelled" data-pill="danger"
+              data-in="9 Mar 2026 · 2:00 PM" data-out="11 Mar 2026 · 11:00 AM">View details</button>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- ── calendar ─────────────────────────────────────────────────── -->
+    <div data-panel="calendar" hidden>
+      <div class="pad mt">
+        <div class="card">
+          <div id="hostCal" data-cal></div>
+          <div class="legend mt" style="margin-top:16px;">
+            <span><i class="l-av"></i>Available</span>
+            <span><i class="l-bk"></i>Booked</span>
+            <span><i class="l-bl"></i>Blocked</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-head"><h2>Tonight's rules</h2></div>
+        <div class="pad menu">
+          <button class="mi" type="button" data-toast="Updating the minimum stay">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-clock" /></svg>
+            <span class="lb">Minimum stay</span>
+            <span class="meta">2 nights</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+          <button class="mi" type="button" data-toast="Opening weekend pricing">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-tag" /></svg>
+            <span class="lb">Weekend price</span>
+            <span class="meta">₹8,500 / night</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+          <button class="mi" type="button" data-toast="Opening the check-in settings">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-key" /></svg>
+            <span class="lb">Check-in window</span>
+            <span class="meta">2 PM – 8 PM</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="pad">
+          <button class="btn block outline" type="button" data-sheet-open="sheet-block">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg>
+            Block dates
+          </button>
+          <div class="hint mt">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-info" /></svg>
+            <span>Block dates when the farmhouse is unavailable. Guests can't book across blocked nights.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── earnings ─────────────────────────────────────────────────── -->
+    <div data-panel="earnings" hidden>
+      <div class="pad mt">
+        <div class="card earn-hero">
+          <span class="k tiny">Net earnings · June 2026</span>
+          <div class="nb num">₹1,14,816</div>
+          <div class="between" style="margin-top:12px;">
+            <span class="k tiny">Across 3 farmhouses · 14 nights booked</span>
+            <span class="k tiny">▲ 18%</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-head"><h2>Breakdown</h2></div>
+        <div class="pad">
+          <div class="card">
+            <div class="sumline"><span class="k">Gross bookings</span><span class="num">₹1,24,800</span></div>
+            <div class="sumline"><span class="k">Platform fees (8%)</span><span class="num">−₹9,984</span></div>
+            <div class="sumline"><span class="k">Cleaning fees collected</span><span class="num">₹4,200</span></div>
+            <div class="sumline total"><span class="k">Net earnings</span><span class="num">₹1,14,816</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Payouts</h2></div>
+        <div class="pad stats">
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-clock" /></svg>Pending payout</span>
+            <span class="nb num">₹42,300</span>
+            <span class="sub">arrives 5 Jul 2026</span>
+          </div>
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-wallet" /></svg>Paid out</span>
+            <span class="nb num">₹72,516</span>
+            <span class="sub">last payout 28 Jun 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="pad menu">
+          <button class="mi" type="button" data-toast="Opening the payout account">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-key" /></svg>
+            <span class="lb">Payout account</span>
+            <span class="meta">HDFC ••4821</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+          <button class="mi" type="button" data-toast="Downloading the statement">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-inbox" /></svg>
+            <span class="lb">Download statement</span>
+            <span class="meta">CSV</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+        </div>
+        <div class="pad">
+          <p class="tiny" style="margin-top:12px;">Amounts come from your payment provider — the prototype shows the shape of the data, not real accounting.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</div>
+
+<div class="scrim" data-scrim></div>
+
+<section class="sheet" id="sheet-booking" role="dialog" aria-modal="true" aria-labelledby="bkTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="bkTitle">Booking detail</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="media" style="aspect-ratio:16/10;">
+    <img id="bkImg" src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="" />
+  </div>
+  <div class="stack mt">
+    <div class="between">
+      <span class="pill ok" id="bkStatus"><span class="pt"></span>Confirmed</span>
+      <span class="tiny" id="bkRef">Booking #9B-40218</span>
+    </div>
+    <h3 class="sec-title" style="font-size:17px;" id="bkProp">Palm Grove Private Farmhouse</h3>
+    <p class="tiny" id="bkLoc">ECR · Near Mahabalipuram</p>
+    <div class="card tight">
+      <div class="sumline"><span class="k">Guest</span><span id="bkGuest">Ananya R (AR)</span></div>
+      <div class="sumline"><span class="k">Check-in</span><span id="bkIn">12 Jun 2026 · 2:00 PM</span></div>
+      <div class="sumline"><span class="k">Check-out</span><span id="bkOut">14 Jun 2026 · 11:00 AM</span></div>
+      <div class="sumline"><span class="k">Party</span><span id="bkGuests">2 guests · 2 nights</span></div>
+      <div class="sumline total"><span class="k">Total</span><span class="num" id="bkTotal">₹20,384</span></div>
+    </div>
+    <div class="row" style="gap:10px;">
+      <button class="btn grow" type="button" data-toast="Opening messages with your guest">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-message" /></svg>Message guest
+      </button>
+      <button class="btn outline grow" type="button" data-toast="Opening the call screen">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-phone" /></svg>Call
+      </button>
+    </div>
+    <button class="btn danger block" type="button" data-sheet-close data-toast="Cancellation policy sent to your guest">Cancel booking</button>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-block" role="dialog" aria-modal="true" aria-labelledby="blockTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="blockTitle">Block dates</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="stack">
+    <div class="field">
+      <label for="blockFrom">From</label>
+      <input class="ctrl" id="blockFrom" type="text" value="20 Jun 2026" />
+    </div>
+    <div class="field">
+      <label for="blockTo">To</label>
+      <input class="ctrl" id="blockTo" type="text" value="24 Jun 2026" />
+    </div>
+    <div class="field">
+      <label for="blockWhy">Reason</label>
+      <select class="ctrl" id="blockWhy">
+        <option>Maintenance</option>
+        <option>Personal use</option>
+        <option>Turnover buffer</option>
+      </select>
+    </div>
+    <button class="btn block" type="button" data-sheet-close data-toast="Dates blocked on your calendar">Block these dates</button>
+  </div>
+</section>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var seg = document.getElementById('bkSeg');
+  var segButtons = Array.prototype.slice.call(seg.querySelectorAll('[data-bseg]'));
+  var lists = Array.prototype.slice.call(document.querySelectorAll('[data-blist]'));
+  segButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      segButtons.forEach(function (b) { b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+      lists.forEach(function (list) { list.classList.toggle('hidden', list.dataset.blist !== btn.dataset.bseg); });
+    });
+  });
+
+  var cal = document.getElementById('hostCal');
+  if (cal && window.odRenderCalendar) {
+    window.odRenderCalendar(cal, {
+      month: '2026-06',
+      booked: ['2026-06-06', '2026-06-07', '2026-06-12', '2026-06-13', '2026-06-14'],
+      blocked: ['2026-06-20', '2026-06-21', '2026-06-22', '2026-06-23', '2026-06-24']
+    });
+  }
+
+  var sheet = document.getElementById('sheet-booking');
+  var fields = {
+    img: document.getElementById('bkImg'),
+    prop: document.getElementById('bkProp'),
+    loc: document.getElementById('bkLoc'),
+    ref: document.getElementById('bkRef'),
+    guest: document.getElementById('bkGuest'),
+    in: document.getElementById('bkIn'),
+    out: document.getElementById('bkOut'),
+    guests: document.getElementById('bkGuests'),
+    total: document.getElementById('bkTotal'),
+    status: document.getElementById('bkStatus')
+  };
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-ref][data-sheet-open="sheet-booking"]');
+    if (!btn) { return; }
+    fields.img.src = btn.dataset.img;
+    fields.img.alt = btn.dataset.prop;
+    fields.prop.textContent = btn.dataset.prop;
+    fields.loc.textContent = btn.dataset.loc;
+    fields.ref.textContent = btn.dataset.ref;
+    fields.guest.textContent = btn.dataset.guest;
+    fields.in.textContent = btn.dataset.in;
+    fields.out.textContent = btn.dataset.out;
+    fields.guests.textContent = btn.dataset.guests;
+    fields.total.textContent = btn.dataset.total;
+    fields.status.className = 'pill ' + btn.dataset.pill;
+    fields.status.innerHTML = '<span class="pt"></span>' + btn.dataset.status;
+  });
+})();
+</script>
+</body>
+</html>

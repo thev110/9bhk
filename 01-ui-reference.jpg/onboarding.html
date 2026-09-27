@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Welcome · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .onb{ min-height:100vh; display:flex; flex-direction:column; padding:26px var(--gutter) calc(30px + env(safe-area-inset-bottom)); }
+  .onb .grow-y{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .onb-hero{ border-radius:var(--r-xl); overflow:hidden; aspect-ratio:4/3; background:var(--surface-2); }
+  .onb-hero img{ width:100%; height:100%; object-fit:cover; }
+  .onb-title{ font-family:var(--font-display); font-weight:400; font-size:33px; line-height:1.1; letter-spacing:-.012em; }
+  .dots{ display:flex; gap:7px; }
+  .dots i{ width:7px; height:7px; border-radius:50%; background:var(--border-strong); }
+  .dots i.on{ background:var(--primary); width:22px; border-radius:var(--r-pill); }
+  .splash-mark{ width:76px; height:76px; border-radius:24px; background:var(--primary); color:var(--on-primary); display:grid; place-items:center; }
+  .splash-mark .ico{ width:38px; height:38px; }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav" style="background:var(--surface);">
+
+  <div class="onb" data-flow>
+
+    <section data-step-id="splash" class="onb" style="padding:0;">
+      <div class="grow-y stack" style="align-items:flex-start;gap:20px;">
+        <span class="splash-mark" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg></span>
+        <div>
+          <p style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;color:var(--moss);">9bhk.app</p>
+          <h1 class="onb-title mt">Your next escape is closer than you think.</h1>
+        </div>
+        <p class="muted" style="max-width:30ch;">Farmhouses, pools and open fields — a short drive from the city.</p>
+      </div>
+      <div class="stack mt-lg" style="margin-top:32px;">
+        <button class="btn block lg" type="button" data-goto="ob-discover">Get started</button>
+        <a class="btn block ghost" href="index.html">Skip for now</a>
+      </div>
+    </section>
+
+    <section data-step-id="ob-discover" hidden>
+      <div class="grow-y stack lg">
+        <div class="onb-hero">
+          <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="A curved pool ringed with palms at a farmhouse near the coast" />
+        </div>
+        <div class="stack sm">
+          <h1 class="onb-title">Find beautiful farmhouses for slow weekends.</h1>
+          <p class="muted">Search by place, dates and the things that matter — a pool, a bonfire, space for the whole group.</p>
+        </div>
+        <div class="dots" role="img" aria-label="Step 1 of 2"><i class="on"></i><i></i></div>
+      </div>
+      <div class="stack mt-lg" style="margin-top:32px;">
+        <a class="btn block lg" href="index.html">Explore farmhouses</a>
+        <button class="btn block ghost" type="button" data-goto="ob-host">Next</button>
+      </div>
+    </section>
+
+    <section data-step-id="ob-host" hidden>
+      <div class="grow-y stack lg">
+        <div class="onb-hero">
+          <img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A lantern-lit stone garden path at a farmhouse courtyard" />
+        </div>
+        <div class="stack sm">
+          <h1 class="onb-title">Have a farmhouse? Turn empty dates into bookings.</h1>
+          <p class="muted">List it in a few guided steps, set your own price, and manage stays from one place.</p>
+        </div>
+        <div class="dots" role="img" aria-label="Step 2 of 2"><i></i><i class="on"></i></div>
+      </div>
+      <div class="stack mt-lg" style="margin-top:32px;">
+        <a class="btn block lg" href="host.html">List your farmhouse</a>
+        <button class="btn block ghost" type="button" data-goto="ob-discover">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="login" hidden>
+      <div class="grow-y stack lg">
+        <div class="onb-hero" style="aspect-ratio:16/10;">
+          <img src="assets/prop-sunset-fields.jpg" width="800" height="1000" alt="An infinity pool looking out over green fields at dusk" />
+        </div>
+        <div class="stack sm">
+          <h1 class="onb-title">Welcome back</h1>
+          <p class="muted">Sign in to save stays, manage trips and book farmhouses.</p>
+        </div>
+      </div>
+      <div class="stack mt-lg" style="margin-top:32px;">
+        <button class="btn block lg" type="button" data-goto="loading">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-google" /></svg>
+          Continue with Google
+        </button>
+        <a class="btn block outline" href="index.html">Continue as guest</a>
+        <p class="tiny center">We never post anything without your permission.</p>
+      </div>
+    </section>
+
+    <section data-step-id="loading" hidden>
+      <div class="grow-y stack center" style="align-items:center;gap:18px;">
+        <span class="spin" role="status" aria-label="Signing you in"></span>
+        <p class="muted">Signing you in…</p>
+      </div>
+    </section>
+
+    <section data-step-id="complete" hidden>
+      <div class="grow-y stack lg">
+        <div class="stack sm">
+          <p class="eyebrow" style="color:var(--moss);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">Almost done</p>
+          <h1 class="onb-title">Tell us who's escaping.</h1>
+          <p class="muted">Optional — you can add this later in your profile.</p>
+        </div>
+        <div class="stack">
+          <div class="field">
+            <label for="onbName">Full name</label>
+            <input class="ctrl" id="onbName" type="text" placeholder="e.g. Aarav Kumar" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="onbPhone">Mobile number</label>
+            <input class="ctrl" id="onbPhone" type="tel" placeholder="+91 98••• •••••" autocomplete="tel" />
+            <p class="help">Used only to confirm your bookings.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stack mt-lg" style="margin-top:32px;">
+        <a class="btn block lg" href="index.html">Finish</a>
+        <a class="btn block ghost" href="index.html">Skip for now</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var flow = document.querySelector('[data-flow]');
+  flow.addEventListener('flowchange', function (event) {
+    if (event.detail.id === 'loading') {
+      setTimeout(function () { window.odFlow(flow)('complete'); }, 1400);
+    }
+  });
+})();
+</script>
+</body>
+</html>

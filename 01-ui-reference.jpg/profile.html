@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Profile · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+<div class="app content">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <h1 class="bar-title">Profile</h1>
+      <a class="icon-btn" href="notifications.html" aria-label="Notifications">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-bell" /></svg>
+      </a>
+    </div>
+  </header>
+
+  <section class="page-head" data-od-id="identity">
+    <div class="row">
+      <span class="avatar" style="width:64px;height:64px;font-size:22px;" aria-hidden="true">AK</span>
+      <span class="stack xs grow">
+        <span class="sec-title" style="font-size:19px;" id="profileName">Aarav Kumar</span>
+        <span class="tiny" id="profileEmail">aarav.kumar@email.com</span>
+        <span class="pill info" style="margin-top:4px;">Guest account</span>
+      </span>
+    </div>
+  </section>
+
+  <section class="mt pad">
+    <a class="card row between" href="host.html" style="text-decoration:none;">
+      <span class="row grow">
+        <span class="avatar alt" aria-hidden="true"><svg class="ico" style="width:20px;height:20px" viewBox="0 0 24 24"><use href="#i-key" /></svg></span>
+        <span class="stack xs grow">
+          <span class="sec-title">Become a host</span>
+          <span class="tiny">Turn empty dates into bookings.</span>
+        </span>
+      </span>
+      <svg class="ico" style="color:var(--muted)" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+    </a>
+  </section>
+
+  <section class="section" data-od-id="sections">
+    <div class="pad">
+      <div class="menu">
+        <button class="mi" type="button" data-sheet-open="sheet-edit">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>
+          <span class="lb">Personal details</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </button>
+        <a class="mi" href="trips.html">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-map" /></svg>
+          <span class="lb">Trips</span>
+          <span class="meta">2 upcoming</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </a>
+        <a class="mi" href="saved.html">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+          <span class="lb">Saved</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </a>
+        <a class="mi" href="host.html">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg>
+          <span class="lb">Become a host</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </a>
+        <button class="mi" type="button" data-toast="Settings are coming in a later build">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-sliders" /></svg>
+          <span class="lb">Settings</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </button>
+        <button class="mi" type="button" data-toast="Opening the help centre">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-info" /></svg>
+          <span class="lb">Help</span>
+          <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad mt">
+    <div class="menu">
+      <a class="mi" href="admin.html">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>
+        <span class="lb">Admin workspace</span>
+        <span class="meta">Staff only</span>
+        <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+      </a>
+      <a class="mi" href="onboarding.html">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-logout" /></svg>
+        <span class="lb">Sign out</span>
+      </a>
+    </div>
+  </section>
+
+  <p class="tiny center mt-lg">9bhk.app · Prototype build</p>
+
+  <nav class="tabbar" data-od-id="bottomnav" aria-label="Primary">
+    <a class="tab" href="index.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compass" /></svg>Explore</a>
+    <a class="tab" href="saved.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-heart" /></svg>Wishlists</a>
+    <a class="tab" href="trips.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-map" /></svg>Trips</a>
+    <a class="tab" href="profile.html" aria-current="page"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-user" /></svg>Profile</a>
+  </nav>
+
+</div>
+
+<div class="scrim" data-scrim></div>
+
+<section class="sheet" id="sheet-edit" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="editTitle">Personal details</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <form class="stack" id="editForm" novalidate>
+    <div class="field">
+      <label for="editName">Full name</label>
+      <input class="ctrl" id="editName" type="text" value="Aarav Kumar" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label for="editEmail">Email</label>
+      <input class="ctrl" id="editEmail" type="email" value="aarav.kumar@email.com" autocomplete="email" />
+      <p class="help">Changing this re-sends a verification link.</p>
+    </div>
+    <div class="field">
+      <label for="editPhone">Mobile number</label>
+      <input class="ctrl" id="editPhone" type="tel" value="+91 98400 12345" autocomplete="tel" />
+    </div>
+    <div class="field">
+      <label for="editCity">Home city</label>
+      <select class="ctrl" id="editCity">
+        <option>Chennai</option>
+        <option>Chengalpattu</option>
+        <option>Pondicherry</option>
+        <option>Bengaluru</option>
+      </select>
+    </div>
+    <button class="btn block mt" type="submit">Save changes</button>
+  </form>
+</section>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var name = document.getElementById('editName').value.trim() || 'Guest';
+    var email = document.getElementById('editEmail').value.trim();
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileEmail').textContent = email;
+    document.querySelector('.page-head .avatar').textContent = name.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    window.odCloseSheets();
+    window.odToast('Profile updated');
+  });
+})();
+</script>
+</body>
+</html>

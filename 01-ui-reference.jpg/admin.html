@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Admin · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .admin-flag{ display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:var(--r-pill); background:var(--warn-soft); color:var(--warn); font-size:11.5px; font-weight:800; }
+  .admin-flag .ico{ width:14px; height:14px; }
+  .doc-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-top:1px solid var(--border); }
+  .doc-row:first-of-type{ border-top:0; }
+  .doc-row .nm{ display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:600; }
+  .doc-row .nm .ico{ width:18px; height:18px; color:var(--moss); }
+  .gallery-sm{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+  .gallery-sm > *{ border-radius:var(--r-md); overflow:hidden; background:var(--surface-2); aspect-ratio:1/1; }
+  .gallery-sm img{ width:100%; height:100%; object-fit:cover; }
+  .gallery-sm .g-lead{ grid-column:1/-1; aspect-ratio:16/9; }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <span class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg></span>
+        <span class="stack xs"><span class="brand-name">Admin</span><span class="tiny" style="line-height:1;">9bhk.app</span></span>
+      </span>
+      <a class="loc-btn" href="index.html">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-logout" /></svg>
+        Exit
+      </a>
+    </div>
+  </header>
+
+  <section class="page-head" data-od-id="heading">
+    <span class="admin-flag"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Restricted workspace</span>
+    <h1 style="margin-top:12px;">Operations console</h1>
+    <p class="sub">Review listings, verify hosts and manage bookings. Access is enforced on the server — the UI only mirrors it.</p>
+  </section>
+
+  <div data-tabs-root class="mt">
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+      <button type="button" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+      <button type="button" role="tab" data-tab="reviews" aria-selected="false">Reviews</button>
+      <button type="button" role="tab" data-tab="users" aria-selected="false">Users</button>
+      <button type="button" role="tab" data-tab="bookings" aria-selected="false">Bookings</button>
+      <button type="button" role="tab" data-tab="verify" aria-selected="false">Verification</button>
+    </div>
+
+    <!-- ── overview ─────────────────────────────────────────────────── -->
+    <div data-panel="overview">
+      <section class="section">
+        <div class="pad stats">
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg>Properties</span>
+            <span class="nb num">248</span>
+            <span class="sub">19 pending review</span>
+          </div>
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-users" /></svg>Users</span>
+            <span class="nb num">5,412</span>
+            <span class="sub">+182 this week</span>
+          </div>
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-calendar" /></svg>Bookings</span>
+            <span class="nb num">1,036</span>
+            <span class="sub">84 active now</span>
+          </div>
+          <div class="stat">
+            <span class="lb"><svg class="ico" viewBox="0 0 24 24"><use href="#i-inbox" /></svg>Pending reviews</span>
+            <span class="nb num">19</span>
+            <span class="sub">oldest 2 days ago</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Queues</h2></div>
+        <div class="pad menu">
+          <button class="mi" type="button" data-jump="reviews">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg>
+            <span class="lb">Property reviews</span>
+            <span class="meta">19 waiting</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+          <button class="mi" type="button" data-jump="verify">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>
+            <span class="lb">Verification queue</span>
+            <span class="meta">7 waiting</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+          <button class="mi" type="button" data-jump="bookings">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-list" /></svg>
+            <span class="lb">Flagged bookings</span>
+            <span class="meta">3 to check</span>
+            <svg class="chev" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Recent activity</h2></div>
+        <div class="pad menu">
+          <div class="mi" style="cursor:default;">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg>
+            <span class="lb">Verde Meadow approved</span>
+            <span class="meta">2h ago</span>
+          </div>
+          <div class="mi" style="cursor:default;">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-bell" /></svg>
+            <span class="lb">Changes requested · Coconut Grove</span>
+            <span class="meta">6h ago</span>
+          </div>
+          <div class="mi" style="cursor:default;">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>
+            <span class="lb">Host ID verified · Meera N</span>
+            <span class="meta">Yesterday</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── property reviews ─────────────────────────────────────────── -->
+    <div data-panel="reviews" hidden>
+      <section class="section" style="margin-top:14px;">
+        <div class="section-head">
+          <h2>Property review</h2>
+          <span class="pill warn" id="reviewCount"><span class="pt"></span>3 in this batch</span>
+        </div>
+
+        <div id="reviewQueue" class="list-stack">
+
+          <article class="card review-item">
+            <div class="gallery-sm">
+              <span class="g-lead"><img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="The Guava House" loading="lazy" /></span>
+              <span><img src="assets/prop-coconut-grove.jpg" width="1080" height="720" alt="Courtyard view" loading="lazy" /></span>
+              <span><img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="Interior" loading="lazy" /></span>
+              <span><img src="assets/prop-mango-orchard.jpg" width="1080" height="720" alt="Orchard" loading="lazy" /></span>
+            </div>
+            <div class="between" style="margin-top:14px;">
+              <span class="pill info"><span class="pt"></span>Submitted 2 days ago</span>
+              <span class="tiny">Listing #LH-2048</span>
+            </div>
+            <h3 class="sec-title" style="font-size:17px;margin-top:10px;">The Guava House</h3>
+            <p class="tiny">Chennai · 4 guests · 2 bedrooms · 2 beds · 2 bathrooms</p>
+            <div class="stack xs" style="margin-top:12px;">
+              <div class="sumline"><span class="k">Host</span><span>Arjun K · host since 2024</span></div>
+              <div class="sumline"><span class="k">Nightly price</span><span class="num">₹5,950</span></div>
+              <div class="sumline"><span class="k">Amenities</span><span class="tiny">Wi-Fi · AC · Pool · Parking</span></div>
+            </div>
+            <p class="sec-title" style="font-size:13px;margin-top:14px;">Submitted documents</p>
+            <div class="card tight" style="margin-top:8px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Ownership proof</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Property tax receipt</span>
+                <span class="pill warn"><span class="pt"></span>Pending</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>Host ID</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-review-action="approve">Approve</button>
+              <button class="btn sm outline grow" type="button" data-review-action="changes">Request changes</button>
+              <button class="btn sm danger grow" type="button" data-review-action="reject">Reject</button>
+            </div>
+          </article>
+
+          <article class="card review-item hidden">
+            <div class="gallery-sm">
+              <span class="g-lead"><img src="assets/prop-lakeview-courtyard.jpg" width="1080" height="720" alt="Lakeview Courtyard Stay" loading="lazy" /></span>
+              <span><img src="assets/prop-blue-horizon.jpg" width="1080" height="720" alt="Lake view" loading="lazy" /></span>
+              <span><img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Lawn" loading="lazy" /></span>
+              <span><img src="assets/prop-sunset-fields.jpg" width="1080" height="720" alt="Sunset" loading="lazy" /></span>
+            </div>
+            <div class="between" style="margin-top:14px;">
+              <span class="pill info"><span class="pt"></span>Submitted 1 day ago</span>
+              <span class="tiny">Listing #LH-2061</span>
+            </div>
+            <h3 class="sec-title" style="font-size:17px;margin-top:10px;">Lakeview Courtyard Stay</h3>
+            <p class="tiny">Pondicherry · 6 guests · 3 bedrooms · 3 beds · 2 bathrooms</p>
+            <div class="stack xs" style="margin-top:12px;">
+              <div class="sumline"><span class="k">Host</span><span>Meera N · host since 2025</span></div>
+              <div class="sumline"><span class="k">Nightly price</span><span class="num">₹7,400</span></div>
+              <div class="sumline"><span class="k">Amenities</span><span class="tiny">Wi-Fi · AC · BBQ · Bonfire</span></div>
+            </div>
+            <p class="sec-title" style="font-size:13px;margin-top:14px;">Submitted documents</p>
+            <div class="card tight" style="margin-top:8px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Ownership proof</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>Host ID</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-review-action="approve">Approve</button>
+              <button class="btn sm outline grow" type="button" data-review-action="changes">Request changes</button>
+              <button class="btn sm danger grow" type="button" data-review-action="reject">Reject</button>
+            </div>
+          </article>
+
+          <article class="card review-item hidden">
+            <div class="gallery-sm">
+              <span class="g-lead"><img src="assets/prop-coconut-grove.jpg" width="1080" height="720" alt="Coconut Grove Farmhouse" loading="lazy" /></span>
+              <span><img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="Garden" loading="lazy" /></span>
+              <span><img src="assets/prop-mango-orchard.jpg" width="1080" height="720" alt="Orchard" loading="lazy" /></span>
+              <span><img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="Veranda" loading="lazy" /></span>
+            </div>
+            <div class="between" style="margin-top:14px;">
+              <span class="pill warn"><span class="pt"></span>Docs incomplete</span>
+              <span class="tiny">Listing #LH-2054</span>
+            </div>
+            <h3 class="sec-title" style="font-size:17px;margin-top:10px;">Coconut Grove Farmhouse</h3>
+            <p class="tiny">Mahabalipuram · 3 guests · 1 bedroom · 2 beds · 1 bathroom</p>
+            <div class="stack xs" style="margin-top:12px;">
+              <div class="sumline"><span class="k">Host</span><span>Dev P · first listing</span></div>
+              <div class="sumline"><span class="k">Nightly price</span><span class="num">₹4,900</span></div>
+              <div class="sumline"><span class="k">Amenities</span><span class="tiny">Wi-Fi · Parking · Kitchenette</span></div>
+            </div>
+            <p class="sec-title" style="font-size:13px;margin-top:14px;">Submitted documents</p>
+            <div class="card tight" style="margin-top:8px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Ownership proof</span>
+                <span class="pill danger"><span class="pt"></span>Missing</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>Host ID</span>
+                <span class="pill warn"><span class="pt"></span>Pending</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-review-action="approve">Approve</button>
+              <button class="btn sm outline grow" type="button" data-review-action="changes">Request changes</button>
+              <button class="btn sm danger grow" type="button" data-review-action="reject">Reject</button>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="empty hidden" id="reviewEmpty">
+          <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span>
+          <h3>Review queue is clear.</h3>
+          <p>New submissions land here the moment a host publishes a listing.</p>
+          <button class="btn outline" type="button" data-jump="overview">Back to overview</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── users ────────────────────────────────────────────────────── -->
+    <div data-panel="users" hidden>
+      <section class="section" style="margin-top:14px;">
+        <div class="section-head"><h2>User &amp; host management</h2></div>
+        <div class="list-stack">
+          <article class="rowcard">
+            <span class="avatar">AR</span>
+            <div class="grow">
+              <div class="between">
+                <span class="sec-title">Ananya R</span>
+                <span class="pill forest"><span class="pt"></span>Guest</span>
+              </div>
+              <p class="tiny" style="margin-top:4px;">ananya.r@example.com · joined 2025</p>
+              <p class="tiny">3 trips · no flags</p>
+              <button class="btn sm outline mt" type="button" data-toast="Opening the user record">View record</button>
+            </div>
+          </article>
+
+          <article class="rowcard">
+            <span class="avatar alt">AK</span>
+            <div class="grow">
+              <div class="between">
+                <span class="sec-title">Arjun K</span>
+                <span class="pill ok"><span class="pt"></span>Host · verified</span>
+              </div>
+              <p class="tiny" style="margin-top:4px;">arjun.k@example.com · host since 2024</p>
+              <p class="tiny">2 listings · 48 stays</p>
+              <button class="btn sm outline mt" type="button" data-toast="Opening the host record">View record</button>
+            </div>
+          </article>
+
+          <article class="rowcard">
+            <span class="avatar">DP</span>
+            <div class="grow">
+              <div class="between">
+                <span class="sec-title">Dev P</span>
+                <span class="pill warn"><span class="pt"></span>Host · pending</span>
+              </div>
+              <p class="tiny" style="margin-top:4px;">dev.p@example.com · applied 3 days ago</p>
+              <p class="tiny">1 listing · verification pending</p>
+              <div class="row" style="gap:8px;margin-top:9px;">
+                <button class="btn sm outline" type="button" data-toast="Opening the host record">View record</button>
+                <button class="btn sm danger" type="button" data-toast="Account suspended pending review">Suspend</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rowcard">
+            <span class="avatar alt">RV</span>
+            <div class="grow">
+              <div class="between">
+                <span class="sec-title">Rahul V</span>
+                <span class="pill danger"><span class="pt"></span>Flagged</span>
+              </div>
+              <p class="tiny" style="margin-top:4px;">rahul.v@example.com · joined 2024</p>
+              <p class="tiny">2 chargebacks · under review</p>
+              <div class="row" style="gap:8px;margin-top:9px;">
+                <button class="btn sm outline" type="button" data-toast="Opening the user record">View record</button>
+                <button class="btn sm danger" type="button" data-toast="Account suspended pending review">Suspend</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── bookings ─────────────────────────────────────────────────── -->
+    <div data-panel="bookings" hidden>
+      <section class="section" style="margin-top:14px;">
+        <div class="section-head"><h2>Booking management</h2></div>
+        <div class="list-stack">
+          <article class="rowcard">
+            <div class="thumb"><img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Palm Grove Private Farmhouse" loading="lazy" /></div>
+            <div class="grow">
+              <div class="between">
+                <span class="pill ok"><span class="pt"></span>Confirmed</span>
+                <span class="tiny num">₹20,384</span>
+              </div>
+              <h3 class="p-title" style="margin-top:7px;">Palm Grove Private Farmhouse</h3>
+              <p class="p-loc">Guest Ananya R · Host Arjun K</p>
+              <p class="p-amen" style="margin-top:6px;">12–14 Jun 2026 · 2 guests</p>
+              <button class="btn sm outline mt" type="button" data-toast="Opening the booking record">View</button>
+            </div>
+          </article>
+
+          <article class="rowcard">
+            <div class="thumb"><img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Verde Meadow Farmhouse" loading="lazy" /></div>
+            <div class="grow">
+              <div class="between">
+                <span class="pill warn"><span class="pt"></span>Awaiting payment</span>
+                <span class="tiny num">₹15,600</span>
+              </div>
+              <h3 class="p-title" style="margin-top:7px;">Verde Meadow Farmhouse</h3>
+              <p class="p-loc">Guest Karthik M · Host Meera N</p>
+              <p class="p-amen" style="margin-top:6px;">3–6 Jul 2026 · 6 guests</p>
+              <div class="row" style="gap:8px;margin-top:9px;">
+                <button class="btn sm outline" type="button" data-toast="Opening the booking record">View</button>
+                <button class="btn sm danger" type="button" data-toast="Booking cancelled and guest notified">Cancel</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rowcard">
+            <div class="thumb"><img src="assets/prop-coconut-grove.jpg" width="1080" height="720" alt="Coconut Grove Farmhouse" loading="lazy" /></div>
+            <div class="grow">
+              <div class="between">
+                <span class="pill danger"><span class="pt"></span>Flagged</span>
+                <span class="tiny num">₹9,800</span>
+              </div>
+              <h3 class="p-title" style="margin-top:7px;">Coconut Grove Farmhouse</h3>
+              <p class="p-loc">Guest Dev P · Host Dev P</p>
+              <p class="p-amen" style="margin-top:6px;">9–11 Mar 2026 · 3 guests · payment dispute</p>
+              <div class="row" style="gap:8px;margin-top:9px;">
+                <button class="btn sm outline" type="button" data-toast="Opening the booking record">View</button>
+                <button class="btn sm danger" type="button" data-toast="Refund issued to the guest">Refund</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── verification queue ───────────────────────────────────────── -->
+    <div data-panel="verify" hidden>
+      <section class="section" style="margin-top:14px;">
+        <div class="section-head">
+          <h2>Verification queue</h2>
+          <span class="tiny">Host and property checks are kept separate.</span>
+        </div>
+        <div class="pad">
+          <div class="seg" id="verifySeg" role="tablist" aria-label="Verification type">
+            <button type="button" role="tab" data-vseg="host" aria-selected="true">Host verification</button>
+            <button type="button" role="tab" data-vseg="property" aria-selected="false">Property verification</button>
+          </div>
+        </div>
+
+        <div class="list-stack mt" data-vlist="host">
+          <article class="card">
+            <div class="between">
+              <span class="row"><span class="avatar sm alt">DP</span><span class="sec-title">Dev P</span></span>
+              <span class="pill warn"><span class="pt"></span>Pending</span>
+            </div>
+            <div class="card tight" style="margin-top:12px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-user" /></svg>Government ID</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-phone" /></svg>Phone + email</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-wallet" /></svg>Payout account</span>
+                <span class="pill warn"><span class="pt"></span>Pending</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-toast="Host verified — access granted">Verify host</button>
+              <button class="btn sm outline grow" type="button" data-toast="More information requested from the host">Request info</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="between">
+              <span class="row"><span class="avatar sm">MN</span><span class="sec-title">Meera N</span></span>
+              <span class="pill ok"><span class="pt"></span>Verified</span>
+            </div>
+            <p class="tiny" style="margin-top:10px;">ID, phone and payout account all confirmed on 24 Jun 2026.</p>
+          </article>
+        </div>
+
+        <div class="list-stack mt hidden" data-vlist="property">
+          <article class="card">
+            <div class="between">
+              <span class="sec-title">The Guava House</span>
+              <span class="pill info"><span class="pt"></span>Docs in review</span>
+            </div>
+            <p class="tiny" style="margin-top:6px;">Chennai · Host Arjun K</p>
+            <div class="card tight" style="margin-top:12px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Ownership proof</span>
+                <span class="pill ok"><span class="pt"></span>Verified</span>
+              </div>
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Property tax receipt</span>
+                <span class="pill warn"><span class="pt"></span>Pending</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-toast="Property verification complete">Mark verified</button>
+              <button class="btn sm outline grow" type="button" data-toast="More documents requested from the host">Request info</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="between">
+              <span class="sec-title">Coconut Grove Farmhouse</span>
+              <span class="pill danger"><span class="pt"></span>Missing documents</span>
+            </div>
+            <p class="tiny" style="margin-top:6px;">Mahabalipuram · Host Dev P</p>
+            <div class="card tight" style="margin-top:12px;padding:10px 12px;">
+              <div class="doc-row">
+                <span class="nm"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>Ownership proof</span>
+                <span class="pill danger"><span class="pt"></span>Missing</span>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px;margin-top:14px;">
+              <button class="btn sm grow" type="button" data-toast="Property verification complete">Mark verified</button>
+              <button class="btn sm outline grow" type="button" data-toast="More documents requested from the host">Request info</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="pad">
+        <div class="hint">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>
+          <span>Every action here is written to an admin-only audit log. Hiding a button is never the control — the server and RLS enforce access.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var tabsRoot = document.querySelector('[data-tabs-root]');
+  function selectTab(name) {
+    var target = null;
+    Array.prototype.slice.call(tabsRoot.querySelectorAll('[data-tab]')).forEach(function (b) {
+      if (b.dataset.tab === name) { target = b; }
+    });
+    if (target) { target.click(); window.scrollTo({ top: 0, behavior: 'auto' }); }
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-jump]')).forEach(function (btn) {
+    btn.addEventListener('click', function () { selectTab(btn.dataset.jump); });
+  });
+
+  var queue = Array.prototype.slice.call(document.querySelectorAll('.review-item'));
+  var empty = document.getElementById('reviewEmpty');
+  var count = document.getElementById('reviewCount');
+  var labels = { approve: 'Listing approved and published', changes: 'Changes requested from the host', reject: 'Listing rejected' };
+  function refresh() {
+    var left = queue.filter(function (item) { return !item.dataset.done; });
+    count.innerHTML = '<span class="pt"></span>' + left.length + ' in this batch';
+    if (!left.length) { count.classList.add('hidden'); empty.classList.remove('hidden'); }
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-review-action]')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var item = btn.closest('.review-item');
+      item.dataset.done = '1';
+      item.classList.add('hidden');
+      var next = queue.filter(function (q) { return !q.dataset.done; })[0];
+      if (next) { next.classList.remove('hidden'); }
+      window.odToast(labels[btn.dataset.reviewAction]);
+      refresh();
+    });
+  });
+  refresh();
+
+  var vseg = document.getElementById('verifySeg');
+  var vButtons = Array.prototype.slice.call(vseg.querySelectorAll('[data-vseg]'));
+  var vLists = Array.prototype.slice.call(document.querySelectorAll('[data-vlist]'));
+  vButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      vButtons.forEach(function (b) { b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+      vLists.forEach(function (list) { list.classList.toggle('hidden', list.dataset.vlist !== btn.dataset.vseg); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

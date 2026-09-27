@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>New listing · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .wiz-head{ position:sticky; top:58px; z-index:25; background:var(--surface); border-bottom:1px solid var(--border); padding:12px var(--gutter); }
+  .wiz-head .label{ display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:8px; }
+  .amen-grid{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .amen-grid .checkline{ gap:9px; font-size:13.5px; }
+  .photo-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .photo{ position:relative; border-radius:var(--r-md); overflow:hidden; background:var(--surface-2); aspect-ratio:4/3; }
+  .photo img{ width:100%; height:100%; object-fit:cover; }
+  .photo .tools{ position:absolute; inset:auto 0 0 0; display:flex; gap:4px; padding:6px; background:linear-gradient(transparent, color-mix(in oklch, var(--ink) 62%, transparent)); }
+  .photo .tools button{ width:32px; height:32px; border-radius:9px; border:0; background:color-mix(in oklch, var(--warm-white) 88%, transparent); color:var(--ink); display:grid; place-items:center; }
+  .photo .tools .ico{ width:15px; height:15px; }
+  .photo .cover{ position:absolute; top:6px; left:6px; }
+  .photo .uploading{ position:absolute; inset:0; display:grid; place-items:center; background:color-mix(in oklch, var(--surface) 80%, transparent); }
+  .add-tile{ display:grid; place-items:center; gap:6px; border:1.5px dashed var(--border-strong); border-radius:var(--r-md); background:var(--surface); aspect-ratio:4/3; color:var(--muted); font-size:12.5px; font-weight:700; }
+  .add-tile .ico{ width:22px; height:22px; color:var(--moss); }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="host.html" aria-label="Close the wizard">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+      </a>
+      <h1 class="bar-title" id="wizTitle">Tell us about your farmhouse</h1>
+      <button class="icon-btn" type="button" id="saveExit" aria-label="Save and exit">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="wiz-head">
+    <p class="label"><span id="wizStep">Step 1 of 9</span><span id="wizName">Basics</span></p>
+    <div class="pbar"><i id="wizBar" style="width:11%"></i></div>
+  </div>
+
+  <div data-flow id="wizard">
+
+    <section data-step-id="basics">
+      <div class="page-head">
+        <h1 style="font-size:26px;">Tell us about your farmhouse</h1>
+        <p class="sub">The name and short description guests see first.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="field">
+          <label for="lName">Property name</label>
+          <input class="ctrl" id="lName" type="text" placeholder="e.g. Palm Grove Private Farmhouse" data-draft="name" required />
+        </div>
+        <div class="field">
+          <label for="lDesc">Short description</label>
+          <textarea class="ctrl" id="lDesc" placeholder="A quiet private escape surrounded by palms, open lawns and a pool." data-draft="desc"></textarea>
+          <p class="help">One or two lines. You can expand this later.</p>
+        </div>
+        <div class="field">
+          <label for="lType">Property type</label>
+          <select class="ctrl" id="lType" data-draft="type">
+            <option>Private farmhouse</option>
+            <option>Farm stay</option>
+            <option>Orchard retreat</option>
+            <option>Pool villa</option>
+          </select>
+        </div>
+        <div class="between card tight">
+          <span class="stack xs"><span class="sec-title">Maximum guests</span><span class="tiny">Any age counts here</span></span>
+          <span class="stepper" data-stepper data-min="2" data-max="30">
+            <button type="button" data-step="-1" aria-label="Fewer guests"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="lGuests">8</span>
+            <button type="button" data-step="1" aria-label="More guests"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+      </div>
+      <div class="pad mt-lg"><button class="btn block lg" type="button" data-goto="location">Continue</button></div>
+    </section>
+
+    <section data-step-id="location" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Where is your farmhouse?</h1>
+        <p class="sub">Guests only see the exact pin after booking.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="field">
+          <label for="lCity">City or region</label>
+          <select class="ctrl" id="lCity" data-draft="city">
+            <option>ECR</option>
+            <option>Chennai</option>
+            <option>Mahabalipuram</option>
+            <option>Chengalpattu</option>
+            <option>Kanchipuram</option>
+            <option>Pondicherry</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="lArea">Area or landmark</label>
+          <input class="ctrl" id="lArea" type="text" placeholder="e.g. Near Mahabalipuram" data-draft="area" />
+        </div>
+        <div class="field">
+          <label for="lAddr">Street address</label>
+          <input class="ctrl" id="lAddr" type="text" placeholder="Plot / street / village" data-draft="addr" />
+          <p class="help">Kept private until a booking is confirmed.</p>
+        </div>
+        <div class="card" style="height:150px;display:grid;place-items:center;background:var(--surface-2);">
+          <span class="row" style="color:var(--muted);font-weight:700;font-size:13px;">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-map" /></svg>Drag the pin to your gate
+          </span>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="capacity">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="basics">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="capacity" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">How much space?</h1>
+        <p class="sub">Bedrooms, beds and bathrooms help guests plan the group.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="between card tight">
+          <span class="sec-title">Bedrooms</span>
+          <span class="stepper" data-stepper data-min="1" data-max="12">
+            <button type="button" data-step="-1" aria-label="Fewer bedrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="lBeds">3</span>
+            <button type="button" data-step="1" aria-label="More bedrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+        <div class="between card tight">
+          <span class="sec-title">Beds</span>
+          <span class="stepper" data-stepper data-min="1" data-max="20">
+            <button type="button" data-step="-1" aria-label="Fewer beds"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="lBedsCount">4</span>
+            <button type="button" data-step="1" aria-label="More beds"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+        <div class="between card tight">
+          <span class="sec-title">Bathrooms</span>
+          <span class="stepper" data-stepper data-min="1" data-max="12">
+            <button type="button" data-step="-1" aria-label="Fewer bathrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="lBaths">3</span>
+            <button type="button" data-step="1" aria-label="More bathrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="amenities">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="location">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="amenities" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">What's on the property?</h1>
+        <p class="sub">Pick everything guests can expect to find.</p>
+      </div>
+      <div class="pad mt">
+        <div class="amen-grid">
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Pool</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">BBQ</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Bonfire</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Wi-Fi</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">AC</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Parking</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Kitchen</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Pet friendly</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Indoor games</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Outdoor games</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Projector &amp; music</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Caretaker</span></button>
+          <button class="checkline" type="button" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Power backup</span></button>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="photos">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="capacity">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="photos" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Add photos</h1>
+        <p class="sub">Guests decide with their eyes — lead with the pool and the lawn.</p>
+      </div>
+      <div class="pad mt">
+        <div class="photo-grid" id="photoGrid">
+          <div class="photo">
+            <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Pool ringed with palms" />
+            <span class="pill forest cover">Cover</span>
+            <div class="tools">
+              <button type="button" data-photo="down" aria-label="Move later"><svg class="ico" viewBox="0 0 24 24"><use href="#i-chevr" /></svg></button>
+              <button type="button" data-photo="remove" aria-label="Remove photo"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash" /></svg></button>
+            </div>
+          </div>
+          <div class="photo">
+            <img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Open meadow" />
+            <div class="tools">
+              <button type="button" data-photo="up" aria-label="Move earlier"><svg class="ico" viewBox="0 0 24 24" style="transform:rotate(180deg)"><use href="#i-chevr" /></svg></button>
+              <button type="button" data-photo="cover" aria-label="Set as cover"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg></button>
+              <button type="button" data-photo="remove" aria-label="Remove photo"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash" /></svg></button>
+            </div>
+          </div>
+          <div class="photo">
+            <img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="Shaded garden" />
+            <div class="tools">
+              <button type="button" data-photo="up" aria-label="Move earlier"><svg class="ico" viewBox="0 0 24 24" style="transform:rotate(180deg)"><use href="#i-chevr" /></svg></button>
+              <button type="button" data-photo="cover" aria-label="Set as cover"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg></button>
+              <button type="button" data-photo="remove" aria-label="Remove photo"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash" /></svg></button>
+            </div>
+          </div>
+          <button class="add-tile" type="button" id="addPhoto">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-camera" /></svg>
+            Add photos
+          </button>
+        </div>
+        <p class="tiny mt" id="photoHint">4 photos added · cover set to the pool shot.</p>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="pricing">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="amenities">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="pricing" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Set your nightly price</h1>
+        <p class="sub">You can change this any time from the listing.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="field">
+          <label for="pBase">Base nightly price (₹)</label>
+          <input class="ctrl num" id="pBase" type="number" min="500" step="100" value="8500" data-draft="price" />
+        </div>
+        <div class="field">
+          <label for="pClean">Cleaning fee (₹)</label>
+          <input class="ctrl num" id="pClean" type="number" min="0" step="100" value="1200" data-draft="clean" />
+          <p class="help">Charged once per stay.</p>
+        </div>
+        <div class="field">
+          <label for="pDeposit">Security deposit (₹) — optional</label>
+          <input class="ctrl num" id="pDeposit" type="number" min="0" step="500" value="0" data-draft="deposit" />
+        </div>
+        <div class="hint">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-spark" /></svg>
+          <span>Seasonal and holiday price overrides are supported later through pricing rules.</span>
+        </div>
+        <div class="card">
+          <div class="sumline"><span class="k">Guest pays for 2 nights</span><span class="num" id="pPreview">₹18,200</span></div>
+          <div class="sumline"><span class="k">Cleaning fee</span><span class="num" id="pPreviewClean">₹1,200</span></div>
+          <div class="sumline total"><span class="k">Before taxes</span><span class="num" id="pPreviewTotal">₹19,400</span></div>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="availability">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="photos">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="availability" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Choose when guests can stay</h1>
+        <p class="sub">Block dates when the farmhouse is unavailable.</p>
+      </div>
+      <div class="pad mt">
+        <div id="availCal"></div>
+        <div class="legend mt">
+          <span><i class="l-av"></i>Open</span>
+          <span><i class="l-bl"></i>Blocked</span>
+        </div>
+        <div class="stack mt">
+          <div class="field">
+            <label for="avMin">Minimum stay (nights)</label>
+            <select class="ctrl" id="avMin" data-draft="minstay">
+              <option>1 night</option>
+              <option selected>2 nights</option>
+              <option>3 nights</option>
+              <option>5 nights</option>
+            </select>
+          </div>
+          <div class="row" style="gap:12px;">
+            <div class="field grow">
+              <label for="avPrice">Price override (₹)</label>
+              <input class="ctrl num" id="avPrice" type="number" min="0" step="100" placeholder="Use base price" data-draft="override" />
+            </div>
+            <div class="field grow">
+              <label for="avStart">Applies from</label>
+              <input class="ctrl" id="avStart" type="text" value="15 Jun" data-draft="overridefrom" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="preview">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="pricing">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="preview" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Preview your listing</h1>
+        <p class="sub">This is roughly what guests see in search.</p>
+      </div>
+      <div class="pad mt">
+        <article class="f-card">
+          <div class="media" style="aspect-ratio:3/2;">
+            <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Preview of your farmhouse" />
+          </div>
+          <div class="p-body">
+            <h3 class="p-title" id="pvName">Your farmhouse</h3>
+            <p class="p-loc" id="pvLoc">ECR</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>New listing</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen" id="pvGuests">8 guests · 3 bedrooms</span>
+            </div>
+            <p class="p-price num" id="pvPrice">₹8,500 <span class="per">/ night</span></p>
+          </div>
+        </article>
+        <div class="card mt">
+          <div class="sumline"><span class="k">Amenities selected</span><span class="num" id="pvAmenities">0</span></div>
+          <div class="sumline"><span class="k">Photos</span><span class="num" id="pvPhotos">4</span></div>
+          <div class="sumline"><span class="k">Minimum stay</span><span class="num" id="pvMin">2 nights</span></div>
+          <div class="sumline"><span class="k">Blocked dates</span><span class="num" id="pvBlocked">0</span></div>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="publish">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="availability">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="publish" hidden>
+      <div class="page-head">
+        <h1 style="font-size:26px;">Ready to publish?</h1>
+        <p class="sub">Hosts usually get a first booking within a week.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="card stack sm">
+          <div class="row"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="grow">Basics and description</span></div>
+          <div class="row"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="grow">Location added</span></div>
+          <div class="row"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="grow">Capacity set</span></div>
+          <div class="row"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="grow">Pricing set</span></div>
+          <div class="row"><svg class="ico" style="color:var(--ok)" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="grow">Availability set</span></div>
+        </div>
+        <div class="hint">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>
+          <span>New listings are reviewed before they go live — usually within 24 hours.</span>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" id="publishBtn">Publish listing</button>
+        <button class="btn block ghost" type="button" data-goto="preview">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="done" hidden>
+      <div class="stack center" style="padding:64px 24px;align-items:center;">
+        <span class="ic" style="width:76px;height:76px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;"><svg class="ico" style="width:34px;height:34px" viewBox="0 0 24 24"><use href="#i-check" /></svg></span>
+        <h1 style="font-family:var(--font-display);font-weight:400;font-size:30px;margin-top:14px;">Submitted for review</h1>
+        <p class="muted">Your farmhouse is queued for verification.</p>
+      </div>
+      <div class="pad stack">
+        <a class="btn block lg" href="host.html">Back to hosting</a>
+        <a class="btn block ghost" href="index.html">See it as a guest</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var flow = document.getElementById('wizard');
+  var STEP_NAMES = [
+    ['basics', 'Basics'], ['location', 'Location'], ['capacity', 'Capacity'], ['amenities', 'Amenities'],
+    ['photos', 'Photos'], ['pricing', 'Pricing'], ['availability', 'Availability'], ['preview', 'Preview'], ['publish', 'Publish']
+  ];
+  var current = 'basics';
+
+  function indexOf(id) { for (var i = 0; i < STEP_NAMES.length; i++) { if (STEP_NAMES[i][0] === id) { return i; } } return 0; }
+
+  flow.addEventListener('flowchange', function (event) {
+    current = event.detail.id;
+    var i = indexOf(current);
+    document.getElementById('wizStep').textContent = 'Step ' + (i + 1) + ' of 9';
+    document.getElementById('wizName').textContent = STEP_NAMES[i][1];
+    document.getElementById('wizBar').style.width = Math.round(((i + 1) / 9) * 100) + '%';
+    document.getElementById('wizTitle').textContent = STEP_NAMES[i][1];
+    if (current === 'preview') { buildPreview(); }
+    if (current === 'pricing') { updatePrice(); }
+  });
+
+  flow.addEventListener('flowrequest', function (event) {
+    if (current === 'basics' && event.detail.id === 'location') {
+      if (document.getElementById('lName').value.trim().length < 3) {
+        event.preventDefault();
+        window.odToast('Add a property name before continuing');
+      }
+    }
+  });
+
+  /* draft autosave + restore */
+  var DRAFT_KEY = 'fh.listingDraft';
+  var draft = window.odRead(DRAFT_KEY, {}) || {};
+  document.querySelectorAll('[data-draft]').forEach(function (el) {
+    var key = el.dataset.draft;
+    if (draft[key] !== undefined && el.type !== 'number') { el.value = draft[key]; }
+    if (draft[key] !== undefined && el.type === 'number') { el.value = draft[key]; }
+    el.addEventListener('input', function () {
+      draft[key] = el.value;
+      window.odWrite(DRAFT_KEY, draft);
+    });
+  });
+
+  var countField = document.getElementById('lGuests').closest('[data-stepper]');
+  countField.addEventListener('stepperchange', function (e) { draft.guests = e.detail.value; window.odWrite(DRAFT_KEY, draft); });
+  var amenityCount = 0;
+  document.querySelectorAll('#wizard [data-step-id="amenities"] .checkline').forEach(function (row) {
+    row.addEventListener('click', function () {
+      amenityCount = document.querySelectorAll('#wizard [data-step-id="amenities"] .checkline[aria-pressed="true"]').length;
+    });
+  });
+
+  /* photos */
+  var grid = document.getElementById('photoGrid');
+  var photoCount = 4;
+  function setCover(tile) {
+    grid.querySelectorAll('.cover').forEach(function (c) { c.remove(); });
+    tile.insertAdjacentHTML('afterbegin', '<span class="pill forest cover">Cover</span>');
+    updatePhotos();
+  }
+  grid.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-photo]');
+    if (!btn) { return; }
+    var tile = btn.closest('.photo');
+    var action = btn.dataset.photo;
+    if (action === 'remove') {
+      if (grid.querySelectorAll('.photo').length <= 1) { window.odToast('Keep at least one photo'); return; }
+      var wasCover = !!tile.querySelector('.cover');
+      tile.remove();
+      photoCount = grid.querySelectorAll('.photo').length;
+      if (wasCover) { var first = grid.querySelector('.photo'); if (first) { setCover(first); } }
+      window.odToast('Photo removed');
+    } else if (action === 'cover') {
+      setCover(tile);
+      window.odToast('Cover photo updated');
+    } else if (action === 'up' || action === 'down') {
+      var tiles = Array.prototype.slice.call(grid.querySelectorAll('.photo'));
+      var i = tiles.indexOf(tile);
+      var j = action === 'up' ? i - 1 : i + 1;
+      if (j < 0 || j >= tiles.length) { return; }
+      if (action === 'up') { grid.insertBefore(tile, tiles[j]); } else { grid.insertBefore(tiles[j], tile); }
+      window.odToast('Photo order updated');
+    }
+    updatePhotos();
+  });
+  function updatePhotos() {
+    photoCount = grid.querySelectorAll('.photo').length;
+    document.getElementById('photoHint').textContent = photoCount + ' photos added · cover set to the first tile.';
+    document.getElementById('pvPhotos').textContent = photoCount;
+  }
+  document.getElementById('addPhoto').addEventListener('click', function () {
+    var src = ['assets/prop-lakeview-courtyard.jpg', 'assets/prop-sunset-fields.jpg', 'assets/prop-coconut-grove.jpg', 'assets/prop-blue-horizon.jpg'][photoCount % 4];
+    var tile = document.createElement('div');
+    tile.className = 'photo';
+    tile.innerHTML = '<img src="' + src + '" alt="Newly added farmhouse photo" /><span class="uploading"><span class="spin" style="width:26px;height:26px;border-width:2px;"></span></span>';
+    grid.insertBefore(tile, document.getElementById('addPhoto'));
+    setTimeout(function () {
+      var up = tile.querySelector('.uploading');
+      if (up) { up.remove(); }
+      tile.insertAdjacentHTML('beforeend', '<div class="tools"><button type="button" data-photo="cover" aria-label="Set as cover"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg></button><button type="button" data-photo="remove" aria-label="Remove photo"><svg class="ico" viewBox="0 0 24 24"><use href="#i-trash" /></svg></button></div>');
+      updatePhotos();
+      window.odToast('Photo uploaded');
+    }, 1200);
+  });
+
+  /* pricing */
+  var pBase = document.getElementById('pBase');
+  var pClean = document.getElementById('pClean');
+  function updatePrice() {
+    var base = parseInt(pBase.value || '0', 10);
+    var clean = parseInt(pClean.value || '0', 10);
+    document.getElementById('pPreview').textContent = '₹' + (base * 2).toLocaleString('en-IN');
+    document.getElementById('pPreviewClean').textContent = '₹' + clean.toLocaleString('en-IN');
+    document.getElementById('pPreviewTotal').textContent = '₹' + (base * 2 + clean).toLocaleString('en-IN');
+  }
+  pBase.addEventListener('input', updatePrice);
+  pClean.addEventListener('input', updatePrice);
+  updatePrice();
+
+  /* availability */
+  var availCal = document.getElementById('availCal');
+  window.odRenderCalendar(availCal, { month: '2026-06', booked: ['2026-06-12', '2026-06-13', '2026-06-14'] });
+  var blocked = [];
+  availCal.addEventListener('calchange', function (event) {
+    var day = event.detail.day;
+    if (day.classList.contains('is-blocked')) {
+      day.classList.remove('is-blocked');
+      day.classList.remove('is-on');
+      day.setAttribute('aria-pressed', 'false');
+      blocked = blocked.filter(function (d) { return d !== event.detail.iso; });
+    } else {
+      day.classList.add('is-blocked');
+      day.classList.remove('is-on');
+      day.setAttribute('aria-pressed', 'false');
+      blocked.push(event.detail.iso);
+    }
+    document.getElementById('pvBlocked').textContent = blocked.length;
+  });
+  document.getElementById('avMin').addEventListener('change', function () {
+    document.getElementById('pvMin').textContent = this.value;
+  });
+
+  function buildPreview() {
+    document.getElementById('pvName').textContent = document.getElementById('lName').value.trim() || 'Your farmhouse';
+    document.getElementById('pvLoc').textContent = document.getElementById('lCity').value;
+    document.getElementById('pvGuests').textContent = document.getElementById('lGuests').textContent + ' guests · ' + document.getElementById('lBeds').textContent + ' bedrooms';
+    document.getElementById('pvPrice').innerHTML = '₹' + Number(pBase.value || 0).toLocaleString('en-IN') + ' <span class="per">/ night</span>';
+    document.getElementById('pvAmenities').textContent = document.querySelectorAll('#wizard [data-step-id="amenities"] .checkline[aria-pressed="true"]').length;
+    document.getElementById('pvPhotos').textContent = photoCount;
+  }
+
+  document.getElementById('saveExit').addEventListener('click', function () {
+    window.odWrite(DRAFT_KEY, draft);
+    window.odToast('Draft saved — resume any time from Hosting');
+    setTimeout(function () { window.location.href = 'host.html'; }, 900);
+  });
+
+  document.getElementById('publishBtn').addEventListener('click', function () {
+    window.odFlow(flow)('done');
+  });
+})();
+</script>
+</body>
+</html>

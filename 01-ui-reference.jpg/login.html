@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sign in · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .auth{ padding-bottom:calc(30px + env(safe-area-inset-bottom)); }
+  .auth-hero{ margin:0 var(--gutter); border-radius:var(--r-lg); overflow:hidden; aspect-ratio:3/2; background:var(--surface-2); }
+  .auth-hero img{ width:100%; height:100%; object-fit:cover; }
+  .auth-body{ padding:22px var(--gutter) 0; }
+  .auth-eyebrow{ font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--moss); }
+  .auth-title{ font-family:var(--font-display); font-weight:400; font-size:32px; line-height:1.08; letter-spacing:-.012em; }
+  .or{ display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; font-weight:700; }
+  .or::before, .or::after{ content:""; height:1px; flex:1; background:var(--border); }
+  .ctrl-wrap{ position:relative; display:flex; }
+  .ctrl-wrap .ctrl{ padding-right:50px; }
+  .ctrl-act{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:38px; height:38px; border-radius:var(--r-pill);
+    border:1px solid transparent; background:transparent; color:var(--muted);
+    display:grid; place-items:center;
+  }
+  .ctrl-act:hover{ color:var(--fg); background:var(--surface-2); }
+  .ctrl-act .ico{ width:18px; height:18px; }
+  .lnk{ background:none; border:0; padding:8px 2px; color:var(--primary); font:inherit; font-size:13px; font-weight:700; }
+  .lnk:hover{ text-decoration:underline; text-underline-offset:3px; }
+  .spin.sm{ width:18px; height:18px; border-width:2px; margin:0; }
+  a.inline-link{ font-weight:700; color:var(--primary); text-decoration:none; }
+  a.inline-link:hover{ text-decoration:underline; text-underline-offset:3px; }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="splash.html" aria-label="Back">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <h1 class="bar-title">Sign in</h1>
+      <span class="bar-spacer" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <div class="auth">
+    <div class="auth-hero mt">
+      <img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="A farmhouse veranda opening onto a green garden" />
+    </div>
+
+    <div class="auth-body">
+      <div class="stack sm">
+        <p class="auth-eyebrow">Welcome back</p>
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="muted">Sign in to save stays, manage trips and book farmhouses.</p>
+      </div>
+
+      <div class="stack mt-lg">
+        <button class="btn block lg" id="googleBtn" type="button">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-google" /></svg>
+          Continue with Google
+        </button>
+
+        <div class="or">or sign in with email</div>
+
+        <form id="loginForm" class="stack" novalidate>
+          <div class="field" id="emailField">
+            <label for="loginEmail">Email</label>
+            <input class="ctrl" id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" />
+            <p class="help" id="emailHelp" hidden>Enter a valid email address.</p>
+          </div>
+
+          <div class="field" id="pwField">
+            <label for="loginPw">Password</label>
+            <div class="ctrl-wrap">
+              <input class="ctrl" id="loginPw" type="password" autocomplete="current-password" placeholder="Your password" />
+              <button class="ctrl-act" type="button" id="pwToggle" aria-label="Show password">
+                <svg class="ico" viewBox="0 0 24 24"><use href="#i-eye" /></svg>
+              </button>
+            </div>
+            <p class="help" id="pwHelp" hidden>Enter your password to continue.</p>
+          </div>
+
+          <div class="row" style="justify-content:flex-end;">
+            <button class="lnk" type="button" data-toast="Password reset link sent to your email">Forgot password?</button>
+          </div>
+
+          <button class="btn block lg outline" id="signinBtn" type="submit">Sign in with email</button>
+        </form>
+
+        <a class="btn block ghost" href="index.html">Continue as guest</a>
+      </div>
+
+      <p class="tiny center mt-lg">New to 9bhk? <a class="inline-link" href="signup.html">Create account</a></p>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var form = document.getElementById('loginForm');
+  var email = document.getElementById('loginEmail');
+  var pw = document.getElementById('loginPw');
+  var emailField = document.getElementById('emailField');
+  var pwField = document.getElementById('pwField');
+  var emailHelp = document.getElementById('emailHelp');
+  var pwHelp = document.getElementById('pwHelp');
+  var signinBtn = document.getElementById('signinBtn');
+
+  document.getElementById('pwToggle').addEventListener('click', function () {
+    var show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+
+  function busy(btn, label) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin sm" aria-hidden="true"></span>' + label;
+  }
+  function go(btn, label) {
+    busy(btn, label);
+    window.odToast(label.replace('…', ''));
+    setTimeout(function () { window.location.href = 'index.html'; }, 1200);
+  }
+
+  document.getElementById('googleBtn').addEventListener('click', function () {
+    go(this, ' Signing you in…');
+  });
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+    var hasPw = pw.value.length > 0;
+    emailField.classList.toggle('err', !validEmail);
+    emailHelp.hidden = validEmail;
+    pwField.classList.toggle('err', !hasPw);
+    pwHelp.hidden = hasPw;
+    if (!validEmail) { email.focus(); return; }
+    if (!hasPw) { pw.focus(); return; }
+    go(signinBtn, ' Signing you in…');
+  });
+})();
+</script>
+</body>
+</html>

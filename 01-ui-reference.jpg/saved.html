@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Wishlists · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+<div class="app content">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <h1 class="bar-title">Wishlists</h1>
+      <span class="bar-spacer" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <section class="page-head">
+    <p class="eyebrow">Saved</p>
+    <h1>Places to come back to</h1>
+    <p class="sub" id="savedCount">Nothing saved yet.</p>
+  </section>
+
+  <div id="savedWrap">
+    <div class="empty hidden" id="savedEmpty">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-heart" /></svg></span>
+      <h3>Save places you want to come back to.</h3>
+      <p>Tap the heart on any farmhouse and it lands here for your next escape.</p>
+      <a class="btn" href="index.html">Explore farmhouses</a>
+    </div>
+    <div class="stack-cards mt" id="savedList"></div>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Popular right now</h2>
+      <a class="see-all" href="search.html">See all
+        <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+      </a>
+    </div>
+    <div class="rail" role="list">
+      <article class="p-card hit" role="listitem">
+        <div class="media">
+          <img src="assets/prop-blue-horizon.jpg" width="640" height="640" alt="Turquoise sea and a sandy cove at Blue Horizon Farm Stay" loading="lazy" />
+        </div>
+        <div class="p-body">
+          <h3 class="p-title"><a class="hit-link" href="property.html">Blue Horizon Farm Stay</a></h3>
+          <p class="p-loc">Mahabalipuram</p>
+          <p class="p-price num">₹9,100 <span class="per">/ night</span></p>
+        </div>
+      </article>
+      <article class="p-card hit" role="listitem">
+        <div class="media">
+          <img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A lantern-lit stone path at Terracotta Courtyard Stay" loading="lazy" />
+        </div>
+        <div class="p-body">
+          <h3 class="p-title"><a class="hit-link" href="property.html">Terracotta Courtyard Stay</a></h3>
+          <p class="p-loc">Pondicherry</p>
+          <p class="p-price num">₹7,800 <span class="per">/ night</span></p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <nav class="tabbar" data-od-id="bottomnav" aria-label="Primary">
+    <a class="tab" href="index.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compass" /></svg>Explore</a>
+    <a class="tab" href="saved.html" aria-current="page"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-heart" /></svg>Wishlists</a>
+    <a class="tab" href="trips.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-map" /></svg>Trips</a>
+    <a class="tab" href="profile.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-user" /></svg>Profile</a>
+  </nav>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var PROP = {
+    'palm-grove': { img: 'assets/prop-palm-grove.jpg', w: 800, h: 1000, title: 'Palm Grove Private Farmhouse', loc: 'ECR · Near Mahabalipuram', price: '₹8,500', rating: '4.9', reviews: '(128)' },
+    'mango-orchard': { img: 'assets/prop-mango-orchard.jpg', w: 800, h: 1000, title: 'Mango Orchard Retreat', loc: 'Chengalpattu', price: '₹6,200', rating: '4.8', reviews: '(94)' },
+    'sunset-fields': { img: 'assets/prop-sunset-fields.jpg', w: 800, h: 1000, title: 'Sunset Fields Farmhouse', loc: 'Kanchipuram', price: '₹7,400', rating: '4.9', reviews: '(76)' },
+    'lakeview-courtyard': { img: 'assets/prop-lakeview-courtyard.jpg', w: 640, h: 640, title: 'Lakeview Courtyard', loc: 'Pondicherry', price: '₹6,900', rating: '4.8', reviews: '(63)' },
+    'coconut-grove': { img: 'assets/prop-coconut-grove.jpg', w: 640, h: 640, title: 'Coconut Grove Escape', loc: 'ECR · Mahabalipuram', price: '₹5,800', rating: '4.8', reviews: '(210)' },
+    'blue-horizon': { img: 'assets/prop-blue-horizon.jpg', w: 640, h: 640, title: 'Blue Horizon Farm Stay', loc: 'Mahabalipuram', price: '₹9,100', rating: '4.7', reviews: '(52)' },
+    'guava-house': { img: 'assets/prop-guava-house.jpg', w: 1080, h: 720, title: 'The Guava House', loc: 'Chennai', price: '₹5,400', rating: '4.9', reviews: '(312)' },
+    'verde-meadow': { img: 'assets/prop-verde-meadow.jpg', w: 1080, h: 720, title: 'Verde Meadow Farmhouse', loc: 'Kanchipuram', price: '₹4,900', rating: '4.6', reviews: '(88)' },
+    'terracotta-courtyard': { img: 'assets/prop-terracotta-courtyard.jpg', w: 1080, h: 720, title: 'Terracotta Courtyard Stay', loc: 'Pondicherry', price: '₹7,800', rating: '4.7', reviews: '(145)' }
+  };
+  var FAV_KEY = 'fh.favorites';
+  var favs = new Set(window.odRead(FAV_KEY, []));
+  var list = document.getElementById('savedList');
+  var empty = document.getElementById('savedEmpty');
+  var count = document.getElementById('savedCount');
+
+  function render() {
+    list.innerHTML = '';
+    var ids = Array.from(favs).filter(function (id) { return PROP[id]; });
+    empty.classList.toggle('hidden', ids.length !== 0);
+    count.textContent = ids.length === 0 ? 'Nothing saved yet.' : ids.length + (ids.length === 1 ? ' saved farmhouse' : ' saved farmhouses');
+    ids.forEach(function (id) {
+      var p = PROP[id];
+      var card = document.createElement('article');
+      card.className = 'f-card hit';
+      card.innerHTML =
+        '<div class="media">' +
+          '<img src="' + p.img + '" width="' + p.w + '" height="' + p.h + '" alt="' + p.title + '" loading="lazy" />' +
+          '<button class="fav is-fav" type="button" data-prop="' + id + '" aria-pressed="true" aria-label="Remove ' + p.title + ' from saved">' +
+            '<svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>' +
+            '<svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="p-body">' +
+          '<h3 class="p-title"><a class="hit-link" href="property.html">' + p.title + '</a></h3>' +
+          '<p class="p-loc">' + p.loc + '</p>' +
+          '<div class="p-meta"><span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>' + p.rating + ' <span class="rc">' + p.reviews + '</span></span></div>' +
+          '<p class="p-price num">' + p.price + ' <span class="per">/ night</span></p>' +
+        '</div>';
+      var fav = card.querySelector('.fav');
+      fav.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        favs.delete(id);
+        window.odWrite(FAV_KEY, Array.from(favs));
+        window.odToast('Removed from your wishlist');
+        render();
+      });
+      list.appendChild(card);
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

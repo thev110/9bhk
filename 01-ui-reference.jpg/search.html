@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Search · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .sticky-search{ position:sticky; top:58px; z-index:25; background:var(--surface); padding:12px 0 10px; border-bottom:1px solid var(--border); }
+  .range{ width:100%; accent-color:var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="app content">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="index.html" aria-label="Back to home">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <h1 class="bar-title">Search</h1>
+      <button class="icon-btn" type="button" data-sheet-open="sheet-filters" aria-label="Open filters">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-sliders" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="sticky-search" data-od-id="search-controls">
+    <div class="searchbar-wrap">
+      <form class="searchbar" id="searchForm" role="search">
+        <svg class="ico s-ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-search" /></svg>
+        <input id="searchInput" type="search" placeholder="Search places, areas or farmhouses" aria-label="Search places, areas or farmhouses" autocomplete="off" />
+        <button class="search-submit" type="submit" aria-label="Search">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+        </button>
+      </form>
+    </div>
+    <div class="summary pad mt">
+      <button class="sum-cell" type="button" data-sheet-open="sheet-where">
+        <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg>Where</span>
+        <span class="v" id="cellWhere">Chennai</span>
+      </button>
+      <button class="sum-cell" type="button" data-sheet-open="sheet-dates">
+        <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-calendar" /></svg>When</span>
+        <span class="v" id="cellWhen">Add dates</span>
+      </button>
+      <button class="sum-cell" type="button" data-sheet-open="sheet-guests">
+        <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-users" /></svg>Guests</span>
+        <span class="v" id="cellGuests">2 guests</span>
+      </button>
+    </div>
+    <div class="chips mt">
+      <button class="chip" type="button" data-amen="pool"><svg class="ico" viewBox="0 0 24 24"><use href="#i-waves" /></svg>Pool</button>
+      <button class="chip" type="button" data-amen="bonfire"><svg class="ico" viewBox="0 0 24 24"><use href="#i-flame" /></svg>Bonfire</button>
+      <button class="chip" type="button" data-amen="bbq"><svg class="ico" viewBox="0 0 24 24"><use href="#i-grill" /></svg>BBQ</button>
+      <button class="chip" type="button" data-amen="pet"><svg class="ico" viewBox="0 0 24 24"><use href="#i-paw" /></svg>Pet friendly</button>
+      <button class="chip" type="button" data-amen="ac"><svg class="ico" viewBox="0 0 24 24"><use href="#i-ac" /></svg>AC</button>
+      <button class="chip" type="button" data-amen="wifi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-wifi" /></svg>Wi-Fi</button>
+      <button class="chip" type="button" data-amen="parking"><svg class="ico" viewBox="0 0 24 24"><use href="#i-car" /></svg>Parking</button>
+    </div>
+  </div>
+
+  <div class="section-head" style="padding-top:18px;">
+    <h2 id="resultCount">9 stays</h2>
+    <div class="row">
+      <label class="sr" for="sortSelect">Sort results</label>
+      <select class="ctrl" id="sortSelect" style="min-height:40px;padding:8px 34px 8px 12px;font-size:13px;background-position:calc(100% - 18px) 17px,calc(100% - 13px) 17px;">
+        <option value="recommended">Recommended</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+        <option value="rating">Top rated</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="list-stack" id="results" role="list">
+
+    <article class="rowcard hit" role="listitem" data-id="palm-grove" data-price="8500" data-rating="4.9" data-beds="3" data-amen="pool bonfire bbq pet" data-name="Palm Grove Private Farmhouse" data-loc="ECR · Near Mahabalipuram">
+      <div class="thumb">
+        <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="A curved swimming pool ringed with palms at Palm Grove Private Farmhouse" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="palm-grove" data-name="Palm Grove Private Farmhouse" aria-pressed="false" aria-label="Save Palm Grove Private Farmhouse">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Palm Grove Private Farmhouse</a></h3>
+        <p class="p-loc">ECR · Near Mahabalipuram</p>
+        <p class="p-amen" style="margin-top:5px;">8 guests · Pool · Bonfire · BBQ</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(128)</span></span>
+          <span class="p-price num" style="margin:0;">₹8,500 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="mango-orchard" data-price="6200" data-rating="4.8" data-beds="2" data-amen="bbq pet" data-name="Mango Orchard Retreat" data-loc="Chengalpattu">
+      <div class="thumb">
+        <img src="assets/prop-mango-orchard.jpg" width="800" height="1000" alt="A stone cottage with a sage-green door at Mango Orchard Retreat" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="mango-orchard" data-name="Mango Orchard Retreat" aria-pressed="false" aria-label="Save Mango Orchard Retreat">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Mango Orchard Retreat</a></h3>
+        <p class="p-loc">Chengalpattu</p>
+        <p class="p-amen" style="margin-top:5px;">6 guests · Orchard · BBQ</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(94)</span></span>
+          <span class="p-price num" style="margin:0;">₹6,200 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="sunset-fields" data-price="7400" data-rating="4.9" data-beds="3" data-amen="pool bonfire" data-name="Sunset Fields Farmhouse" data-loc="Kanchipuram">
+      <div class="thumb">
+        <img src="assets/prop-sunset-fields.jpg" width="800" height="1000" alt="An infinity pool looking out over green fields at Sunset Fields Farmhouse" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="sunset-fields" data-name="Sunset Fields Farmhouse" aria-pressed="false" aria-label="Save Sunset Fields Farmhouse">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Sunset Fields Farmhouse</a></h3>
+        <p class="p-loc">Kanchipuram</p>
+        <p class="p-amen" style="margin-top:5px;">10 guests · Pool · Fields</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(76)</span></span>
+          <span class="p-price num" style="margin:0;">₹7,400 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="lakeview-courtyard" data-price="6900" data-rating="4.8" data-beds="2" data-amen="pool wifi" data-name="Lakeview Courtyard" data-loc="Pondicherry">
+      <div class="thumb">
+        <img src="assets/prop-lakeview-courtyard.jpg" width="640" height="640" alt="A pool beside a calm lake at Lakeview Courtyard" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="lakeview-courtyard" data-name="Lakeview Courtyard" aria-pressed="false" aria-label="Save Lakeview Courtyard">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Lakeview Courtyard</a></h3>
+        <p class="p-loc">Pondicherry</p>
+        <p class="p-amen" style="margin-top:5px;">6 guests · Pool · Lake view</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(63)</span></span>
+          <span class="p-price num" style="margin:0;">₹6,900 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="coconut-grove" data-price="5800" data-rating="4.8" data-beds="2" data-amen="pool pet" data-name="Coconut Grove Escape" data-loc="ECR · Mahabalipuram">
+      <div class="thumb">
+        <img src="assets/prop-coconut-grove.jpg" width="640" height="640" alt="Palms leaning over white sand near Coconut Grove Escape" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="coconut-grove" data-name="Coconut Grove Escape" aria-pressed="false" aria-label="Save Coconut Grove Escape">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Coconut Grove Escape</a></h3>
+        <p class="p-loc">ECR · Mahabalipuram</p>
+        <p class="p-amen" style="margin-top:5px;">6 guests · Pool · Near beach</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(210)</span></span>
+          <span class="p-price num" style="margin:0;">₹5,800 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="blue-horizon" data-price="9100" data-rating="4.7" data-beds="4" data-amen="pool ac wifi parking" data-name="Blue Horizon Farm Stay" data-loc="Mahabalipuram">
+      <div class="thumb">
+        <img src="assets/prop-blue-horizon.jpg" width="640" height="640" alt="Turquoise sea and a sandy cove framed by palms at Blue Horizon Farm Stay" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="blue-horizon" data-name="Blue Horizon Farm Stay" aria-pressed="false" aria-label="Save Blue Horizon Farm Stay">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Blue Horizon Farm Stay</a></h3>
+        <p class="p-loc">Mahabalipuram</p>
+        <p class="p-amen" style="margin-top:5px;">12 guests · Pool · Sea view</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.7 <span class="rc">(52)</span></span>
+          <span class="p-price num" style="margin:0;">₹9,100 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="guava-house" data-price="5400" data-rating="4.9" data-beds="2" data-amen="pet wifi parking" data-name="The Guava House" data-loc="Chennai">
+      <div class="thumb">
+        <img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="A shaded green garden with mature trees at The Guava House" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="guava-house" data-name="The Guava House" aria-pressed="false" aria-label="Save The Guava House">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">The Guava House</a></h3>
+        <p class="p-loc">Chennai</p>
+        <p class="p-amen" style="margin-top:5px;">6 guests · Garden · Pet friendly</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(312)</span></span>
+          <span class="p-price num" style="margin:0;">₹5,400 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="verde-meadow" data-price="4900" data-rating="4.6" data-beds="3" data-amen="bonfire ac parking" data-name="Verde Meadow Farmhouse" data-loc="Kanchipuram">
+      <div class="thumb">
+        <img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="A wide green meadow edged with trees at Verde Meadow Farmhouse" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="verde-meadow" data-name="Verde Meadow Farmhouse" aria-pressed="false" aria-label="Save Verde Meadow Farmhouse">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Verde Meadow Farmhouse</a></h3>
+        <p class="p-loc">Kanchipuram</p>
+        <p class="p-amen" style="margin-top:5px;">10 guests · Meadow · Bonfire</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.6 <span class="rc">(88)</span></span>
+          <span class="p-price num" style="margin:0;">₹4,900 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+    <article class="rowcard hit" role="listitem" data-id="terracotta-courtyard" data-price="7800" data-rating="4.7" data-beds="3" data-amen="pool bonfire ac" data-name="Terracotta Courtyard Stay" data-loc="Pondicherry">
+      <div class="thumb">
+        <img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A stone garden path lit by lanterns at Terracotta Courtyard Stay" loading="lazy" />
+        <button class="fav sm" type="button" data-prop="terracotta-courtyard" data-name="Terracotta Courtyard Stay" aria-pressed="false" aria-label="Save Terracotta Courtyard Stay">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg><svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+      <div class="grow">
+        <h3 class="p-title"><a class="hit-link" href="property.html">Terracotta Courtyard Stay</a></h3>
+        <p class="p-loc">Pondicherry</p>
+        <p class="p-amen" style="margin-top:5px;">8 guests · Courtyard · Bonfire</p>
+        <div class="between" style="margin-top:7px;">
+          <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.7 <span class="rc">(145)</span></span>
+          <span class="p-price num" style="margin:0;">₹7,800 <span class="per">/ night</span></span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="empty hidden" id="noResults">
+    <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-search" /></svg></span>
+    <h3>No farmhouses match those filters yet.</h3>
+    <p>Try widening the price range or clearing a filter or two.</p>
+    <button class="btn outline" type="button" id="clearAll">Clear all filters</button>
+  </div>
+
+</div>
+
+<div class="scrim" data-scrim></div>
+
+<section class="sheet" id="sheet-where" role="dialog" aria-modal="true" aria-labelledby="whereTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="whereTitle">Where to?</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="menu">
+    <button class="mi" type="button" data-place="Chennai"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">Chennai</span><span class="meta">24 stays</span></button>
+    <button class="mi" type="button" data-place="ECR"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">ECR</span><span class="meta">31 stays</span></button>
+    <button class="mi" type="button" data-place="Mahabalipuram"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">Mahabalipuram</span><span class="meta">18 stays</span></button>
+    <button class="mi" type="button" data-place="Chengalpattu"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">Chengalpattu</span><span class="meta">12 stays</span></button>
+    <button class="mi" type="button" data-place="Kanchipuram"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">Kanchipuram</span><span class="meta">9 stays</span></button>
+    <button class="mi" type="button" data-place="Pondicherry"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg><span class="lb">Pondicherry</span><span class="meta">21 stays</span></button>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-dates" role="dialog" aria-modal="true" aria-labelledby="datesTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="datesTitle">When are you going?</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div id="searchCal"></div>
+  <div class="legend mt">
+    <span><i class="l-av"></i>Available</span>
+    <span><i class="l-bk"></i>Booked</span>
+    <span><i class="l-bl"></i>Blocked by host</span>
+  </div>
+  <div class="between mt">
+    <span class="tiny" id="dateSummary">Pick a check-in date.</span>
+    <button class="btn sm" type="button" data-sheet-close>Done</button>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-guests" role="dialog" aria-modal="true" aria-labelledby="guestsTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="guestsTitle">Who's coming?</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="stack">
+    <div class="between card tight">
+      <span class="stack xs"><span class="sec-title">Adults</span><span class="tiny">Ages 13 and above</span></span>
+      <span class="stepper" data-stepper data-min="1" data-max="16">
+        <button type="button" data-step="-1" aria-label="Fewer adults"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+        <span class="val" id="valAdults">2</span>
+        <button type="button" data-step="1" aria-label="More adults"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+      </span>
+    </div>
+    <div class="between card tight">
+      <span class="stack xs"><span class="sec-title">Children</span><span class="tiny">Ages 2 to 12</span></span>
+      <span class="stepper" data-stepper data-min="0" data-max="10">
+        <button type="button" data-step="-1" aria-label="Fewer children"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+        <span class="val" id="valChildren">0</span>
+        <button type="button" data-step="1" aria-label="More children"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+      </span>
+    </div>
+    <div class="between card tight">
+      <span class="stack xs"><span class="sec-title">Pets</span><span class="tiny">On pet-friendly farmhouses</span></span>
+      <span class="stepper" data-stepper data-min="0" data-max="4">
+        <button type="button" data-step="-1" aria-label="Fewer pets"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+        <span class="val" id="valPets">0</span>
+        <button type="button" data-step="1" aria-label="More pets"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+      </span>
+    </div>
+  </div>
+  <button class="btn block mt" type="button" data-sheet-close>Done</button>
+</section>
+
+<section class="sheet" id="sheet-filters" role="dialog" aria-modal="true" aria-labelledby="filtersTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="filtersTitle">Filters</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="stack lg">
+    <div class="stack sm">
+      <div class="between"><span class="sec-title">Price per night</span><span class="tiny num" id="priceOut">up to ₹12,000</span></div>
+      <input class="range" id="priceRange" type="range" min="4000" max="12000" step="100" value="12000" aria-label="Maximum price per night" />
+    </div>
+    <div class="stack sm">
+      <span class="sec-title">Guest rating</span>
+      <div class="seg" id="ratingSeg">
+        <button type="button" data-rating="0" aria-selected="true">Any</button>
+        <button type="button" data-rating="4.5" aria-selected="false">4.5+</button>
+        <button type="button" data-rating="4.7" aria-selected="false">4.7+</button>
+        <button type="button" data-rating="4.8" aria-selected="false">4.8+</button>
+      </div>
+    </div>
+    <div class="between">
+      <span class="sec-title">Bedrooms</span>
+      <span class="stepper" data-stepper data-min="0" data-max="5">
+        <button type="button" data-step="-1" aria-label="Fewer bedrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+        <span class="val" id="valBeds">0</span>
+        <button type="button" data-step="1" aria-label="More bedrooms"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+      </span>
+    </div>
+    <div class="stack sm">
+      <span class="sec-title">Amenities</span>
+      <div class="stack xs">
+        <button class="checkline" type="button" data-famen="pool" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Pool</span></button>
+        <button class="checkline" type="button" data-famen="bonfire" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Bonfire</span></button>
+        <button class="checkline" type="button" data-famen="bbq" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">BBQ</span></button>
+        <button class="checkline" type="button" data-famen="pet" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Pet friendly</span></button>
+        <button class="checkline" type="button" data-famen="ac" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">AC</span></button>
+        <button class="checkline" type="button" data-famen="wifi" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Wi-Fi</span></button>
+        <button class="checkline" type="button" data-famen="parking" aria-pressed="false"><span class="box"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span><span class="lb">Parking</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-lg" style="gap:10px;">
+    <button class="btn outline" type="button" id="resetFilters">Reset</button>
+    <button class="btn grow" type="button" data-sheet-close>Show stays</button>
+  </div>
+</section>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(window.location.search);
+  var state = {
+    q: params.get('q') || '',
+    amenities: new Set(),
+    priceMax: 12000,
+    ratingMin: 0,
+    bedsMin: 0,
+    sort: 'recommended',
+    when: { inDate: '', outDate: '' },
+    guests: { adults: 2, children: 0, pets: 0 }
+  };
+  var saved = window.odRead('fh.search', {});
+  if (saved && saved.q) { state.q = state.q || saved.q; }
+
+  var input = document.getElementById('searchInput');
+  input.value = state.q;
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('#results [data-id]'));
+  var countEl = document.getElementById('resultCount');
+  var emptyEl = document.getElementById('noResults');
+
+  function amenitySet(card) { return (card.dataset.amen || '').split(' '); }
+
+  function apply() {
+    var q = state.q.toLowerCase();
+    var shown = 0;
+    cards.forEach(function (card) {
+      var am = amenitySet(card);
+      var ok = true;
+      if (q && (card.dataset.name.toLowerCase().indexOf(q) < 0 && card.dataset.loc.toLowerCase().indexOf(q) < 0)) { ok = false; }
+      state.amenities.forEach(function (a) { if (am.indexOf(a) < 0) { ok = false; } });
+      if (parseInt(card.dataset.price, 10) > state.priceMax) { ok = false; }
+      if (parseFloat(card.dataset.rating) < state.ratingMin) { ok = false; }
+      if (parseInt(card.dataset.beds, 10) < state.bedsMin) { ok = false; }
+      card.classList.toggle('hidden', !ok);
+      if (ok) { shown++; }
+    });
+    countEl.textContent = shown + (shown === 1 ? ' stay' : ' stays');
+    emptyEl.classList.toggle('hidden', shown !== 0);
+    sortCards();
+    window.odWrite('fh.search', { q: state.q, amenities: Array.from(state.amenities), priceMax: state.priceMax, ratingMin: state.ratingMin, bedsMin: state.bedsMin, when: state.when, guests: state.guests });
+  }
+
+  function sortCards() {
+    var list = document.getElementById('results');
+    var vis = cards.slice();
+    if (state.sort === 'low') { vis.sort(function (a, b) { return a.dataset.price - b.dataset.price; }); }
+    else if (state.sort === 'high') { vis.sort(function (a, b) { return b.dataset.price - a.dataset.price; }); }
+    else if (state.sort === 'rating') { vis.sort(function (a, b) { return b.dataset.rating - a.dataset.rating; }); }
+    else { vis.sort(function (a, b) { return b.dataset.rating - a.dataset.rating || a.dataset.price - b.dataset.price; }); }
+    vis.forEach(function (c) { list.appendChild(c); });
+  }
+
+  document.getElementById('searchForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    state.q = input.value.trim();
+    apply();
+    window.odToast(state.q ? 'Searching for “' + state.q + '”' : 'Showing all farmhouses');
+  });
+
+  document.querySelectorAll('.chip[data-amen]').forEach(function (chip) {
+    var a = chip.dataset.amen;
+    if (state.amenities.has(a)) { chip.classList.add('is-active'); chip.setAttribute('aria-pressed', 'true'); }
+    chip.addEventListener('click', function () {
+      if (state.amenities.has(a)) { state.amenities.delete(a); chip.classList.remove('is-active'); chip.setAttribute('aria-pressed', 'false'); }
+      else { state.amenities.add(a); chip.classList.add('is-active'); chip.setAttribute('aria-pressed', 'true'); }
+      syncFilterSheet();
+      apply();
+    });
+  });
+
+  function syncFilterSheet() {
+    document.querySelectorAll('.checkline[data-famen]').forEach(function (row) {
+      var on = state.amenities.has(row.dataset.famen);
+      row.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  document.querySelectorAll('.checkline[data-famen]').forEach(function (row) {
+    row.addEventListener('click', function () {
+      var a = row.dataset.famen;
+      if (state.amenities.has(a)) { state.amenities.delete(a); } else { state.amenities.add(a); }
+      document.querySelectorAll('.chip[data-amen="' + a + '"]').forEach(function (chip) {
+        var on = state.amenities.has(a);
+        chip.classList.toggle('is-active', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      syncFilterSheet();
+      apply();
+    });
+  });
+  syncFilterSheet();
+
+  var price = document.getElementById('priceRange');
+  var priceOut = document.getElementById('priceOut');
+  price.value = state.priceMax;
+  priceOut.textContent = 'up to ₹' + Number(state.priceMax).toLocaleString('en-IN');
+  price.addEventListener('input', function () {
+    state.priceMax = parseInt(price.value, 10);
+    priceOut.textContent = 'up to ₹' + Number(state.priceMax).toLocaleString('en-IN');
+    apply();
+  });
+
+  document.querySelectorAll('#ratingSeg button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#ratingSeg button').forEach(function (b) { b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+      state.ratingMin = parseFloat(btn.dataset.rating);
+      apply();
+    });
+  });
+
+  var bedsVal = document.getElementById('valBeds');
+  bedsVal.closest('[data-stepper]').addEventListener('stepperchange', function (event) {
+    state.bedsMin = event.detail.value;
+    apply();
+  });
+
+  document.getElementById('sortSelect').addEventListener('change', function (event) {
+    state.sort = event.target.value;
+    apply();
+  });
+
+  document.getElementById('resetFilters').addEventListener('click', function () {
+    state.amenities.clear();
+    state.priceMax = 12000;
+    state.ratingMin = 0;
+    state.bedsMin = 0;
+    state.q = '';
+    input.value = '';
+    price.value = 12000;
+    priceOut.textContent = 'up to ₹12,000';
+    document.querySelectorAll('.chip[data-amen]').forEach(function (c) { c.classList.remove('is-active'); c.setAttribute('aria-pressed', 'false'); });
+    document.querySelectorAll('#ratingSeg button').forEach(function (b, i) { b.setAttribute('aria-selected', i === 0 ? 'true' : 'false'); });
+    bedsVal.textContent = '0';
+    var bedsBox = bedsVal.closest('[data-stepper]');
+    var step = parseInt(bedsVal.textContent, 10);
+    syncFilterSheet();
+    apply();
+    window.odToast('Filters reset');
+    void step;
+  });
+
+  document.getElementById('clearAll').addEventListener('click', function () {
+    document.getElementById('resetFilters').click();
+  });
+
+  document.querySelectorAll('[data-place]').forEach(function (item) {
+    item.addEventListener('click', function () {
+      document.getElementById('cellWhere').textContent = item.dataset.place;
+      state.q = item.dataset.place === 'Chennai' ? '' : item.dataset.place;
+      apply();
+      window.odCloseSheets();
+      window.odToast('Showing stays in ' + item.dataset.place);
+    });
+  });
+
+  var cal = document.getElementById('searchCal');
+  window.odRenderCalendar(cal, {
+    month: '2026-06',
+    booked: ['2026-06-06', '2026-06-07', '2026-06-13', '2026-06-20', '2026-06-21'],
+    blocked: ['2026-06-26', '2026-06-27'],
+    today: 0
+  });
+  var dateSummary = document.getElementById('dateSummary');
+  cal.addEventListener('calchange', function (event) {
+    var iso = event.detail.iso;
+    if (!state.when.inDate || (state.when.inDate && state.when.outDate)) {
+      state.when = { inDate: iso, outDate: '' };
+      document.querySelectorAll('#searchCal .cal-d').forEach(function (d) { d.classList.remove('is-in'); });
+      event.detail.day.classList.add('is-in');
+      dateSummary.textContent = 'Check-in ' + iso + ' — now pick check-out.';
+    } else {
+      if (iso < state.when.inDate) { state.when = { inDate: iso, outDate: '' }; dateSummary.textContent = 'Check-in ' + iso + ' — now pick check-out.'; return; }
+      state.when.outDate = iso;
+      dateSummary.textContent = state.when.inDate + ' → ' + iso;
+      document.getElementById('cellWhen').textContent = state.when.inDate.slice(8) + '–' + iso.slice(8) + ' Jun';
+    }
+    apply();
+  });
+
+  var adults = document.getElementById('valAdults');
+  document.getElementById('valAdults').closest('[data-stepper]').addEventListener('stepperchange', function (e) { state.guests.adults = e.detail.value; updateGuests(); });
+  document.getElementById('valChildren').closest('[data-stepper]').addEventListener('stepperchange', function (e) { state.guests.children = e.detail.value; updateGuests(); });
+  document.getElementById('valPets').closest('[data-stepper]').addEventListener('stepperchange', function (e) { state.guests.pets = e.detail.value; updateGuests(); });
+  function updateGuests() {
+    var total = state.guests.adults + state.guests.children;
+    document.getElementById('cellGuests').textContent = total + (total === 1 ? ' guest' : ' guests');
+    apply();
+  }
+  void adults;
+
+  apply();
+})();
+</script>
+</body>
+</html>

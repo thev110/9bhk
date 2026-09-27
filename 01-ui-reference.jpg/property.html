@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Palm Grove Private Farmhouse · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .map-block{ position:relative; border-radius:var(--r-lg); overflow:hidden; background:var(--surface-2); aspect-ratio:16/10; border:1px solid var(--border); }
+  .map-block img{ width:100%; height:100%; object-fit:cover; opacity:.55; }
+  .map-pin{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-pill); padding:8px 14px; font-size:12.5px; font-weight:800; display:flex; align-items:center; gap:7px; box-shadow:var(--sh-md); }
+  .map-pin .ico{ width:16px; height:16px; color:var(--primary); }
+  .award-row{ display:flex; align-items:center; justify-content:center; gap:18px; padding:6px 0 2px; }
+  .award-row .n{ font-size:44px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+  .award-row .laurel{ width:26px; height:52px; color:var(--moss); }
+</style>
+</head>
+<body>
+
+<div class="app content has-bar">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="index.html" aria-label="Back">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <div class="row" style="gap:8px;">
+        <button class="icon-btn" type="button" data-toast="Share link copied">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-share" /></svg>
+        </button>
+        <button class="icon-btn fav-static" type="button" id="favTop" aria-pressed="false" aria-label="Save Palm Grove Private Farmhouse">
+          <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+          <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="mt" data-od-id="gallery">
+    <div class="gal">
+      <div class="g-main">
+        <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="A curved swimming pool ringed with palms and tropical planting at Palm Grove Private Farmhouse" />
+      </div>
+      <div class="g-item"><img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A lantern-lit stone path through the courtyard garden" loading="lazy" /></div>
+      <div class="g-item"><img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Wide open lawn edged with mature trees" loading="lazy" /></div>
+      <div class="g-item"><img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="A shaded garden with seating under a canopy of trees" loading="lazy" /></div>
+      <div class="g-item">
+        <img src="assets/prop-coconut-grove.jpg" width="640" height="640" alt="Palm trees and open sky above the property boundary" loading="lazy" />
+        <button class="more" type="button" data-toast="Opening the full photo gallery">+ 18 photos</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-head" data-od-id="headline">
+    <p class="eyebrow">Private farmhouse</p>
+    <h1 style="font-size:30px;">Palm Grove Private Farmhouse</h1>
+    <p class="sub" style="margin-top:8px;">ECR · Near Mahabalipuram</p>
+    <div class="row mt" style="gap:10px;">
+      <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(128 reviews)</span></span>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="tiny">Guest favourite</span>
+    </div>
+  </section>
+
+  <section class="mt" data-od-id="capacity">
+    <div class="pad">
+      <div class="card">
+        <div class="row between">
+          <span class="stack xs center"><svg class="ico" style="color:var(--moss)" viewBox="0 0 24 24"><use href="#i-users" /></svg><span class="tiny">8 guests</span></span>
+          <span class="stack xs center"><svg class="ico" style="color:var(--moss)" viewBox="0 0 24 24"><use href="#i-home-v" /></svg><span class="tiny">3 bedrooms</span></span>
+          <span class="stack xs center"><svg class="ico" style="color:var(--moss)" viewBox="0 0 24 24"><use href="#i-bed" /></svg><span class="tiny">4 beds</span></span>
+          <span class="stack xs center"><svg class="ico" style="color:var(--moss)" viewBox="0 0 24 24"><use href="#i-bath" /></svg><span class="tiny">3 bathrooms</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="about">
+    <div class="section-head"><h2>About this escape</h2></div>
+    <div class="pad">
+      <p style="font-size:14.5px;line-height:1.65;">A quiet private escape surrounded by palms, open lawns and a pool — made for slow mornings and long evenings.</p>
+      <p class="muted" style="font-size:14px;line-height:1.65;margin-top:12px;">Twenty minutes from the beach, the farmhouse sits behind a grove of coconut palms with nothing but fields around it. The pool faces the lawn, the verandah catches the evening breeze, and the bonfire pit is ready for after dark.</p>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="amenities">
+    <div class="section-head"><h2>What this place offers</h2></div>
+    <div class="amen">
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-waves" /></svg>Private pool</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-flame" /></svg>Bonfire pit</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-grill" /></svg>BBQ grill</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-ac" /></svg>Air conditioning</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-wifi" /></svg>Wi-Fi</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-car" /></svg>Free parking</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-utensils" /></svg>Equipped kitchen</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-paw" /></svg>Pet friendly</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-bolt" /></svg>Power backup</span>
+      <span class="a"><svg class="ico" viewBox="0 0 24 24"><use href="#i-music" /></svg>Projector &amp; music</span>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="reviews">
+    <div class="section-head"><h2>Reviews</h2></div>
+    <div class="pad">
+      <div class="card">
+        <div class="award-row" aria-label="Rated 4.9 out of 5">
+          <svg class="laurel" viewBox="0 0 24 52" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M20 50C7 46 3 34 7 18"/><path d="M15 44c-6-4-8-8-8-14"/><path d="M9 20C4 20 3 15 6 11"/><path d="M11 28C5 28 4 24 6 20"/><path d="M13 36C7 36 5 32 7 28"/></svg>
+          <span class="n num">4.9</span>
+          <svg class="laurel" viewBox="0 0 24 52" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="transform:scaleX(-1)"><path d="M20 50C7 46 3 34 7 18"/><path d="M15 44c-6-4-8-8-8-14"/><path d="M9 20C4 20 3 15 6 11"/><path d="M11 28C5 28 4 24 6 20"/><path d="M13 36C7 36 5 32 7 28"/></svg>
+        </div>
+        <p class="center sec-title">Guest favourite</p>
+        <p class="center tiny" style="margin-top:4px;">One of the most loved farmhouses near Mahabalipuram</p>
+        <div class="stack mt" style="gap:6px;">
+          <div class="between"><span class="tiny">Cleanliness</span><span class="tiny num" style="color:var(--fg);font-weight:700;">5.0</span></div>
+          <div class="between"><span class="tiny">Accuracy</span><span class="tiny num" style="color:var(--fg);font-weight:700;">4.9</span></div>
+          <div class="between"><span class="tiny">Check-in</span><span class="tiny num" style="color:var(--fg);font-weight:700;">4.8</span></div>
+        </div>
+      </div>
+
+      <div class="mt">
+        <div class="review">
+          <div class="who row">
+            <span class="avatar" aria-hidden="true">RS</span>
+            <span class="stack xs"><span class="sec-title" style="font-size:14px;">Rhea S.</span><span class="tiny">May 2026 · 2 nights</span></span>
+          </div>
+          <p style="font-size:14px;margin-top:10px;">Woke up to birdsong and the pool. The verandah is where we spent every evening. Exactly the reset we needed.</p>
+        </div>
+        <div class="review">
+          <div class="who row">
+            <span class="avatar alt" aria-hidden="true">AK</span>
+            <span class="stack xs"><span class="sec-title" style="font-size:14px;">Arjun K.</span><span class="tiny">April 2026 · 3 nights</span></span>
+          </div>
+          <p style="font-size:14px;margin-top:10px;">Booking for ten people and it still felt spacious. The caretaker was on hand without ever being in the way.</p>
+        </div>
+        <div class="review">
+          <div class="who row">
+            <span class="avatar" aria-hidden="true">ML</span>
+            <span class="stack xs"><span class="sec-title" style="font-size:14px;">Meera L.</span><span class="tiny">March 2026 · 2 nights</span></span>
+          </div>
+          <p style="font-size:14px;margin-top:10px;">Clean, calm and genuinely private. We drove down from Chennai in under an hour.</p>
+        </div>
+        <button class="btn outline block mt" type="button" data-toast="Showing all 128 reviews">Show all 128 reviews</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="location">
+    <div class="section-head"><h2>Where you'll be</h2></div>
+    <div class="pad">
+      <div class="map-block">
+        <img src="assets/prop-blue-horizon.jpg" width="640" height="640" alt="Coastal landscape near the property" loading="lazy" />
+        <span class="map-pin"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg>ECR · Near Mahabalipuram</span>
+      </div>
+      <p class="tiny mt">Exact location shared once your booking is confirmed.</p>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="rules">
+    <div class="section-head"><h2>House rules</h2></div>
+    <div class="pad">
+      <div class="menu">
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-clock" /></svg><span class="lb">Check-in after 2:00 PM</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-clock" /></svg><span class="lb">Check-out before 11:00 AM</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-users" /></svg><span class="lb">8 guests maximum</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-flame" /></svg><span class="lb">No smoking indoors</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-music" /></svg><span class="lb">Quiet hours after 11:00 PM</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-od-id="cancellation">
+    <div class="section-head"><h2>Cancellation policy</h2></div>
+    <div class="pad">
+      <div class="menu">
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg><span class="lb">Free cancellation up to 7 days before check-in</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-info" /></svg><span class="lb">50% refund up to 48 hours before check-in</span></div>
+        <div class="mi"><svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg><span class="lb">No refund within 48 hours of check-in</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="stickybar" data-od-id="booking-bar">
+  <span class="stack xs">
+    <span class="num" style="font-size:18px;font-weight:800;letter-spacing:-.015em;">₹8,500 <span class="tiny" style="font-weight:500;">/ night</span></span>
+    <span class="tiny">No charge yet</span>
+  </span>
+  <a class="btn" href="booking.html">Check availability</a>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var btn = document.getElementById('favTop');
+  var FAV_KEY = 'fh.favorites';
+  var favs = new Set(window.odRead(FAV_KEY, []));
+  function paint() {
+    var on = favs.has('palm-grove');
+    btn.classList.toggle('is-fav', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('aria-label', (on ? 'Remove ' : 'Save ') + 'Palm Grove Private Farmhouse' + (on ? ' from saved' : ''));
+  }
+  paint();
+  btn.addEventListener('click', function () {
+    if (favs.has('palm-grove')) { favs.delete('palm-grove'); } else { favs.add('palm-grove'); }
+    window.odWrite(FAV_KEY, Array.from(favs));
+    paint();
+    window.odToast(favs.has('palm-grove') ? 'Saved to your wishlist' : 'Removed from your wishlist');
+  });
+})();
+</script>
+</body>
+</html>

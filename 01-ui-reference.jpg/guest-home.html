@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Guest Home · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ─── tokens — the only place colour and type are defined ─────────── */
+  :root{
+    /* palette (DESIGN_SYSTEM.md) */
+    --forest:#18352B;
+    --forest-deep:#10251E;
+    --sage:#7C927E;
+    --moss:#556B5D;
+    --cream:#F7F3EA;
+    --warm-white:#FCFBF8;
+    --sand:#E9DFCC;
+    --terracotta:#C86B45;
+    --ink:#181A18;
+    --muted:#70756F;
+
+    /* semantic aliases */
+    --bg:var(--cream);
+    --surface:var(--warm-white);
+    --surface-2:color-mix(in oklch, var(--sand) 46%, var(--warm-white));
+    --fg:var(--ink);
+    --border:color-mix(in oklch, var(--sand) 66%, var(--warm-white));
+    --border-strong:var(--sand);
+    --primary:var(--forest);
+    --primary-press:var(--forest-deep);
+    --on-primary:var(--warm-white);
+    --accent:var(--terracotta);
+    --accent-soft:color-mix(in oklch, var(--terracotta) 13%, var(--warm-white));
+
+    /* radii */
+    --r-sm:10px;
+    --r-md:16px;
+    --r-lg:24px;
+    --r-xl:32px;
+    --r-pill:999px;
+
+    /* elevation — soft, restrained */
+    --sh-sm:0 1px 2px rgba(24,26,24,.05), 0 2px 8px rgba(24,26,24,.045);
+    --sh-md:0 2px 6px rgba(24,26,24,.05), 0 12px 28px rgba(24,26,24,.08);
+    --sh-float:0 10px 30px rgba(16,37,30,.22);
+
+    /* type */
+    --font-ui:"Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display:"Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
+
+    --app-max:430px;
+    --gutter:20px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--font-ui);
+    font-size:15px;
+    line-height:1.5;
+    overflow-x:clip;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    -webkit-tap-highlight-color:transparent;
+  }
+  img{ display:block; max-width:100%; }
+  button{ font:inherit; color:inherit; cursor:pointer; }
+  h1,h2,h3,p{ margin:0; }
+  h1,h2,h3{ text-wrap:balance; }
+  p{ text-wrap:pretty; }
+  .ico{ width:20px; height:20px; flex:none; }
+  .num{ font-variant-numeric:tabular-nums; }
+
+  :focus-visible{ outline:2px solid var(--primary); outline-offset:2px; border-radius:8px; }
+
+  /* ─── app shell ───────────────────────────────────────────────────── */
+  .app{
+    position:relative;
+    max-width:var(--app-max);
+    margin-inline:auto;
+    min-height:100vh;
+    background:var(--surface);
+  }
+  @media (min-width:520px){
+    .app{ border-left:1px solid var(--border); border-right:1px solid var(--border); }
+  }
+
+  /* ─── app bar ─────────────────────────────────────────────────────── */
+  .appbar{
+    position:sticky; top:0; z-index:30;
+    background:color-mix(in oklch, var(--surface) 86%, transparent);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .appbar-inner{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px var(--gutter); }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:34px; height:34px; border-radius:11px;
+    background:var(--primary); color:var(--on-primary);
+    display:grid; place-items:center;
+  }
+  .brand-mark .ico{ width:19px; height:19px; }
+  .brand-name{ font-size:15px; font-weight:800; letter-spacing:.01em; }
+  .loc-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    min-height:44px; padding:0 13px;
+    background:var(--surface); border:1px solid var(--border-strong);
+    border-radius:var(--r-pill); font-size:13px; font-weight:700;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .loc-btn:hover{ border-color:var(--primary); background:color-mix(in oklch, var(--primary) 5%, var(--surface)); }
+  .loc-btn .ico{ width:16px; height:16px; color:var(--moss); }
+  .loc-btn .chev{ width:14px; height:14px; color:var(--muted); }
+
+  /* ─── greeting ────────────────────────────────────────────────────── */
+  .greet{ padding:22px var(--gutter) 4px; }
+  .greet .hello{ font-size:13px; font-weight:600; color:var(--muted); letter-spacing:.01em; }
+  .greet h1{
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:37px;
+    line-height:1.05;
+    letter-spacing:-.012em;
+    margin-top:7px;
+  }
+
+  /* ─── search + quick summary ──────────────────────────────────────── */
+  .searchwrap{ padding:18px var(--gutter) 0; }
+  .searchbar{
+    display:flex; align-items:center; gap:9px;
+    padding:7px 7px 7px 15px;
+    background:var(--surface);
+    border:1px solid var(--border-strong);
+    border-radius:var(--r-pill);
+    box-shadow:var(--sh-sm);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .searchbar:focus-within{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px color-mix(in oklch, var(--primary) 15%, transparent);
+  }
+  .searchbar .s-ico{ width:19px; height:19px; color:var(--moss); }
+  .searchbar input{
+    flex:1; min-width:0; border:0; background:transparent;
+    font:inherit; font-size:15px; font-weight:500; color:var(--fg);
+    padding:9px 0; outline:none;
+  }
+  .searchbar input::placeholder{ color:color-mix(in oklch, var(--muted) 82%, var(--surface)); }
+  .search-submit{
+    flex:none; width:46px; height:46px; border:0; border-radius:var(--r-pill);
+    background:var(--primary); color:var(--on-primary);
+    display:grid; place-items:center;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .search-submit:hover{ background:var(--primary-press); }
+  .search-submit:active{ transform:scale(.93); }
+  .search-submit .ico{ width:20px; height:20px; }
+
+  .summary{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+  .sum-cell{
+    display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+    min-height:58px; padding:10px 12px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-md); text-align:left;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .sum-cell:hover{ border-color:var(--primary); background:color-mix(in oklch, var(--primary) 4%, var(--surface)); }
+  .sum-cell .k{ display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--muted); }
+  .sum-cell .k .ico{ width:14px; height:14px; color:var(--sage); }
+  .sum-cell .v{ font-size:13.5px; font-weight:700; letter-spacing:-.005em; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* ─── section scaffolding ─────────────────────────────────────────── */
+  .section{ margin-top:30px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:0 var(--gutter) 13px; }
+  .section-head h2{ font-size:19px; font-weight:800; letter-spacing:-.015em; }
+  .see-all{
+    display:inline-flex; align-items:center; gap:3px;
+    min-height:44px; font-size:13px; font-weight:700; color:var(--primary);
+    background:none; border:0; padding:0 2px;
+  }
+  .see-all:hover{ color:var(--primary-press); text-decoration:underline; text-underline-offset:3px; }
+  .see-all .ico{ width:15px; height:15px; }
+
+  /* ─── horizontal rails ────────────────────────────────────────────── */
+  .rail{
+    display:flex; gap:14px; overflow-x:auto;
+    padding:2px var(--gutter) 6px;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+  }
+  .rail::-webkit-scrollbar{ display:none; }
+
+  /* ─── media + favourite button ────────────────────────────────────── */
+  .media{ position:relative; border-radius:var(--r-lg); overflow:hidden; background:var(--surface-2); }
+  .media img{ width:100%; height:100%; object-fit:cover; }
+  .fav{
+    position:absolute; top:10px; right:10px;
+    width:38px; height:38px; border-radius:var(--r-pill);
+    display:grid; place-items:center;
+    background:color-mix(in oklch, var(--warm-white) 76%, transparent);
+    border:1px solid color-mix(in oklch, var(--ink) 9%, transparent);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    color:var(--ink);
+    transition:background .15s ease, transform .12s ease, color .15s ease;
+  }
+  .fav:hover{ background:var(--warm-white); }
+  .fav:active{ transform:scale(.9); }
+  .fav .ico{ width:18px; height:18px; }
+  .fav .h-fill{ display:none; color:var(--accent); }
+  .fav.sm{ width:30px; height:30px; top:7px; right:7px; }
+  .fav.sm .ico{ width:15px; height:15px; }
+  .fav.is-fav{ color:var(--accent); }
+  .fav.is-fav .h-line{ display:none; }
+  .fav.is-fav .h-fill{ display:block; }
+
+  .badge-guest{
+    position:absolute; top:10px; left:10px;
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 10px 5px 8px; border-radius:var(--r-pill);
+    background:color-mix(in oklch, var(--warm-white) 92%, transparent);
+    border:1px solid color-mix(in oklch, var(--accent) 40%, transparent);
+    color:var(--accent); font-size:11px; font-weight:800; letter-spacing:.01em;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .badge-guest .ico{ width:13px; height:13px; }
+
+  /* ─── property card (shared body) ─────────────────────────────────── */
+  .p-card{ flex:0 0 68%; max-width:285px; scroll-snap-align:start; cursor:pointer; }
+  .p-card .media{ aspect-ratio:4/5; }
+  .p-body{ padding:11px 2px 0; }
+  .p-title{ font-size:15.5px; font-weight:800; letter-spacing:-.012em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .p-loc{ margin-top:2px; font-size:12.5px; font-weight:500; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .p-meta{ display:flex; align-items:center; gap:6px; margin-top:7px; }
+  .rating{ display:inline-flex; align-items:center; gap:4px; font-size:12.5px; font-weight:700; }
+  .rating .ico{ width:13px; height:13px; color:var(--primary); }
+  .rating .rc{ color:var(--muted); font-weight:500; }
+  .dot{ width:3px; height:3px; border-radius:50%; background:var(--border-strong); }
+  .p-amen{ font-size:12.5px; font-weight:500; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .p-price{ margin-top:8px; font-size:14.5px; font-weight:800; letter-spacing:-.01em; }
+  .p-price .per{ font-size:12.5px; font-weight:500; color:var(--muted); letter-spacing:0; }
+
+  /* ─── vibe chips ──────────────────────────────────────────────────── */
+  .chips{ display:flex; gap:9px; overflow-x:auto; padding:2px var(--gutter) 4px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:none; display:inline-flex; align-items:center; gap:7px;
+    min-height:44px; padding:0 15px;
+    background:var(--surface); border:1px solid var(--border-strong);
+    border-radius:var(--r-pill);
+    font-size:13.5px; font-weight:700; color:var(--fg);
+    transition:background .15s ease, color .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .chip .ico{ width:16px; height:16px; color:var(--moss); transition:color .15s ease; }
+  .chip:hover{ border-color:var(--primary); }
+  .chip:active{ transform:scale(.97); }
+  .chip.is-active{ background:var(--primary); border-color:var(--primary); color:var(--on-primary); }
+  .chip.is-active .ico{ color:var(--on-primary); }
+
+  /* ─── compact nearby card ─────────────────────────────────────────── */
+  .n-card{
+    flex:0 0 80%; max-width:305px; scroll-snap-align:start;
+    display:flex; align-items:center; gap:12px;
+    padding:10px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-lg); cursor:pointer;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .n-card:hover{ border-color:var(--moss); box-shadow:var(--sh-sm); }
+  .n-thumb{ position:relative; width:96px; height:96px; flex:none; border-radius:var(--r-md); overflow:hidden; }
+  .n-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .n-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .n-body .p-title{ font-size:14.5px; }
+  .n-body .p-price{ margin-top:7px; font-size:14px; }
+
+  /* ─── stacked popular cards ───────────────────────────────────────── */
+  .stack-cards{ display:flex; flex-direction:column; gap:24px; padding:0 var(--gutter); }
+  .f-card{ cursor:pointer; }
+  .f-card .media{ aspect-ratio:3/2; }
+
+  /* ─── bottom navigation ───────────────────────────────────────────── */
+  .tabbar{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:0; z-index:40;
+    width:100%; max-width:var(--app-max);
+    display:grid; grid-template-columns:repeat(4,1fr); gap:2px;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    background:color-mix(in oklch, var(--surface) 90%, transparent);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--border);
+  }
+  .tab{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    min-height:48px; padding:6px 0;
+    background:transparent; border:0; border-radius:var(--r-md);
+    font-size:11px; font-weight:700; color:var(--muted);
+    transition:color .15s ease, background .15s ease;
+  }
+  .tab .ico{ width:22px; height:22px; }
+  .tab:hover{ color:var(--primary); background:color-mix(in oklch, var(--primary) 6%, transparent); }
+  .tab[aria-selected="true"]{ color:var(--primary); }
+
+  /* ─── toast ───────────────────────────────────────────────────────── */
+  .toast{
+    position:fixed; left:50%; bottom:92px; z-index:60;
+    width:calc(100% - 40px); max-width:390px;
+    transform:translateX(-50%) translateY(10px);
+    padding:12px 16px;
+    background:var(--primary-press); color:var(--on-primary);
+    border-radius:var(--r-md); box-shadow:var(--sh-float);
+    font-size:13.5px; font-weight:600;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .content{ padding-bottom:104px; }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ transition-duration:.001ms !important; animation-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <g id="i-home"><path d="M4 11 12 4l8 7"/><path d="M6.2 9.8V19a1 1 0 0 0 1 1H17a1 1 0 0 0 1-1V9.8"/></g>
+    <g id="i-pin"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></g>
+    <g id="i-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></g>
+    <g id="i-arrow"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></g>
+    <g id="i-calendar"><path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2.5"/><path d="M3 10h18"/></g>
+    <g id="i-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></g>
+    <g id="i-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></g>
+    <g id="i-heart-fill"><path fill="currentColor" stroke="none" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></g>
+    <g id="i-star"><path d="M11.53 2.3a.53.53 0 0 1 .95 0l2.31 4.68a2.12 2.12 0 0 0 1.6 1.16l5.16.76a.53.53 0 0 1 .3.9l-3.74 3.64a2.12 2.12 0 0 0-.61 1.88l.88 5.14a.53.53 0 0 1-.77.56l-4.62-2.43a2.12 2.12 0 0 0-1.97 0L6.4 21.01a.53.53 0 0 1-.77-.56l.88-5.14a2.12 2.12 0 0 0-.61-1.88L2.16 9.8a.53.53 0 0 1 .29-.9l5.17-.76a2.12 2.12 0 0 0 1.6-1.16Z"/></g>
+    <g id="i-award"><path d="m15.48 12.89 1.51 8.53a.5.5 0 0 1-.81.47L12.6 19.2a1 1 0 0 0-1.2 0l-3.58 2.69a.5.5 0 0 1-.81-.47l1.51-8.53"/><circle cx="12" cy="8" r="6"/></g>
+    <g id="i-waves"><path d="M2 6c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></g>
+    <g id="i-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/></g>
+    <g id="i-leaf"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></g>
+    <g id="i-home-v"><path d="M3 20V9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9.5 21v-6h5v6"/></g>
+    <g id="i-paw"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.04 1 1 0 0 1-.98-.5A3.5 3.5 0 0 1 5.5 10H9Z"/></g>
+    <g id="i-compass"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6Z"/></g>
+    <g id="i-map"><path d="M14.1 5.55a2 2 0 0 0 1.79 0l3.66-1.83A1 1 0 0 1 21 4.62v12.76a1 1 0 0 1-.55.9l-4.55 2.27a2 2 0 0 1-1.79 0l-4.21-2.1a2 2 0 0 0-1.79 0l-3.66 1.83A1 1 0 0 1 3 19.38V6.62a1 1 0 0 1 .55-.9l4.55-2.27a2 2 0 0 1 1.79 0Z"/><path d="M15 5.76v15M9 3.24v15"/></g>
+    <g id="i-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></g>
+    <g id="i-chev"><path d="m6 9 6 6 6-6"/></g>
+    <g id="i-spark"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.4 2.4M15.3 15.3l2.4 2.4M17.7 6.3l-2.4 2.4M8.7 15.3l-2.4 2.4"/></g>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- app bar -->
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home" /></svg>
+        </span>
+        <span class="brand-name">9bhk.app</span>
+      </div>
+      <button class="loc-btn" type="button" data-toast="Choose a different location" aria-label="Change location, currently Chennai">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin" /></svg>
+        Chennai
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chev" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+
+    <!-- greeting -->
+    <section class="greet" data-od-id="greeting">
+      <p class="hello">Good evening</p>
+      <h1>Where do you want to escape?</h1>
+    </section>
+
+    <!-- search + quick summary -->
+    <section class="searchwrap" data-od-id="search">
+      <form class="searchbar" id="searchForm" role="search">
+        <svg class="ico s-ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-search" /></svg>
+        <input id="searchInput" type="search" placeholder="Search places, areas or farmhouses" aria-label="Search places, areas or farmhouses" autocomplete="off" />
+        <button class="search-submit" type="submit" aria-label="Search">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow" /></svg>
+        </button>
+      </form>
+
+      <div class="summary" role="group" aria-label="Trip details">
+        <button class="sum-cell" type="button" data-toast="Pick where you want to escape" aria-label="Where — Chennai">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin" /></svg>Where</span>
+          <span class="v">Chennai</span>
+        </button>
+        <button class="sum-cell" type="button" data-toast="Choose your check-in and check-out dates" aria-label="When — add dates">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calendar" /></svg>When</span>
+          <span class="v">Add dates</span>
+        </button>
+        <button class="sum-cell" type="button" data-toast="Add guests to see the right farmhouses" aria-label="Guests — 2 guests">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users" /></svg>Guests</span>
+          <span class="v">2 guests</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- featured -->
+    <section class="section" data-od-id="featured">
+      <div class="section-head">
+        <h2>Made for slow weekends</h2>
+        <button class="see-all" type="button" data-toast="Browse all slow-weekend stays">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+      <div class="rail" role="list">
+        <article class="p-card" role="listitem" data-od-id="feature-card-palm-grove" data-open="Palm Grove Private Farmhouse" data-toast="Opening Palm Grove Private Farmhouse">
+          <div class="media">
+            <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="A curved swimming pool ringed with palms and tropical planting at Palm Grove Private Farmhouse" loading="lazy" />
+            <span class="badge-guest"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-award" /></svg>Guest favourite</span>
+            <button class="fav" type="button" data-prop="palm-grove" data-name="Palm Grove Private Farmhouse" aria-pressed="false" aria-label="Save Palm Grove Private Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">Palm Grove Private Farmhouse</h3>
+            <p class="p-loc">ECR · Near Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.9 <span class="rc">(128)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">8 guests · Pool · Bonfire</span>
+            </div>
+            <p class="p-price num">₹8,500 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="p-card" role="listitem" data-od-id="feature-card-mango-orchard" data-open="Mango Orchard Retreat" data-toast="Opening Mango Orchard Retreat">
+          <div class="media">
+            <img src="assets/prop-mango-orchard.jpg" width="800" height="1000" alt="A stone cottage with a sage-green door and wildflowers at Mango Orchard Retreat" loading="lazy" />
+            <button class="fav" type="button" data-prop="mango-orchard" data-name="Mango Orchard Retreat" aria-pressed="false" aria-label="Save Mango Orchard Retreat">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">Mango Orchard Retreat</h3>
+            <p class="p-loc">Chengalpattu</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.8 <span class="rc">(94)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">6 guests · Orchard · BBQ</span>
+            </div>
+            <p class="p-price num">₹6,200 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="p-card" role="listitem" data-od-id="feature-card-sunset-fields" data-open="Sunset Fields Farmhouse" data-toast="Opening Sunset Fields Farmhouse">
+          <div class="media">
+            <img src="assets/prop-sunset-fields.jpg" width="800" height="1000" alt="An infinity pool looking out over green fields at Sunset Fields Farmhouse" loading="lazy" />
+            <button class="fav" type="button" data-prop="sunset-fields" data-name="Sunset Fields Farmhouse" aria-pressed="false" aria-label="Save Sunset Fields Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">Sunset Fields Farmhouse</h3>
+            <p class="p-loc">Kanchipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.9 <span class="rc">(76)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">10 guests · Pool · Fields</span>
+            </div>
+            <p class="p-price num">₹7,400 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- explore by vibe -->
+    <section class="section" data-od-id="vibes">
+      <div class="section-head">
+        <h2>Explore by vibe</h2>
+      </div>
+      <div class="chips" role="group" aria-label="Explore by vibe">
+        <button class="chip" type="button" data-vibe="pool" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-waves" /></svg>Pool
+        </button>
+        <button class="chip" type="button" data-vibe="bonfire" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-flame" /></svg>Bonfire
+        </button>
+        <button class="chip" type="button" data-vibe="countryside" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-leaf" /></svg>Countryside
+        </button>
+        <button class="chip" type="button" data-vibe="groups" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-users" /></svg>Groups
+        </button>
+        <button class="chip" type="button" data-vibe="romantic" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>Romantic
+        </button>
+        <button class="chip" type="button" data-vibe="family" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home-v" /></svg>Family
+        </button>
+        <button class="chip" type="button" data-vibe="pet-friendly" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-paw" /></svg>Pet friendly
+        </button>
+      </div>
+    </section>
+
+    <!-- escapes near you -->
+    <section class="section" data-od-id="nearby">
+      <div class="section-head">
+        <h2>Escapes near you</h2>
+        <button class="see-all" type="button" data-toast="Browse all escapes near you">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+      <div class="rail" role="list">
+        <article class="n-card" role="listitem" data-od-id="nearby-card-lakeview" data-open="Lakeview Courtyard" data-toast="Opening Lakeview Courtyard">
+          <div class="n-thumb">
+            <img src="assets/prop-lakeview-courtyard.jpg" width="640" height="640" alt="A pool beside a calm lake at Lakeview Courtyard" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="lakeview-courtyard" data-name="Lakeview Courtyard" aria-pressed="false" aria-label="Save Lakeview Courtyard">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title">Lakeview Courtyard</h3>
+            <p class="p-loc">Pondicherry</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.8 <span class="rc">(63)</span></span>
+            </div>
+            <p class="p-price num">₹6,900 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="n-card" role="listitem" data-od-id="nearby-card-coconut-grove" data-open="Coconut Grove Escape" data-toast="Opening Coconut Grove Escape">
+          <div class="n-thumb">
+            <img src="assets/prop-coconut-grove.jpg" width="640" height="640" alt="Palm trees leaning over white sand and turquoise water near Coconut Grove Escape" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="coconut-grove" data-name="Coconut Grove Escape" aria-pressed="false" aria-label="Save Coconut Grove Escape">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title">Coconut Grove Escape</h3>
+            <p class="p-loc">ECR · Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.8 <span class="rc">(210)</span></span>
+            </div>
+            <p class="p-price num">₹5,800 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="n-card" role="listitem" data-od-id="nearby-card-blue-horizon" data-open="Blue Horizon Farm Stay" data-toast="Opening Blue Horizon Farm Stay">
+          <div class="n-thumb">
+            <img src="assets/prop-blue-horizon.jpg" width="640" height="640" alt="Turquoise sea and a sandy cove framed by palms at Blue Horizon Farm Stay" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="blue-horizon" data-name="Blue Horizon Farm Stay" aria-pressed="false" aria-label="Save Blue Horizon Farm Stay">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title">Blue Horizon Farm Stay</h3>
+            <p class="p-loc">Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.7 <span class="rc">(52)</span></span>
+            </div>
+            <p class="p-price num">₹9,100 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- popular farmhouses -->
+    <section class="section" data-od-id="popular">
+      <div class="section-head">
+        <h2>Popular farmhouses</h2>
+        <button class="see-all" type="button" data-toast="Browse all popular farmhouses">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+      <div class="stack-cards">
+        <article class="f-card" data-od-id="popular-card-guava-house" data-open="The Guava House" data-toast="Opening The Guava House">
+          <div class="media">
+            <img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="A shaded green garden with mature trees at The Guava House" loading="lazy" />
+            <button class="fav" type="button" data-prop="guava-house" data-name="The Guava House" aria-pressed="false" aria-label="Save The Guava House">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">The Guava House</h3>
+            <p class="p-loc">Chennai</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.9 <span class="rc">(312)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">6 guests · Garden · Pet friendly</span>
+            </div>
+            <p class="p-price num">₹5,400 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="f-card" data-od-id="popular-card-verde-meadow" data-open="Verde Meadow Farmhouse" data-toast="Opening Verde Meadow Farmhouse">
+          <div class="media">
+            <img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="A wide green meadow edged with trees at Verde Meadow Farmhouse" loading="lazy" />
+            <button class="fav" type="button" data-prop="verde-meadow" data-name="Verde Meadow Farmhouse" aria-pressed="false" aria-label="Save Verde Meadow Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">Verde Meadow Farmhouse</h3>
+            <p class="p-loc">Kanchipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.6 <span class="rc">(88)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">10 guests · Meadow · Bonfire</span>
+            </div>
+            <p class="p-price num">₹4,900 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="f-card" data-od-id="popular-card-terracotta-courtyard" data-open="Terracotta Courtyard Stay" data-toast="Opening Terracotta Courtyard Stay">
+          <div class="media">
+            <img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A stone garden path lit by lanterns at Terracotta Courtyard Stay" loading="lazy" />
+            <button class="fav" type="button" data-prop="terracotta-courtyard" data-name="Terracotta Courtyard Stay" aria-pressed="false" aria-label="Save Terracotta Courtyard Stay">
+              <svg class="ico h-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title">Terracotta Courtyard Stay</h3>
+            <p class="p-loc">Pondicherry</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><use href="#i-star" /></svg>4.7 <span class="rc">(145)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">8 guests · Courtyard · Bonfire</span>
+            </div>
+            <p class="p-price num">₹7,800 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- bottom navigation -->
+  <nav class="tabbar" data-od-id="bottomnav" aria-label="Primary">
+    <button class="tab" type="button" data-nav="explore" aria-selected="true">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compass" /></svg>
+      Explore
+    </button>
+    <button class="tab" type="button" data-nav="wishlists" aria-selected="false">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-heart" /></svg>
+      Wishlists
+    </button>
+    <button class="tab" type="button" data-nav="trips" aria-selected="false">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-map" /></svg>
+      Trips
+    </button>
+    <button class="tab" type="button" data-nav="profile" aria-selected="false">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-user" /></svg>
+      Profile
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  function read(key, fallback) {
+    try {
+      var raw = window.localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function write(key, value) {
+    try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ }
+  }
+
+  /* favourites ------------------------------------------------------- */
+  var FAV_KEY = 'fh.favorites';
+  var favourites = new Set(read(FAV_KEY, []));
+
+  function paintFavourite(btn) {
+    var id = btn.dataset.prop;
+    var on = favourites.has(id);
+    btn.classList.toggle('is-fav', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('aria-label', (on ? 'Remove ' : 'Save ') + (btn.dataset.name || 'this farmhouse') + (on ? ' from saved' : ''));
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.fav'), function (btn) {
+    paintFavourite(btn);
+    btn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      var id = btn.dataset.prop;
+      if (favourites.has(id)) { favourites.delete(id); } else { favourites.add(id); }
+      paintFavourite(btn);
+      write(FAV_KEY, Array.from(favourites));
+      toast(favourites.has(id) ? 'Saved to your wishlist' : 'Removed from your wishlist');
+    });
+  });
+
+  /* vibes ------------------------------------------------------------ */
+  var VIBE_KEY = 'fh.vibes';
+  var vibes = new Set(read(VIBE_KEY, []));
+
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
+    var id = chip.dataset.vibe;
+    if (vibes.has(id)) { chip.classList.add('is-active'); chip.setAttribute('aria-pressed', 'true'); }
+    chip.addEventListener('click', function () {
+      var on = !chip.classList.contains('is-active');
+      chip.classList.toggle('is-active', on);
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (on) { vibes.add(id); } else { vibes.delete(id); }
+      write(VIBE_KEY, Array.from(vibes));
+      toast((on ? 'Showing ' : 'Hiding ') + chip.textContent.trim() + ' stays');
+    });
+  });
+
+  /* property cards --------------------------------------------------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function (card) {
+    card.addEventListener('click', function () { toast(card.dataset.toast || 'Opening…'); });
+    card.addEventListener('keydown', function (event) {
+      if (event.target !== card) { return; }
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toast(card.dataset.toast || 'Opening…');
+      }
+    });
+    card.tabIndex = 0;
+  });
+
+  /* generic toast triggers ------------------------------------------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-toast]:not([data-open])'), function (el) {
+    el.addEventListener('click', function () { toast(el.dataset.toast); });
+  });
+
+  /* search ----------------------------------------------------------- */
+  var searchForm = document.getElementById('searchForm');
+  var searchInput = document.getElementById('searchInput');
+  searchForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var query = searchInput.value.trim();
+    if (!query) { toast('Type a place, area or farmhouse to search'); searchInput.focus(); return; }
+    toast('Searching for “' + query + '”');
+  });
+
+  /* bottom navigation ------------------------------------------------ */
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (tab) {
+    tab.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (other) {
+        other.setAttribute('aria-selected', other === tab ? 'true' : 'false');
+      });
+      var name = tab.dataset.nav;
+      if (name === 'explore') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        toast(tab.textContent.trim() + ' is coming in a later build');
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

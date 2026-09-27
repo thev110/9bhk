@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Home · 9bhk.app</title>
+<meta name="description" content="9bhk.app — find a beautiful farmhouse for a short escape near Chennai, ECR and Pondicherry." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="brand" href="index.html" aria-label="9bhk.app home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-home" /></svg>
+        </span>
+        <span class="brand-name">9bhk.app</span>
+      </a>
+      <a class="loc-btn" href="search.html" aria-label="Change location, currently Chennai">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg>
+        Chennai
+        <svg class="chev" viewBox="0 0 24 24"><use href="#i-chev" /></svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+
+    <section class="page-head" data-od-id="greeting">
+      <p class="hello muted" style="font-size:13px;font-weight:600;">Good evening</p>
+      <h1 style="margin-top:7px;">Where do you want to escape?</h1>
+    </section>
+
+    <section class="mt" data-od-id="search">
+      <form class="searchbar-wrap" id="searchForm" role="search" action="search.html">
+        <div class="searchbar">
+          <svg class="ico s-ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-search" /></svg>
+          <input id="searchInput" type="search" name="q" placeholder="Search places, areas or farmhouses" aria-label="Search places, areas or farmhouses" autocomplete="off" />
+          <button class="search-submit" type="submit" aria-label="Search">
+            <svg class="ico" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="summary pad mt" role="group" aria-label="Trip details">
+        <a class="sum-cell" href="search.html" aria-label="Where — Chennai">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pin" /></svg>Where</span>
+          <span class="v">Chennai</span>
+        </a>
+        <a class="sum-cell" href="search.html#dates" aria-label="When — add dates">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-calendar" /></svg>When</span>
+          <span class="v">Add dates</span>
+        </a>
+        <a class="sum-cell" href="search.html#guests" aria-label="Guests — 2 guests">
+          <span class="k"><svg class="ico" viewBox="0 0 24 24"><use href="#i-users" /></svg>Guests</span>
+          <span class="v">2 guests</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="featured">
+      <div class="section-head">
+        <h2>Made for slow weekends</h2>
+        <a class="see-all" href="search.html">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+        </a>
+      </div>
+      <div class="rail" role="list">
+        <article class="p-card hit" role="listitem" data-od-id="feature-card-palm-grove">
+          <div class="media">
+            <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="A curved swimming pool ringed with palms and tropical planting at Palm Grove Private Farmhouse" loading="lazy" />
+            <span class="badge-guest"><svg class="ico" viewBox="0 0 24 24"><use href="#i-award" /></svg>Guest favourite</span>
+            <button class="fav" type="button" data-prop="palm-grove" data-name="Palm Grove Private Farmhouse" aria-pressed="false" aria-label="Save Palm Grove Private Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Palm Grove Private Farmhouse</a></h3>
+            <p class="p-loc">ECR · Near Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(128)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">8 guests · Pool · Bonfire</span>
+            </div>
+            <p class="p-price num">₹8,500 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="p-card hit" role="listitem" data-od-id="feature-card-mango-orchard">
+          <div class="media">
+            <img src="assets/prop-mango-orchard.jpg" width="800" height="1000" alt="A stone cottage with a sage-green door and wildflowers at Mango Orchard Retreat" loading="lazy" />
+            <button class="fav" type="button" data-prop="mango-orchard" data-name="Mango Orchard Retreat" aria-pressed="false" aria-label="Save Mango Orchard Retreat">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Mango Orchard Retreat</a></h3>
+            <p class="p-loc">Chengalpattu</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(94)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">6 guests · Orchard · BBQ</span>
+            </div>
+            <p class="p-price num">₹6,200 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="p-card hit" role="listitem" data-od-id="feature-card-sunset-fields">
+          <div class="media">
+            <img src="assets/prop-sunset-fields.jpg" width="800" height="1000" alt="An infinity pool looking out over green fields at Sunset Fields Farmhouse" loading="lazy" />
+            <button class="fav" type="button" data-prop="sunset-fields" data-name="Sunset Fields Farmhouse" aria-pressed="false" aria-label="Save Sunset Fields Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Sunset Fields Farmhouse</a></h3>
+            <p class="p-loc">Kanchipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(76)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">10 guests · Pool · Fields</span>
+            </div>
+            <p class="p-price num">₹7,400 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="vibes">
+      <div class="section-head"><h2>Explore by vibe</h2></div>
+      <div class="chips" role="group" aria-label="Explore by vibe">
+        <button class="chip" type="button" data-vibe="pool" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-waves" /></svg>Pool
+        </button>
+        <button class="chip" type="button" data-vibe="bonfire" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-flame" /></svg>Bonfire
+        </button>
+        <button class="chip" type="button" data-vibe="countryside" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-leaf" /></svg>Countryside
+        </button>
+        <button class="chip" type="button" data-vibe="groups" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-users" /></svg>Groups
+        </button>
+        <button class="chip" type="button" data-vibe="romantic" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-heart" /></svg>Romantic
+        </button>
+        <button class="chip" type="button" data-vibe="family" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg>Family
+        </button>
+        <button class="chip" type="button" data-vibe="pet-friendly" aria-pressed="false">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-paw" /></svg>Pet friendly
+        </button>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="nearby">
+      <div class="section-head">
+        <h2>Escapes near you</h2>
+        <a class="see-all" href="search.html">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+        </a>
+      </div>
+      <div class="rail" role="list">
+        <article class="n-card hit" role="listitem" data-od-id="nearby-card-lakeview">
+          <div class="n-thumb">
+            <img src="assets/prop-lakeview-courtyard.jpg" width="640" height="640" alt="A pool beside a calm lake at Lakeview Courtyard" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="lakeview-courtyard" data-name="Lakeview Courtyard" aria-pressed="false" aria-label="Save Lakeview Courtyard">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Lakeview Courtyard</a></h3>
+            <p class="p-loc">Pondicherry</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(63)</span></span>
+            </div>
+            <p class="p-price num">₹6,900 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="n-card hit" role="listitem" data-od-id="nearby-card-coconut-grove">
+          <div class="n-thumb">
+            <img src="assets/prop-coconut-grove.jpg" width="640" height="640" alt="Palm trees leaning over white sand and turquoise water near Coconut Grove Escape" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="coconut-grove" data-name="Coconut Grove Escape" aria-pressed="false" aria-label="Save Coconut Grove Escape">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Coconut Grove Escape</a></h3>
+            <p class="p-loc">ECR · Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.8 <span class="rc">(210)</span></span>
+            </div>
+            <p class="p-price num">₹5,800 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="n-card hit" role="listitem" data-od-id="nearby-card-blue-horizon">
+          <div class="n-thumb">
+            <img src="assets/prop-blue-horizon.jpg" width="640" height="640" alt="Turquoise sea and a sandy cove framed by palms at Blue Horizon Farm Stay" loading="lazy" />
+            <button class="fav sm" type="button" data-prop="blue-horizon" data-name="Blue Horizon Farm Stay" aria-pressed="false" aria-label="Save Blue Horizon Farm Stay">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="n-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Blue Horizon Farm Stay</a></h3>
+            <p class="p-loc">Mahabalipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.7 <span class="rc">(52)</span></span>
+            </div>
+            <p class="p-price num">₹9,100 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="popular">
+      <div class="section-head">
+        <h2>Popular farmhouses</h2>
+        <a class="see-all" href="search.html">See all
+          <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow" /></svg>
+        </a>
+      </div>
+      <div class="stack-cards">
+        <article class="f-card hit" data-od-id="popular-card-guava-house">
+          <div class="media">
+            <img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="A shaded green garden with mature trees at The Guava House" loading="lazy" />
+            <button class="fav" type="button" data-prop="guava-house" data-name="The Guava House" aria-pressed="false" aria-label="Save The Guava House">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">The Guava House</a></h3>
+            <p class="p-loc">Chennai</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(312)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">6 guests · Garden · Pet friendly</span>
+            </div>
+            <p class="p-price num">₹5,400 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="f-card hit" data-od-id="popular-card-verde-meadow">
+          <div class="media">
+            <img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="A wide green meadow edged with trees at Verde Meadow Farmhouse" loading="lazy" />
+            <button class="fav" type="button" data-prop="verde-meadow" data-name="Verde Meadow Farmhouse" aria-pressed="false" aria-label="Save Verde Meadow Farmhouse">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Verde Meadow Farmhouse</a></h3>
+            <p class="p-loc">Kanchipuram</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.6 <span class="rc">(88)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">10 guests · Meadow · Bonfire</span>
+            </div>
+            <p class="p-price num">₹4,900 <span class="per">/ night</span></p>
+          </div>
+        </article>
+
+        <article class="f-card hit" data-od-id="popular-card-terracotta-courtyard">
+          <div class="media">
+            <img src="assets/prop-terracotta-courtyard.jpg" width="1080" height="720" alt="A stone garden path lit by lanterns at Terracotta Courtyard Stay" loading="lazy" />
+            <button class="fav" type="button" data-prop="terracotta-courtyard" data-name="Terracotta Courtyard Stay" aria-pressed="false" aria-label="Save Terracotta Courtyard Stay">
+              <svg class="ico h-line" viewBox="0 0 24 24"><use href="#i-heart" /></svg>
+              <svg class="ico h-fill" viewBox="0 0 24 24"><use href="#i-heart-fill" /></svg>
+            </button>
+          </div>
+          <div class="p-body">
+            <h3 class="p-title"><a class="hit-link" href="property.html">Terracotta Courtyard Stay</a></h3>
+            <p class="p-loc">Pondicherry</p>
+            <div class="p-meta">
+              <span class="rating"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.7 <span class="rc">(145)</span></span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="p-amen">8 guests · Courtyard · Bonfire</span>
+            </div>
+            <p class="p-price num">₹7,800 <span class="per">/ night</span></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" data-od-id="host-invite">
+      <div class="pad">
+        <a class="card row between" href="host.html" style="text-decoration:none;">
+          <span class="row grow">
+            <span class="avatar alt" aria-hidden="true"><svg class="ico" style="width:20px;height:20px" viewBox="0 0 24 24"><use href="#i-key" /></svg></span>
+            <span class="stack xs grow">
+              <span class="sec-title">Have a farmhouse?</span>
+              <span class="tiny">Turn empty dates into bookings.</span>
+            </span>
+          </span>
+          <svg class="ico" style="color:var(--muted)" viewBox="0 0 24 24"><use href="#i-chevr" /></svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar" data-od-id="bottomnav" aria-label="Primary">
+    <a class="tab" href="index.html" aria-current="page">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compass" /></svg>Explore
+    </a>
+    <a class="tab" href="saved.html">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-heart" /></svg>Wishlists
+    </a>
+    <a class="tab" href="trips.html">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-map" /></svg>Trips
+    </a>
+    <a class="tab" href="profile.html">
+      <svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-user" /></svg>Profile
+    </a>
+  </nav>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var form = document.getElementById('searchForm');
+  var input = document.getElementById('searchInput');
+  var VIBE_KEY = 'fh.vibes';
+  var vibes = new Set(window.odRead(VIBE_KEY, []));
+  document.querySelectorAll('.chip').forEach(function (chip) {
+    var id = chip.dataset.vibe;
+    if (vibes.has(id)) { chip.classList.add('is-active'); chip.setAttribute('aria-pressed', 'true'); }
+    chip.addEventListener('click', function () {
+      var on = !chip.classList.contains('is-active');
+      chip.classList.toggle('is-active', on);
+      vibes[on ? 'add' : 'delete'](id);
+      window.odWrite(VIBE_KEY, Array.from(vibes));
+      window.odToast((on ? 'Showing ' : 'Hiding ') + chip.textContent.trim() + ' stays');
+    });
+  });
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var q = input.value.trim();
+    window.location.href = 'search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+  });
+})();
+</script>
+</body>
+</html>

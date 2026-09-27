@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Notifications · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .note-row{ display:flex; gap:12px; padding:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); width:100%; text-align:left; }
+  .note-row .ic{ width:40px; height:40px; border-radius:50%; background:var(--surface-2); color:var(--moss); display:grid; place-items:center; flex:none; }
+  .note-row.unread .ic{ background:color-mix(in oklch, var(--primary) 12%, var(--warm-white)); color:var(--primary); }
+  .unread-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none; }
+</style>
+</head>
+<body>
+
+<div class="app content">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="profile.html" aria-label="Back">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <h1 class="bar-title">Notifications</h1>
+      <button class="icon-btn" type="button" id="markAll" aria-label="Mark all as read">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="noteList" class="stack mt pad">
+    <button class="note-row unread" type="button" data-toast="Opening your confirmed trip">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-check" /></svg></span>
+      <span class="grow">
+        <span class="between">
+          <span class="sec-title" style="font-size:14px;">Booking confirmed</span>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </span>
+        <span class="tiny" style="display:block;margin-top:3px;">Palm Grove Private Farmhouse · 12–14 Jun · Tap to view your trip.</span>
+        <span class="tiny" style="display:block;margin-top:5px;color:var(--moss);font-weight:700;">2 hours ago</span>
+      </span>
+    </button>
+
+    <button class="note-row unread" type="button" data-toast="Opening your messages">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-message" /></svg></span>
+      <span class="grow">
+        <span class="between">
+          <span class="sec-title" style="font-size:14px;">New message from host</span>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </span>
+        <span class="tiny" style="display:block;margin-top:3px;">“Gate code is 4412 — see you after 2 PM.”</span>
+        <span class="tiny" style="display:block;margin-top:5px;color:var(--moss);font-weight:700;">5 hours ago</span>
+      </span>
+    </button>
+
+    <button class="note-row" type="button" data-toast="Opening the price alert">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-tag" /></svg></span>
+      <span class="grow">
+        <span class="sec-title" style="font-size:14px;display:block;">Price drop on a saved stay</span>
+        <span class="tiny" style="display:block;margin-top:3px;">Verde Meadow Farmhouse is ₹700 cheaper for your saved dates.</span>
+        <span class="tiny" style="display:block;margin-top:5px;">Yesterday</span>
+      </span>
+    </button>
+
+    <button class="note-row" type="button" data-toast="Opening your past trip">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg></span>
+      <span class="grow">
+        <span class="sec-title" style="font-size:14px;display:block;">How was The Guava House?</span>
+        <span class="tiny" style="display:block;margin-top:3px;">Share a review to help other guests plan their escape.</span>
+        <span class="tiny" style="display:block;margin-top:5px;">3 days ago</span>
+      </span>
+    </button>
+  </div>
+
+  <div class="empty hidden" id="noteEmpty">
+    <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-bell" /></svg></span>
+    <h3>You're all caught up.</h3>
+    <p>Booking updates, host messages and trip reminders will appear here.</p>
+    <a class="btn outline" href="index.html">Back to explore</a>
+  </div>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var list = document.getElementById('noteList');
+  var empty = document.getElementById('noteEmpty');
+  document.getElementById('markAll').addEventListener('click', function () {
+    list.innerHTML = '';
+    list.classList.add('hidden');
+    empty.classList.remove('hidden');
+    window.odToast('All notifications marked as read');
+  });
+})();
+</script>
+</body>
+</html>

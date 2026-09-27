@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Trips · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+
+<div class="app content">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <h1 class="bar-title">Trips</h1>
+      <a class="icon-btn" href="notifications.html" aria-label="Notifications">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-bell" /></svg>
+      </a>
+    </div>
+  </header>
+
+  <div data-tabs-root>
+    <div class="tabs mt" role="tablist" aria-label="Trip status">
+      <button type="button" role="tab" data-tab="upcoming" aria-selected="true">Upcoming</button>
+      <button type="button" role="tab" data-tab="past" aria-selected="false">Past</button>
+      <button type="button" role="tab" data-tab="cancelled" aria-selected="false">Cancelled</button>
+    </div>
+
+    <div data-panel="upcoming">
+      <div class="list-stack mt">
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Palm Grove Private Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill ok"><span class="pt"></span>Confirmed</span>
+              <span class="tiny num">₹20,384</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Palm Grove Private Farmhouse</h3>
+            <p class="p-loc">ECR · Near Mahabalipuram</p>
+            <p class="p-amen" style="margin-top:6px;">12–14 Jun 2026 · 2 guests</p>
+            <button class="btn sm outline mt" type="button" data-sheet-open="sheet-trip">View trip</button>
+          </div>
+        </article>
+
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-verde-meadow.jpg" width="1080" height="720" alt="Verde Meadow Farmhouse" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill warn"><span class="pt"></span>Awaiting host</span>
+              <span class="tiny num">₹15,600</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">Verde Meadow Farmhouse</h3>
+            <p class="p-loc">Kanchipuram</p>
+            <p class="p-amen" style="margin-top:6px;">3–6 Jul 2026 · 6 guests</p>
+            <button class="btn sm outline mt" type="button" data-sheet-open="sheet-trip">View trip</button>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div data-panel="past" hidden>
+      <div class="list-stack mt">
+        <article class="rowcard">
+          <div class="thumb"><img src="assets/prop-guava-house.jpg" width="1080" height="720" alt="The Guava House" loading="lazy" /></div>
+          <div class="grow">
+            <div class="between">
+              <span class="pill muted"><span class="pt"></span>Completed</span>
+              <span class="tiny num">₹11,900</span>
+            </div>
+            <h3 class="p-title" style="margin-top:7px;">The Guava House</h3>
+            <p class="p-loc">Chennai</p>
+            <p class="p-amen" style="margin-top:6px;">2–4 Feb 2026 · 4 guests</p>
+            <div class="row" style="gap:8px;margin-top:9px;">
+              <button class="btn sm outline" type="button" data-toast="Opening the review form">Write a review</button>
+              <button class="btn sm outline" type="button" data-toast="Booking again — opening dates">Book again</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div data-panel="cancelled" hidden>
+      <div class="empty">
+        <span class="ic"><svg class="ico" viewBox="0 0 24 24"><use href="#i-map" /></svg></span>
+        <h3>Your next escape starts here.</h3>
+        <p>Nothing cancelled so far — when you book a farmhouse, it shows up under Trips.</p>
+        <a class="btn" href="index.html">Explore farmhouses</a>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar" data-od-id="bottomnav" aria-label="Primary">
+    <a class="tab" href="index.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compass" /></svg>Explore</a>
+    <a class="tab" href="saved.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-heart" /></svg>Wishlists</a>
+    <a class="tab" href="trips.html" aria-current="page"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-map" /></svg>Trips</a>
+    <a class="tab" href="profile.html"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-user" /></svg>Profile</a>
+  </nav>
+
+</div>
+
+<div class="scrim" data-scrim></div>
+
+<section class="sheet" id="sheet-trip" role="dialog" aria-modal="true" aria-labelledby="tripTitle">
+  <div class="sheet-grab"></div>
+  <div class="sheet-head">
+    <h2 id="tripTitle">Your trip</h2>
+    <button class="icon-btn" type="button" data-sheet-close aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-x" /></svg>
+    </button>
+  </div>
+  <div class="media" style="aspect-ratio:16/10;">
+    <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Palm Grove Private Farmhouse" />
+  </div>
+  <div class="stack mt">
+    <div class="between">
+      <span class="pill ok"><span class="pt"></span>Confirmed</span>
+      <span class="tiny">Booking #9B-40218</span>
+    </div>
+    <h3 class="sec-title" style="font-size:17px;">Palm Grove Private Farmhouse</h3>
+    <div class="card tight">
+      <div class="sumline"><span class="k">Check-in</span><span>12 Jun 2026 · 2:00 PM</span></div>
+      <div class="sumline"><span class="k">Check-out</span><span>14 Jun 2026 · 11:00 AM</span></div>
+      <div class="sumline"><span class="k">Guests</span><span>2 guests · 2 nights</span></div>
+      <div class="sumline total"><span class="k">Total paid</span><span class="num">₹20,384</span></div>
+    </div>
+    <div class="hint">
+      <svg class="ico" viewBox="0 0 24 24"><use href="#i-info" /></svg>
+      <span>Free cancellation until 5 Jun 2026. After that, 50% refund until 10 Jun 2026.</span>
+    </div>
+    <div class="row" style="gap:10px;">
+      <a class="btn grow" href="profile.html"><svg class="ico" viewBox="0 0 24 24"><use href="#i-message" /></svg>Contact host</a>
+      <button class="btn outline grow" type="button" data-toast="Opening the help centre">Get help</button>
+    </div>
+  </div>
+</section>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

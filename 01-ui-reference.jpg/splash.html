@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Splash · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .splash{
+    position:relative; min-height:100vh; background:var(--primary);
+    display:flex; flex-direction:column; justify-content:space-between; gap:32px;
+    padding:calc(38px + env(safe-area-inset-top)) var(--gutter) calc(30px + env(safe-area-inset-bottom));
+    overflow:hidden;
+  }
+  .splash-bg{ position:absolute; inset:0; z-index:0; }
+  .splash-bg img{ width:100%; height:100%; object-fit:cover; }
+  .splash-bg::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg,
+      color-mix(in oklch, var(--forest-deep) 32%, transparent) 0%,
+      color-mix(in oklch, var(--forest-deep) 80%, transparent) 56%,
+      var(--forest-deep) 100%);
+  }
+  .splash-top, .splash-foot{ position:relative; z-index:1; color:var(--warm-white); }
+  .splash-mark{
+    width:72px; height:72px; border-radius:22px;
+    background:var(--warm-white); color:var(--primary);
+    display:grid; place-items:center;
+  }
+  .splash-mark .ico{ width:34px; height:34px; }
+  .splash-word{
+    margin-top:22px; font-size:13px; font-weight:800;
+    letter-spacing:.15em; text-transform:uppercase;
+    color:color-mix(in oklch, var(--warm-white) 84%, transparent);
+  }
+  .splash-title{
+    margin-top:12px; max-width:15ch;
+    font-family:var(--font-display); font-weight:400;
+    font-size:40px; line-height:1.05; letter-spacing:-.015em;
+  }
+  .splash-sub{
+    margin-top:14px; max-width:30ch; font-size:14px;
+    color:color-mix(in oklch, var(--warm-white) 82%, transparent);
+  }
+  .splash-bar{
+    height:4px; border-radius:var(--r-pill);
+    background:color-mix(in oklch, var(--warm-white) 26%, transparent);
+    overflow:hidden; margin-bottom:16px;
+  }
+  .splash-bar > i{
+    display:block; height:100%; width:0; border-radius:var(--r-pill);
+    background:var(--warm-white); animation:splashfill 2.4s linear forwards;
+  }
+  @keyframes splashfill{ to{ width:100%; } }
+  .btn.solid{ background:var(--warm-white); color:var(--primary); }
+  .btn.solid:hover{ background:var(--sand); }
+  .btn.ghost-light{
+    background:transparent; color:var(--warm-white);
+    border-color:color-mix(in oklch, var(--warm-white) 52%, transparent);
+  }
+  .btn.ghost-light:hover{
+    background:color-mix(in oklch, var(--warm-white) 14%, transparent);
+    border-color:var(--warm-white);
+  }
+  @media (prefers-reduced-motion:reduce){ .splash-bar > i{ animation:none; width:100%; } }
+</style>
+</head>
+<body>
+
+<div class="app no-nav splash">
+
+  <div class="splash-bg" aria-hidden="true">
+    <img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="" />
+  </div>
+
+  <div class="splash-top stack" style="gap:0;">
+    <span class="splash-mark" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><use href="#i-home-v" /></svg></span>
+    <p class="splash-word">9bhk.app</p>
+    <h1 class="splash-title">Your next escape is closer than you think.</h1>
+    <p class="splash-sub">Farmhouses, pools and open fields — a short drive from the city.</p>
+  </div>
+
+  <div class="splash-foot stack">
+    <div class="splash-bar" role="progressbar" aria-label="Loading 9bhk.app"><i></i></div>
+    <a class="btn block lg solid" href="login.html">Get started</a>
+    <a class="btn block ghost-light" href="index.html">Browse as guest</a>
+  </div>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  setTimeout(function () { window.location.href = 'login.html'; }, 2400);
+})();
+</script>
+</body>
+</html>

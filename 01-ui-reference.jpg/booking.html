@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Book your stay · 9bhk.app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .bar-head{ position:sticky; top:58px; z-index:25; background:var(--surface); padding:12px var(--gutter); border-bottom:1px solid var(--border); }
+  .bar-head .label{ font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; }
+  .pay-card{ border-radius:var(--r-lg); border:1px solid var(--border-strong); background:linear-gradient(150deg,var(--forest),var(--forest-deep)); color:var(--warm-white); padding:18px; }
+  .pay-card .num{ font-size:19px; letter-spacing:.12em; font-weight:700; margin-top:26px; }
+</style>
+</head>
+<body>
+
+<div class="app content no-nav">
+
+  <header class="appbar" data-od-id="appbar">
+    <div class="appbar-inner">
+      <a class="icon-btn" href="property.html" aria-label="Back to property">
+        <svg class="ico" viewBox="0 0 24 24"><use href="#i-back" /></svg>
+      </a>
+      <h1 class="bar-title" id="barTitle">Choose dates</h1>
+      <span class="bar-spacer" aria-hidden="true"></span>
+    </div>
+  </header>
+
+  <div class="bar-head" id="progressHead">
+    <p class="label"><span id="stepLabel">Step 1 of 4</span><span id="stepPct">25%</span></p>
+    <div class="pbar"><i id="stepBar" style="width:25%"></i></div>
+  </div>
+
+  <div data-flow id="bookingFlow">
+
+    <section data-step-id="dates">
+      <div class="page-head">
+        <h1 style="font-size:28px;">Pick your dates</h1>
+        <p class="sub">Minimum stay is 2 nights. Blocked and booked dates can't be selected.</p>
+      </div>
+      <div class="pad mt">
+        <div id="bookCal"></div>
+        <div class="legend mt">
+          <span><i class="l-av"></i>Available</span>
+          <span><i class="l-bk"></i>Booked</span>
+          <span><i class="l-bl"></i>Blocked</span>
+        </div>
+        <div class="card mt">
+          <div class="sumline"><span class="k">Check-in</span><span class="num" id="ciText">Not set</span></div>
+          <div class="sumline"><span class="k">Check-out</span><span class="num" id="coText">Not set</span></div>
+          <div class="sumline"><span class="k">Nights</span><span class="num" id="nightsText">—</span></div>
+        </div>
+      </div>
+      <div class="pad mt-lg">
+        <button class="btn block lg" type="button" id="toGuests" data-goto="guests">Continue</button>
+      </div>
+    </section>
+
+    <section data-step-id="guests" hidden>
+      <div class="page-head">
+        <h1 style="font-size:28px;">Who's staying?</h1>
+        <p class="sub">Up to 8 guests at Palm Grove Private Farmhouse.</p>
+      </div>
+      <div class="pad mt stack">
+        <div class="between card tight">
+          <span class="stack xs"><span class="sec-title">Adults</span><span class="tiny">Ages 13 and above</span></span>
+          <span class="stepper" data-stepper data-min="1" data-max="8">
+            <button type="button" data-step="-1" aria-label="Fewer adults"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="bAdults">2</span>
+            <button type="button" data-step="1" aria-label="More adults"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+        <div class="between card tight">
+          <span class="stack xs"><span class="sec-title">Children</span><span class="tiny">Ages 2 to 12</span></span>
+          <span class="stepper" data-stepper data-min="0" data-max="6">
+            <button type="button" data-step="-1" aria-label="Fewer children"><svg class="ico" viewBox="0 0 24 24"><use href="#i-minus" /></svg></button>
+            <span class="val" id="bChildren">0</span>
+            <button type="button" data-step="1" aria-label="More children"><svg class="ico" viewBox="0 0 24 24"><use href="#i-plus" /></svg></button>
+          </span>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="summary">Continue</button>
+        <button class="btn block ghost" type="button" data-goto="dates">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="summary" hidden>
+      <div class="page-head">
+        <h1 style="font-size:28px;">Your stay</h1>
+        <p class="sub" id="summaryMeta">2 nights · 2 guests</p>
+      </div>
+      <div class="pad mt">
+        <div class="rowcard">
+          <div class="thumb"><img src="assets/prop-palm-grove.jpg" width="800" height="1000" alt="Palm Grove Private Farmhouse" /></div>
+          <div class="grow">
+            <h3 class="p-title">Palm Grove Private Farmhouse</h3>
+            <p class="p-loc">ECR · Near Mahabalipuram</p>
+            <div class="rating" style="margin-top:6px;"><svg class="ico" viewBox="0 0 24 24"><use href="#i-star" /></svg>4.9 <span class="rc">(128)</span></div>
+          </div>
+        </div>
+        <div class="card mt">
+          <div class="sumline"><span class="k">Nightly stay</span><span class="num" id="lineStay">₹17,000</span></div>
+          <div class="sumline"><span class="k">Cleaning fee</span><span class="num" id="lineClean">₹1,200</span></div>
+          <div class="sumline"><span class="k">Taxes (12%)</span><span class="num" id="lineTax">₹2,184</span></div>
+          <div class="sumline" id="lineDiscountRow"><span class="k">Discount</span><span class="num off" id="lineDiscount">−₹0</span></div>
+          <div class="sumline total"><span class="k">Total</span><span class="num" id="lineTotal">₹20,384</span></div>
+        </div>
+        <p class="tiny mt">Totals are calculated from the nightly rate and stay length. Your card is charged on the next step.</p>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="details">Continue to payment</button>
+        <button class="btn block ghost" type="button" data-goto="guests">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="details" hidden>
+      <div class="page-head">
+        <h1 style="font-size:28px;">Guest details</h1>
+        <p class="sub">The host uses these to confirm your stay.</p>
+      </div>
+      <form class="pad mt stack" id="detailsForm" novalidate>
+        <div class="field" id="fName">
+          <label for="gName">Full name</label>
+          <input class="ctrl" id="gName" type="text" placeholder="e.g. Aarav Kumar" autocomplete="name" required />
+          <p class="help hidden" id="hName">Please add the name on the booking.</p>
+        </div>
+        <div class="field" id="fEmail">
+          <label for="gEmail">Email</label>
+          <input class="ctrl" id="gEmail" type="email" placeholder="you@email.com" autocomplete="email" required />
+          <p class="help hidden" id="hEmail">We'll send your confirmation here.</p>
+        </div>
+        <div class="field" id="fPhone">
+          <label for="gPhone">Mobile number</label>
+          <input class="ctrl" id="gPhone" type="tel" placeholder="+91 98••• •••••" autocomplete="tel" required />
+          <p class="help hidden" id="hPhone">The host may call to confirm arrival time.</p>
+        </div>
+        <button class="btn block lg mt" type="submit">Continue to payment</button>
+        <button class="btn block ghost" type="button" data-goto="summary">Back</button>
+      </form>
+    </section>
+
+    <section data-step-id="payment" hidden>
+      <div class="page-head">
+        <h1 style="font-size:28px;">Secure your stay</h1>
+        <p class="sub">Payments run through a mock provider in this prototype.</p>
+      </div>
+      <div class="pad mt">
+        <div class="pay-card">
+          <span class="tiny" style="color:color-mix(in oklch,var(--warm-white) 70%,transparent);letter-spacing:.1em;text-transform:uppercase;font-weight:800;">Total due</span>
+          <p class="num" style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:4px;" id="payTotal">₹20,384</p>
+          <p class="num">•••• •••• •••• 4291</p>
+          <div class="between" style="margin-top:18px;">
+            <span class="tiny" style="color:color-mix(in oklch,var(--warm-white) 80%,transparent);">AARAV KUMAR</span>
+            <span class="tiny" style="color:color-mix(in oklch,var(--warm-white) 80%,transparent);">09/28</span>
+          </div>
+        </div>
+        <div class="stack mt">
+          <div class="field">
+            <label for="cardNum">Card number</label>
+            <input class="ctrl" id="cardNum" inputmode="numeric" value="4242 4242 4242 4291" autocomplete="cc-number" />
+          </div>
+          <div class="row" style="gap:12px;">
+            <div class="field grow">
+              <label for="cardExp">Expiry</label>
+              <input class="ctrl" id="cardExp" value="09 / 28" autocomplete="cc-exp" />
+            </div>
+            <div class="field grow">
+              <label for="cardCvc">CVC</label>
+              <input class="ctrl" id="cardCvc" inputmode="numeric" value="123" autocomplete="cc-csc" />
+            </div>
+          </div>
+        </div>
+        <div class="hint mt">
+          <svg class="ico" viewBox="0 0 24 24"><use href="#i-shield" /></svg>
+          <span>This is a prototype. No real card is charged and no data leaves your browser.</span>
+        </div>
+      </div>
+      <div class="pad mt-lg stack">
+        <button class="btn block lg" type="button" data-goto="processing" id="payBtn">Pay ₹20,384</button>
+        <button class="btn block ghost" type="button" data-goto="details">Back</button>
+      </div>
+    </section>
+
+    <section data-step-id="processing" hidden>
+      <div class="stack center" style="padding:90px 24px;align-items:center;">
+        <span class="spin" role="status" aria-label="Processing payment"></span>
+        <p style="font-weight:700;margin-top:18px;">Processing your payment…</p>
+        <p class="tiny">Please don't close this screen.</p>
+      </div>
+    </section>
+
+    <section data-step-id="confirmation" hidden>
+      <div class="stack center" style="padding:64px 24px;align-items:center;">
+        <span class="empty" style="padding:0;">
+          <span class="ic" style="width:72px;height:72px;background:var(--ok-soft);color:var(--ok);"><svg class="ico" style="width:32px;height:32px" viewBox="0 0 24 24"><use href="#i-check" /></svg></span>
+        </span>
+        <h1 style="font-size:30px;margin-top:14px;font-family:var(--font-display);font-weight:400;">Booking confirmed</h1>
+        <p class="muted">Your farmhouse escape is booked.</p>
+      </div>
+      <div class="pad">
+        <div class="card">
+          <div class="sumline"><span class="k">Property</span><span>Palm Grove</span></div>
+          <div class="sumline"><span class="k">Dates</span><span class="num" id="confDates">—</span></div>
+          <div class="sumline"><span class="k">Guests</span><span class="num" id="confGuests">2 guests</span></div>
+          <div class="sumline total"><span class="k">Paid</span><span class="num" id="confTotal">₹20,384</span></div>
+        </div>
+        <div class="stack mt-lg">
+          <a class="btn block lg" href="trips.html">View trip</a>
+          <a class="btn block ghost" href="index.html">Back to explore</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  'use strict';
+  var flow = document.getElementById('bookingFlow');
+  var RATE = 8500, CLEAN = 1200, TAX = 0.12;
+  var state = { inDate: '', outDate: '', nights: 2, adults: 2, children: 0 };
+
+  var steps = { dates: [1, 'Choose dates', 25], guests: [2, 'Guests', 50], summary: [3, 'Review', 60], details: [3, 'Guest details', 75], payment: [4, 'Payment', 90], processing: [4, 'Payment', 95], confirmation: [4, 'Confirmed', 100] };
+
+  flow.addEventListener('flowchange', function (event) {
+    var s = steps[event.detail.id] || steps.dates;
+    document.getElementById('stepLabel').textContent = 'Step ' + s[0] + ' of 4 · ' + s[1];
+    document.getElementById('stepPct').textContent = s[2] + '%';
+    document.getElementById('stepBar').style.width = s[2] + '%';
+    document.getElementById('barTitle').textContent = s[1];
+    if (event.detail.id === 'processing') {
+      setTimeout(function () { window.odFlow(flow)('confirmation'); }, 1600);
+    }
+  });
+
+  var cal = document.getElementById('bookCal');
+  window.odRenderCalendar(cal, {
+    month: '2026-06',
+    booked: ['2026-06-06', '2026-06-07', '2026-06-13', '2026-06-20', '2026-06-21', '2026-06-22'],
+    blocked: ['2026-06-26', '2026-06-27', '2026-06-28']
+  });
+  var fmt = function (iso) { var p = iso.split('-'); return p[2] + ' Jun ' + p[0]; };
+  cal.addEventListener('calchange', function (event) {
+    var iso = event.detail.iso;
+    if (!state.inDate || (state.inDate && state.outDate)) {
+      state.inDate = iso; state.outDate = '';
+      document.querySelectorAll('#bookCal .cal-d').forEach(function (d) { d.classList.remove('is-in'); });
+      event.detail.day.classList.add('is-in');
+    } else if (iso < state.inDate) {
+      state.inDate = iso;
+      document.querySelectorAll('#bookCal .cal-d').forEach(function (d) { d.classList.remove('is-in'); });
+      event.detail.day.classList.add('is-in');
+    } else {
+      state.outDate = iso;
+    }
+    document.getElementById('ciText').textContent = state.inDate ? fmt(state.inDate) : 'Not set';
+    document.getElementById('coText').textContent = state.outDate ? fmt(state.outDate) : 'Not set';
+    document.getElementById('nightsText').textContent = (state.inDate && state.outDate) ? (new Date(state.outDate) - new Date(state.inDate)) / 86400000 + ' nights' : '—';
+  });
+
+  document.getElementById('toGuests').addEventListener('click', function (event) {
+    if (!state.inDate || !state.outDate) { event.stopImmediatePropagation(); window.odToast('Pick a check-in and check-out date'); return; }
+    var n = (new Date(state.outDate) - new Date(state.inDate)) / 86400000;
+    if (n < 2) { event.stopImmediatePropagation(); window.odToast('Minimum stay is 2 nights'); return; }
+    state.nights = n;
+    document.getElementById('summaryMeta').textContent = n + ' nights · ' + (state.adults + state.children) + ' guests';
+    recalc();
+  }, true);
+
+  document.getElementById('bAdults').closest('[data-stepper]').addEventListener('stepperchange', function (e) {
+    state.adults = e.detail.value;
+    document.getElementById('summaryMeta').textContent = state.nights + ' nights · ' + (state.adults + state.children) + ' guests';
+    document.getElementById('confGuests').textContent = (state.adults + state.children) + ' guests';
+  });
+  document.getElementById('bChildren').closest('[data-stepper]').addEventListener('stepperchange', function (e) {
+    state.children = e.detail.value;
+    document.getElementById('summaryMeta').textContent = state.nights + ' nights · ' + (state.adults + state.children) + ' guests';
+    document.getElementById('confGuests').textContent = (state.adults + state.children) + ' guests';
+  });
+
+  function recalc() {
+    var stay = RATE * state.nights;
+    var subtotal = stay + CLEAN;
+    var discount = state.nights >= 3 ? Math.round(subtotal * 0.1) : 0;
+    var tax = Math.round((subtotal - discount) * TAX);
+    var total = subtotal - discount + tax;
+    var money = function (v) { return '₹' + v.toLocaleString('en-IN'); };
+    document.getElementById('lineStay').textContent = money(stay);
+    document.getElementById('lineClean').textContent = money(CLEAN);
+    document.getElementById('lineTax').textContent = money(tax);
+    document.getElementById('lineDiscount').textContent = '−' + money(discount);
+    document.getElementById('lineTotal').textContent = money(total);
+    document.getElementById('payTotal').textContent = money(total);
+    document.getElementById('payBtn').textContent = 'Pay ' + money(total);
+    document.getElementById('confTotal').textContent = money(total);
+    document.getElementById('confDates').textContent = (state.inDate && state.outDate)
+      ? (state.inDate.slice(8) + '–' + state.outDate.slice(8) + ' Jun') : '2 nights';
+  }
+  recalc();
+
+  document.getElementById('detailsForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var name = document.getElementById('gName');
+    var email = document.getElementById('gEmail');
+    var phone = document.getElementById('gPhone');
+    var valid = true;
+    function mark(fieldId, helpId, ok) {
+      document.getElementById(fieldId).classList.toggle('err', !ok);
+      document.getElementById(helpId).classList.toggle('hidden', ok);
+      if (!ok) { valid = false; }
+    }
+    mark('fName', 'hName', name.value.trim().length > 1);
+    mark('fEmail', 'hEmail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()));
+    mark('fPhone', 'hPhone', phone.value.replace(/\D/g, '').length >= 10);
+    if (!valid) { window.odToast('Please fix the highlighted fields'); return; }
+    window.odFlow(flow)('payment');
+  });
+
+  document.getElementById('payBtn').addEventListener('click', function () {
+    window.odFlow(flow)('processing');
+  });
+})();
+</script>
+</body>
+</html>
