@@ -200,10 +200,26 @@ export default function AdminPage() {
           image: (row.image_urls && row.image_urls[0]) || "/assets/prop-palm-grove.jpg",
           alt: row.alt || row.name,
           blurb: row.blurb || row.description || "",
-          type: row.type || "Farm stay",
+          type: row.type || "Oceanfront Estate",
           guestFavourite: row.guest_favourite,
           group: row.group_name || "popular",
           status: row.status || "published",
+          beachFrontage: row.beach_frontage || "120 ft direct beachfront",
+          coastalZone: row.coastal_zone || "Direct Oceanfront",
+          privateBeachAccess: row.private_beach_access ?? true,
+          tideDistanceMeters: row.tide_distance_meters ?? 40,
+          garage: {
+            type: row.garage_type || "collector_vault",
+            name: row.garage_type === "marine_port" ? "Beach & Marine Port" : row.garage_type === "ev_pavilion" ? "Executive EV Pavilion" : row.garage_type === "teak_portico" ? "Coastal Teak Portico" : "Subterranean Collector's Vault",
+            capacity: row.garage_capacity ?? 2,
+            supercarFriendly: row.supercar_friendly ?? true,
+            evChargingKw: row.ev_charging_kw ?? 22,
+            washdownStation: row.washdown_station ?? true,
+            description: "Protected coastal vehicle bay.",
+          },
+          isForSale: Boolean(row.is_for_sale),
+          salePrice: row.sale_price,
+          landArea: row.land_area,
         }));
         setAdminProps(fromDb);
       } else {

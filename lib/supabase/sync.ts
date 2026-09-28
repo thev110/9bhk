@@ -20,6 +20,11 @@ export async function persistProfile(user: User): Promise<void> {
     avatar_url: user.avatarUrl ?? null,
     city: user.city,
     upi_id: user.upiId ?? null,
+    role: user.role || "buyer",
+    agency_name: user.agencyName ?? null,
+    rera_number: user.reraNumber ?? null,
+    verified_broker: Boolean(user.verifiedBroker),
+    commission_rate: user.commissionRate ?? 2.0,
   });
 }
 
@@ -62,5 +67,74 @@ export async function persistConfirmation(booking: Booking): Promise<void> {
     title: "Stay is booked",
     body: `${booking.propertyName || "Your farmhouse"} is confirmed. Check Trips for arrival details.`,
     href: "/trips",
+  });
+}
+
+export async function persistClient(client: any): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id) return;
+  await supabase.from("bhk_realtor_clients").insert({
+    id: client.id,
+    realtor_id: id,
+    name: client.name,
+    phone: client.phone,
+    email: client.email || null,
+    budget_min_cr: client.budgetMinCr,
+    budget_max_cr: client.budgetMaxCr,
+    preferred_stretch: client.preferredStretch,
+    garage_need: client.garageNeed,
+    confidential: client.confidential,
+    notes: client.notes || null,
+  });
+}
+
+export async function deleteClientFromDb(clientId: string): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id) return;
+  await supabase.from("bhk_realtor_clients").delete().eq("id", clientId).eq("realtor_id", id);
+}
+
+export async function loadRealtorClients(): Promise<any[]> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id) return [];
+  const { data } = await supabase.from("bhk_realtor_clients").select("*").eq("realtor_id", id);
+  if (!data) return [];
+  return data.map((r: any) => ({
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    email: r.email || undefined,
+    budgetMinCr: Number(r.budget_min_cr),
+    budgetMaxCr: Number(r.budget_max_cr),
+    preferredStretch: r.preferred_stretch,
+    garageNeed: r.garage_need,
+    confidential: Boolean(r.confidential),
+    notes: r.notes || undefined,
+    createdAt: r.created_at,
+  }));
+}
+
+export async function persistViewingRequest(req: {
+  propertyId: string;
+  propertyName: string;
+  buyerName: string;
+  buyerPhone: string;
+  buyerEmail?: string;
+  automotiveMandate?: string;
+}): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase) return;
+  await supabase.from("bhk_viewing_requests").insert({
+    property_id: req.propertyId,
+    property_name: req.propertyName,
+    buyer_name: req.buyerName,
+    buyer_phone: req.buyerPhone,
+    buyer_email: req.buyerEmail || null,
+    user_id: id || null,
+    automotive_mandate: req.automotiveMandate || null,
   });
 }

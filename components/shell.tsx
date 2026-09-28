@@ -35,9 +35,10 @@ export function FavButton({
   );
 }
 
-export function TabBar({ current }: { current: "explore" | "saved" | "trips" | "profile" }) {
+export function TabBar({ current }: { current: "explore" | "buy" | "saved" | "trips" | "profile" }) {
   const items = [
-    { id: "explore", href: "/", label: "Explore", icon: "compass" },
+    { id: "explore", href: "/", label: "Stays", icon: "compass" },
+    { id: "buy", href: "/buy", label: "Buy", icon: "key" },
     { id: "saved", href: "/saved", label: "Wishlists", icon: "heart" },
     { id: "trips", href: "/trips", label: "Trips", icon: "map" },
     { id: "profile", href: "/profile", label: "Profile", icon: "user" },
@@ -124,7 +125,7 @@ export function Shell({
   dock = "none",
 }: {
   children: React.ReactNode;
-  nav?: "explore" | "saved" | "trips" | "profile";
+  nav?: "explore" | "buy" | "saved" | "trips" | "profile";
   dock?: "nav" | "bar" | "none";
 }) {
   const mode = nav ? "nav" : dock;
@@ -133,7 +134,6 @@ export function Shell({
     <div className="app">
       <main className={contentClass}>{children}</main>
       {nav ? <TabBar current={nav} /> : null}
-      <Toast />
     </div>
   );
 }

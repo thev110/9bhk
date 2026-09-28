@@ -57,8 +57,13 @@ export async function saveProperty(form: ListingDraft): Promise<string> {
     highlights: `${form.guests} guests · ${form.type}`,
     blurb: form.description,
     alt: form.name,
-    group_name: "popular",
     status: "published",
+    beach_frontage: form.beachFrontage || "120 ft direct beachfront",
+    is_for_sale: Boolean(form.isForSale),
+    sale_price: form.salePrice || null,
+    garage_type: form.garageType || "collector_vault",
+    garage_capacity: form.garageCapacity || 2,
+    land_area: form.landArea || null,
   });
   if (error) throw error;
   return id;

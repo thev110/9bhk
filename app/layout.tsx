@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: { default: "9bhk.app", template: "%s · 9bhk.app" },
-  description: "Farmhouses for better weekends.",
+  description: "Coastal beach houses and automotive sanctuaries.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -48,10 +48,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <StoreProvider>
           <AuthSync />
-          <CatalogProvider>{children}</CatalogProvider>
+          <CatalogProvider>
+            {children}
+            <CommandMenu />
+          </CatalogProvider>
           <PwaMobileHandler />
-          <CommandMenu />
-          <Toaster position="top-center" richColors closeButton />
+          <Toaster position="bottom-center" richColors closeButton />
         </StoreProvider>
       </body>
     </html>

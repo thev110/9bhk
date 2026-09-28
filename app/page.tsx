@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandBar, Shell } from "@/components/shell";
 import { Icon, vibeIcon } from "@/components/icon";
@@ -20,7 +21,7 @@ function greeting(): string {
 
 export default function HomePage() {
   const router = useRouter();
-  const { city, setCity, showToast } = useStore();
+  const { city, setCity } = useStore();
   const { properties } = useCatalog();
   const [q, setQ] = useState("");
   const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
@@ -51,8 +52,28 @@ export default function HomePage() {
     <Shell nav="explore">
       <BrandBar onLocation={() => setSheet("where")} />
       <section className="greet">
-        <p className="hello">{hello}</p>
-        <h1>Where do you want to escape?</h1>
+        <div className="between" style={{ alignItems: "center" }}>
+          <p className="hello" style={{ margin: 0 }}>{hello}</p>
+          <div className="row" style={{ gap: 6 }}>
+            <span
+              className="chip is-active"
+              style={{ minHeight: 30, padding: "0 10px", fontSize: 12 }}
+            >
+              Stays
+            </span>
+            <Link
+              href="/buy"
+              className="chip"
+              style={{ minHeight: 30, padding: "0 10px", fontSize: 12 }}
+            >
+              Buy
+            </Link>
+          </div>
+        </div>
+        <h1 style={{ marginTop: 8 }}>Direct beachfront sanctuaries</h1>
+        <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+          Private shoreline estates with collector-grade automotive accommodations. Zero inland compromises.
+        </p>
       </section>
 
       <section className="searchwrap">
@@ -60,8 +81,8 @@ export default function HomePage() {
           <Icon name="search" className="ico s-ico" />
           <input
             type="search"
-            placeholder="Search places, areas or farmhouses"
-            aria-label="Search places, areas or farmhouses"
+            placeholder="Search beachfront estates, dunes or garages"
+            aria-label="Search beachfront estates, dunes or garages"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -164,14 +185,22 @@ export default function HomePage() {
       <section className="section pad">
         <div className="card">
           <p className="eyebrow" style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--moss)" }}>
-            Have a farmhouse?
+            Own a coastal holding?
           </p>
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, marginTop: 6 }}>
-            Turn empty dates into bookings.
+            List your beachfront estate for sale or private stay.
           </h2>
-          <button className="btn mt" type="button" onClick={() => router.push("/host")}>
-            List your farmhouse
-          </button>
+          <div className="row mt" style={{ flexWrap: "wrap", gap: 8 }}>
+            <button className="btn sm" type="button" onClick={() => router.push("/host/new?mode=sale")}>
+              List for Sale
+            </button>
+            <button className="btn outline sm" type="button" onClick={() => router.push("/host/new")}>
+              Host Guests
+            </button>
+            <button className="btn ghost sm" type="button" onClick={() => router.push("/realtor")}>
+              Realtor Portal →
+            </button>
+          </div>
         </div>
       </section>
 
@@ -189,7 +218,6 @@ export default function HomePage() {
               onClick={() => {
                 setCity(c);
                 setSheet(null);
-                showToast(`Showing escapes around ${c}`);
               }}
             >
               <Icon name="pin" />

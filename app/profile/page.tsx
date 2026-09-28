@@ -52,7 +52,14 @@ export default function ProfilePage() {
             {user.phone ? <p className="muted"><a href={`tel:${user.phone.replace(/\s/g, "")}`}>{user.phone}</a></p> : (
               <p className="muted" style={{ color: "var(--moss)", fontWeight: 600 }}>Phone not added</p>
             )}
-            <p className="muted">Verified member</p>
+            <div className="row mt" style={{ gap: 6, marginTop: 4 }}>
+              <span className="pill forest" style={{ fontSize: 10, textTransform: "capitalize" }}>
+                {user.role === "realtor" ? "Licensed Broker" : user.role === "seller" ? "Estate Owner" : "Coastal Buyer"}
+              </span>
+              {user.agencyName ? (
+                <span className="pill" style={{ fontSize: 10 }}>{user.agencyName}</span>
+              ) : null}
+            </div>
           </div>
         </div>
 
@@ -78,12 +85,23 @@ export default function ProfilePage() {
           </div>
         ) : null}
 
-        <Link href="/host" className="card" style={{ textDecoration: "none" }}>
-          <strong>Become a host</strong>
-          <p className="muted">Turn empty dates into bookings.</p>
-        </Link>
+        <div className="row wrap" style={{ gap: 10 }}>
+          <Link href="/realtor" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
+            <strong>Realtor Portal</strong>
+            <p className="muted" style={{ fontSize: 12 }}>Client roster & presentation.</p>
+          </Link>
+          <Link href="/host/new?mode=sale" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
+            <strong>Sell an Estate</strong>
+            <p className="muted" style={{ fontSize: 12 }}>List for acquisition.</p>
+          </Link>
+        </div>
 
         <div className="menu">
+          <Link className="mi" href="/realtor">
+            <Icon name="users" />
+            <span className="lb">Realtor & Broker Portal</span>
+            <span className="meta">Client Onboarding</span>
+          </Link>
           <button className="mi" type="button" onClick={() => { setForm(user); setEditing(true); }}>
             <Icon name="user" />
             <span className="lb">Personal details</span>
@@ -150,7 +168,41 @@ export default function ProfilePage() {
               <input className="ctrl" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </label>
             <label className="field">
-              Home city
+              <span>Account Role</span>
+              <select
+                className="ctrl"
+                value={form.role || "buyer"}
+                onChange={(e) => setForm({ ...form, role: e.target.value as any })}
+              >
+                <option value="buyer">Coastal Buyer / Investor</option>
+                <option value="realtor">Licensed Realtor / Broker</option>
+                <option value="seller">Beachfront Estate Owner</option>
+              </select>
+            </label>
+            {form.role === "realtor" ? (
+              <>
+                <label className="field">
+                  <span>Agency / Firm Name</span>
+                  <input
+                    className="ctrl"
+                    value={form.agencyName || ""}
+                    placeholder="e.g. Sotheby's Coastal"
+                    onChange={(e) => setForm({ ...form, agencyName: e.target.value })}
+                  />
+                </label>
+                <label className="field">
+                  <span>RERA License ID</span>
+                  <input
+                    className="ctrl"
+                    value={form.reraNumber || ""}
+                    placeholder="e.g. TN/AGENT/0491/2023"
+                    onChange={(e) => setForm({ ...form, reraNumber: e.target.value })}
+                  />
+                </label>
+              </>
+            ) : null}
+            <label className="field">
+              <span>Home city</span>
               <select className="ctrl" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}>
                 {[...CITIES, "Bengaluru"].map((c) => (
                   <option key={c}>{c}</option>

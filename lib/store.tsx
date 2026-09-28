@@ -2,7 +2,15 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { persistBooking, persistConfirmation, persistProfile } from "@/lib/supabase/sync";
+import {
+  deleteClientFromDb,
+  loadRealtorClients,
+  persistBooking,
+  persistClient,
+  persistConfirmation,
+  persistProfile,
+  persistViewingRequest,
+} from "@/lib/supabase/sync";
 import { signOutSupabase } from "@/lib/supabase/browser";
 
 export type BookingStatus = "confirmed" | "awaiting" | "completed" | "cancelled";
@@ -25,6 +33,8 @@ export type Booking = {
   paymentRef?: string;
 };
 
+export type UserRole = "buyer" | "realtor" | "seller" | "guest" | "admin";
+
 export type User = {
   name: string;
   email: string;
@@ -32,6 +42,11 @@ export type User = {
   city: string;
   avatarUrl?: string;
   upiId?: string;
+  role?: UserRole;
+  agencyName?: string;
+  reraNumber?: string;
+  verifiedBroker?: boolean;
+  commissionRate?: number;
 };
 
 export type AppNote = {
@@ -60,6 +75,26 @@ export type ListingDraft = {
   deposit: number;
   minStay: number;
   status: "draft" | "pending" | "published";
+  isForSale?: boolean;
+  salePrice?: number;
+  beachFrontage?: string;
+  garageType?: string;
+  garageCapacity?: number;
+  landArea?: string;
+};
+
+export type RealtorClient = {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  budgetMinCr: number;
+  budgetMaxCr: number;
+  preferredStretch: string;
+  garageNeed: string;
+  confidential: boolean;
+  notes?: string;
+  createdAt: string;
 };
 
 type Persisted = {
@@ -71,6 +106,8 @@ type Persisted = {
   seenIntro: boolean;
   signedIn: boolean;
   notes: AppNote[];
+  clients: RealtorClient[];
+  presentationMode?: boolean;
 };
 
 const STORAGE_KEY = "9bhk-state";
@@ -80,6 +117,7 @@ export const defaultUser: User = {
   email: "guest@9bhk.app",
   phone: "",
   city: "Chennai",
+  role: "buyer",
 };
 
 const emptyDraft = (): ListingDraft => ({
@@ -106,6 +144,8 @@ type Store = Persisted & {
   ready: boolean;
   sessionChecked: boolean;
   toast: string;
+  presentationMode: boolean;
+  setPresentationMode: (active: boolean) => void;
   showToast: (message: string) => void;
   setCity: (city: string) => void;
   toggleSaved: (id: string) => void;
@@ -118,6 +158,16 @@ type Store = Persisted & {
   markIntro: () => void;
   markSessionChecked: () => void;
   confirmBooking: (id: string) => void;
+  addClient: (client: RealtorClient) => void;
+  removeClient: (id: string) => void;
+  addViewingRequest: (req: {
+    propertyId: string;
+    propertyName: string;
+    buyerName: string;
+    buyerPhone: string;
+    buyerEmail?: string;
+    automotiveMandate?: string;
+  }) => Promise<void>;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -132,6 +182,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     seenIntro: true,
     signedIn: false,
     notes: [],
+    clients: [
+      {
+        id: "c-101",
+        name: "Vikramaditya K (Family Office)",
+        phone: "+91 98401 22334",
+        email: "vk@chennaicapital.com",
+        budgetMinCr: 20,
+        budgetMaxCr: 40,
+        preferredStretch: "ECR · Mahabalipuram Dunes",
+        garageNeed: "Collector Vault (4+ cars, low approach ramp)",
+        confidential: true,
+        notes: "Looking for direct high-tide frontage with private beach gate for Ferrari 296 GTB & Defender.",
+        createdAt: "2026-09-27",
+      },
+    ],
+    presentationMode: false,
   });
   const [ready, setReady] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -146,7 +212,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const realBookings = (parsed.bookings || []).filter(
           (b) => b.id !== "b1" && b.id !== "b2" && b.id !== "b3" && b.guestName !== "Aarav Kumar" && !b.guestEmail?.includes("aarav")
         );
-        setState({
+        setState((curr) => ({
           city: parsed.city || "Chennai",
           saved: parsed.saved || [],
           user: parsed.signedIn ? parsed.user ?? null : null,
@@ -155,7 +221,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           seenIntro: true,
           signedIn: parsed.signedIn === true,
           notes: parsed.notes ?? [],
-        });
+          clients: parsed.clients && parsed.clients.length ? parsed.clients : curr.clients,
+          presentationMode: parsed.presentationMode ?? false,
+        }));
       }
     } catch {
       /* ignore */
@@ -253,6 +321,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ],
           };
         }),
+      presentationMode: Boolean(state.presentationMode),
+      setPresentationMode: (active) => setState((s) => ({ ...s, presentationMode: active })),
+      addClient: (client) => {
+        void persistClient(client);
+        setState((s) => ({
+          ...s,
+          clients: [client, ...s.clients],
+        }));
+      },
+      removeClient: (id) => {
+        void deleteClientFromDb(id);
+        setState((s) => ({
+          ...s,
+          clients: s.clients.filter((c) => c.id !== id),
+        }));
+      },
+      addViewingRequest: async (req) => {
+        await persistViewingRequest(req);
+      },
     };
   }, [state, ready, sessionChecked, toast, showToast]);
 

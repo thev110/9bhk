@@ -5,24 +5,35 @@ import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { CITIES, inr } from "@/lib/format";
-import { PROPERTIES } from "@/lib/properties";
+import { PROPERTIES, formatInrCrores } from "@/lib/properties";
 import { emptyDraft, useStore, type ListingDraft } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
 import { saveProperty, uploadPropertyPhotos } from "@/lib/supabase/properties";
 
 const AMENITIES = ["Pool", "BBQ", "Bonfire", "Wi-Fi", "AC", "Parking", "Kitchen", "Pet friendly", "Indoor games", "Outdoor games", "Projector & music", "Caretaker", "Power backup"];
-const TYPES = ["Private farmhouse", "Farm stay", "Orchard retreat", "Pool villa"];
+const TYPES = [
+  "Oceanfront Estate",
+  "Marine Beachfront Villa",
+  "Dune Edge Sanctuary",
+  "Cove Beachfront Villa",
+];
+const GARAGE_OPTIONS = [
+  { id: "collector_vault", label: "Collector's Vault (<7° Supercar Ramp)" },
+  { id: "marine_port", label: "Beach & Marine Port (Jet Ski Slip)" },
+  { id: "ev_pavilion", label: "Executive EV Pavilion (DC Fast Charge)" },
+  { id: "teak_portico", label: "Coastal Teak Portico (Pergola)" },
+];
 const PHOTOS = PROPERTIES.slice(0, 6);
 
 const TITLES = [
-  "Tell us about your farmhouse",
-  "Where is your farmhouse?",
+  "Tell us about your coastal estate",
+  "Where is the shoreline boundary?",
   "How much space?",
-  "What's on the property?",
-  "Add photos",
-  "Set your nightly price",
-  "Choose when guests can stay",
-  "Preview your listing",
+  "Garage & automotive specifications",
+  "Add high-res photos",
+  "Set pricing & acquisition terms",
+  "Availability & private access",
+  "Preview your coastal listing",
   "Ready to publish?",
 ];
 
@@ -141,6 +152,18 @@ export default function ListingWizard() {
                 </button>
               </div>
             </div>
+            <div className="between" style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+              <div>
+                <strong>List for Sale (Acquisition)</strong>
+                <p className="muted" style={{ fontSize: 12 }}>Make this estate purchasable in the Buy tab</p>
+              </div>
+              <button
+                type="button"
+                className="sw"
+                aria-checked={Boolean(form.isForSale)}
+                onClick={() => patch({ isForSale: !form.isForSale })}
+              />
+            </div>
           </>
         ) : null}
 
@@ -181,7 +204,31 @@ export default function ListingWizard() {
 
         {step === 3 ? (
           <>
-            <p className="muted">Pick everything guests can expect to find.</p>
+            <p className="muted">Specify coastal shoreline boundary and vehicle accommodations.</p>
+            <label className="field">
+              <span>Direct Beach Frontage</span>
+              <input
+                className="ctrl"
+                placeholder="e.g. 180 ft direct oceanfront"
+                value={form.beachFrontage || ""}
+                onChange={(e) => patch({ beachFrontage: e.target.value })}
+              />
+            </label>
+            <p style={{ fontWeight: 800, marginTop: 12 }}>Automotive Garage Architecture</p>
+            <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
+              {GARAGE_OPTIONS.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  className={`chip${(form.garageType || "collector_vault") === g.id ? " is-active" : ""}`}
+                  onClick={() => patch({ garageType: g.id })}
+                >
+                  <Icon name="car" />
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            <p style={{ fontWeight: 800, marginTop: 16 }}>Curated Estate Amenities</p>
             <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
               {AMENITIES.map((item) => {
                 const on = form.amenities.includes(item);
@@ -240,7 +287,34 @@ export default function ListingWizard() {
 
         {step === 5 ? (
           <>
-            <p className="muted">You can change this any time from the listing.</p>
+            <p className="muted">Configure nightly stay rates and acquisition terms.</p>
+            {form.isForSale ? (
+              <div className="card" style={{ background: "color-mix(in oklch, var(--accent) 8%, var(--surface))", border: "1.5px solid var(--accent)", marginBottom: 14 }}>
+                <p className="eyebrow" style={{ color: "var(--accent)" }}>Acquisition Terms</p>
+                <label className="field mt">
+                  <span>Asking Sale Price (₹)</span>
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    placeholder="e.g. 280000000 (28 Cr)"
+                    value={form.salePrice || ""}
+                    onChange={(e) => patch({ salePrice: Number(e.target.value) || 0 })}
+                  />
+                  <span className="help" style={{ color: "var(--forest)", fontWeight: 700 }}>
+                    {form.salePrice ? `Acquisition asking: ${formatInrCrores(form.salePrice)}` : "Enter asking price in INR"}
+                  </span>
+                </label>
+                <label className="field mt">
+                  <span>Land / Survey Area</span>
+                  <input
+                    className="ctrl"
+                    placeholder="e.g. 4.5 Grounds (10,800 sq.ft)"
+                    value={form.landArea || ""}
+                    onChange={(e) => patch({ landArea: e.target.value })}
+                  />
+                </label>
+              </div>
+            ) : null}
             <label className="field">
               Base nightly price (₹)
               <input className="ctrl" inputMode="numeric" value={form.price} onChange={(e) => patch({ price: Number(e.target.value) || 0 })} />
