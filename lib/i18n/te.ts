@@ -1,15 +1,29 @@
 import { en, type Dict } from "./en";
+import { teAdmin } from "./te/admin";
+import { teCore } from "./te/core";
+import { teHost } from "./te/host";
+import { teLegal } from "./te/legal";
+import { teOnboarding } from "./te/onboarding";
+import { teRealtor } from "./te/realtor";
 
 /**
  * Telugu (తెలుగు) catalog.
  *
- * Add translated strings to `overrides`. Anything omitted falls back to the
- * English value in `en`, so the UI is never broken or blank — it just stays
- * English until the string is translated.
+ * Translations live one file per surface under `lib/i18n/te/` so parallel
+ * authoring does not collide and each surface stays reviewable on its own.
+ * Anything missing here falls back to `en`, so the UI is never blank — but
+ * `npm test` fails on an incomplete catalog, because a partially-English UI is
+ * a worse outcome than an untranslated one.
  *
- * Complex terms (Collector Vault, Marine Port, CRZ, RERA, LOI) should be
- * confirmed by a native Telugu speaker before going live.
+ * Terminology: `lib/i18n/GLOSSARY.md`. Values marked `// REVIEW:` need a
+ * native-speaker pass.
  */
-const overrides: Partial<Dict> = {};
-
-export const te: Dict = { ...en, ...overrides };
+export const te: Dict = {
+  ...en,
+  ...teCore,
+  ...teOnboarding,
+  ...teRealtor,
+  ...teHost,
+  ...teAdmin,
+  ...teLegal,
+};

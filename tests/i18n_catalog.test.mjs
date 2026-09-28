@@ -30,15 +30,20 @@ function catalogFiles() {
   return [path.resolve("lib/i18n/en.ts"), ...fragments];
 }
 
-/** Keys explicitly listed in the `overrides` object, as key -> value pairs. */
-function readOverrides(locale) {
-  const file = path.resolve(`lib/i18n/${locale}.ts`);
-  const src = fs.readFileSync(file, "utf8");
-  const body = src.match(/overrides[^=]*=\s*\{([\s\S]*?)\n\};/);
+/**
+ * Translations live one file per surface under lib/i18n/<locale>/, so that
+ * parallel authoring does not collide and each surface stays reviewable.
+ * Reading them as text keeps this test free of a TS loader.
+ */
+function readLocale(locale) {
+  const dir = path.resolve(`lib/i18n/${locale}`);
   const map = new Map();
-  if (!body) return map;
-  for (const match of body[1].matchAll(/"([\w.]+)"\s*:\s*"([\s\S]*?)",?\s*\n/g)) {
-    map.set(match[1], match[2]);
+  if (fs.existsSync(dir)) {
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".ts"))) {
+      for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(KEY_LINE)) {
+        map.set(m[1], m[2]);
+      }
+    }
   }
   return map;
 }
@@ -104,21 +109,16 @@ test("Tamil and Telugu catalogs are complete and report translation progress", (
   const total = english.size;
 
   for (const locale of ["ta", "te"]) {
-    const translated = readOverrides(locale);
+    const translated = readLocale(locale);
     const unknown = [...translated.keys()].filter((key) => !english.has(key));
     assert.deepEqual(
       unknown,
       [],
-      `${locale}.ts overrides reference keys that do not exist: ${unknown.join(", ")}`,
+      `${locale} translations reference keys that do not exist: ${unknown.join(", ")}`,
     );
 
-    // Untranslated keys fall back to English at runtime, so a partial catalog
-    // is correct — this asserts the fallback is intact, not that it's finished.
-    const remaining = total - translated.size;
-    console.log(
-      `  [i18n] ${locale}: ${translated.size}/${total} translated, ${remaining} falling back to English`,
-    );
-    assert.ok(translated.size <= total, `${locale} reports more overrides than catalog keys`);
+    console.log(`  [i18n] ${locale}: ${translated.size}/${total} translated`);
+    assert.ok(translated.size <= total, `${locale} reports more keys than the catalog has`);
   }
 });
 
@@ -132,7 +132,7 @@ test("Tamil and Telugu overrides actually differ from the English source string"
 
   const identical = [];
   for (const locale of ["ta", "te"]) {
-    const overrides = readOverrides(locale);
+    const overrides = readLocale(locale);
     for (const [key, value] of overrides) {
       if (ALLOWED_IDENTICAL.has(key)) continue;
       if (value === english.get(key)) identical.push(`${locale}: "${key}"`);
@@ -144,4 +144,128 @@ test("Tamil and Telugu overrides actually differ from the English source string"
     [],
     `Overrides that are byte-identical to English:\n  ${identical.join("\n  ")}`,
   );
+});
+
+test("every catalog key has a Tamil and a Telugu translation", () => {
+  // The completeness gate. If a key falls through to English, selecting that
+  // language silently renders mixed output — which is the failure mode this
+  // whole feature exists to prevent, so it must fail loudly.
+  const expected = [...english.keys()];
+  const report = [];
+  const gaps = [];
+
+  for (const locale of ["ta", "te"]) {
+    const dir = path.resolve(`lib/i18n/${locale}`);
+    const have = new Set();
+
+    if (fs.existsSync(dir)) {
+      for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".ts"))) {
+        for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(KEY_LINE)) {
+          have.add(m[1]);
+        }
+      }
+    }
+    for (const key of readLocale(locale).keys()) have.add(key);
+
+    const missing = expected.filter((k) => !have.has(k));
+    const unknown = [...have].filter((k) => !english.has(k));
+
+    report.push(
+      `  ${locale}: ${have.size}/${expected.length} translated` +
+        (missing.length ? ` — ${missing.length} MISSING` : " — complete"),
+    );
+    if (unknown.length) report.push(`    unknown keys: ${unknown.join(", ")}`);
+    if (missing.length) {
+      const bySurface = {};
+      for (const k of missing) (bySurface[k.split(".")[0]] ||= []).push(k);
+      report.push(
+        `    by surface: ${Object.entries(bySurface)
+          .map(([s, ks]) => `${s} (${ks.length})`)
+          .join(", ")}`,
+      );
+      gaps.push(`${locale} is missing ${missing.length} keys`);
+    }
+  }
+
+  console.log(report.join("\n"));
+  assert.deepEqual(gaps, [], `\nIncomplete translations:\n${report.join("\n")}`);
+});
+
+test("translated values keep the same {placeholders} as English", () => {
+  // Tamil and Telugu are verb-final, so a translator can legitimately move a
+  // placeholder — but it must never be renamed or dropped, or the substitution
+  // silently leaves the raw token in the UI.
+  const names = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(",");
+  const problems = [];
+
+  for (const locale of ["ta", "te"]) {
+    const dir = path.resolve(`lib/i18n/${locale}`);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".ts"))) {
+      for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(KEY_LINE)) {
+        const [, key, value] = m;
+        const base = english.get(key);
+        if (!base) continue;
+        if (names(value) !== names(base)) {
+          problems.push(`${locale} "${key}": got {${names(value)}}, want {${names(base)}}`);
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(problems, [], `Placeholder mismatches:\n  ${problems.join("\n  ")}`);
+});
+
+test("Tamil files contain no Telugu text, and vice versa", () => {
+  // Parallel authoring makes it easy to write a Telugu string into the Tamil
+  // fragment. Neither language can substitute for the other at runtime, so
+  // this is invisible in testing and obvious to a user.
+  const SCRIPT = {
+    tamil: (cp) => (cp >= 0x0b80 && cp <= 0x0bff) || cp === 0x0964 || cp === 0x0965,
+    telugu: (cp) => (cp >= 0x0c00 && cp <= 0x0c7f) || cp === 0x0964 || cp === 0x0965,
+    // Scripts that have no business appearing at all.
+    foreign: (cp) =>
+      (cp >= 0x0900 && cp <= 0x097f) || // Devanagari
+      (cp >= 0x0980 && cp <= 0x09ff) || // Bengali
+      (cp >= 0x0a80 && cp <= 0x0aff) || // Gujarati
+      (cp >= 0x0c80 && cp <= 0x0cff) || // Kannada
+      (cp >= 0x0d00 && cp <= 0x0d7f), //   Malayalam
+  };
+  const EXPECTED = { ta: "tamil", te: "telugu" };
+  // U+200C/U+200D are correct Indic orthography (ZWNJ/ZWJ) and appear in both.
+  const isJoiner = (cp) => cp === 0x200c || cp === 0x200d;
+  const isSymbol = (cp) =>
+    cp <= 0x7f || "₹°·–—…→▲⌘#%+&<>/'\"".includes(String.fromCodePoint(cp));
+
+  const problems = [];
+  let checked = 0;
+
+  for (const locale of ["ta", "te"]) {
+    const own = SCRIPT[EXPECTED[locale]];
+    const other = SCRIPT[locale === "ta" ? "telugu" : "tamil"];
+    const dir = path.resolve(`lib/i18n/${locale}`);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".ts"))) {
+      for (const m of fs.readFileSync(path.join(dir, f), "utf8").matchAll(KEY_LINE)) {
+        const [, key, value] = m;
+        checked++;
+        for (const ch of value) {
+          const cp = ch.codePointAt(0);
+          if (cp === 0xfffd) {
+            problems.push(`${locale} "${key}": U+FFFD replacement character`);
+          } else if (SCRIPT.foreign(cp)) {
+            problems.push(`${locale} "${key}": foreign script U+${cp.toString(16).toUpperCase()}`);
+          } else if (!own(cp) && other(cp)) {
+            const otherName = locale === "ta" ? "telugu" : "tamil";
+            problems.push(`${locale} "${key}": ${otherName} character U+${cp.toString(16).toUpperCase()}`);
+          } else if (!own(cp) && !other(cp) && !isJoiner(cp) && !isSymbol(cp)) {
+            problems.push(`${locale} "${key}": unexpected U+${cp.toString(16).toUpperCase()}`);
+          }
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(problems, [], `Script problems:\n  ${problems.slice(0, 25).join("\n  ")}`);
+  assert.ok(checked > 0, "expected to inspect at least one translated value");
 });
