@@ -1,6 +1,7 @@
 "use client";
 
 import { OTPInput, type SlotProps } from "input-otp";
+import { useT } from "@/lib/i18n";
 
 export function OtpField({
   value,
@@ -13,6 +14,7 @@ export function OtpField({
   maxLength?: number;
   onComplete?: (val: string) => void;
 }) {
+  const t = useT();
   return (
     <OTPInput
       maxLength={maxLength}
@@ -21,7 +23,7 @@ export function OtpField({
       onComplete={onComplete}
       containerClassName="otp-container"
       render={({ slots }) => (
-        <div className="otp-group" role="group" aria-label="One time password verification code">
+        <div className="otp-group" role="group" aria-label={t("a11y.otpGroup")}>
           {slots.map((slot, idx) => (
             <OtpSlot key={idx} {...slot} />
           ))}

@@ -11,12 +11,14 @@ import { useCatalog } from "@/lib/catalog";
 import { formatInrCrores } from "@/lib/properties";
 import { BaseSheet } from "@/components/base-sheet";
 import NumberFlow from "@number-flow/react";
+import { useT } from "@/lib/i18n";
 
 export default function PropertyPage() {
   const params = useParams<{ slug: string }>();
   const { properties } = useCatalog();
   const property = properties.find((item) => item.id === params.slug);
   const { user, isSaved, toggleSaved, showToast, presentationMode, setPresentationMode, addViewingRequest } = useStore();
+  const t = useT();
 
   const [viewingModalOpen, setViewingModalOpen] = useState(false);
   const [buyerName, setBuyerName] = useState(user?.name || "");
@@ -27,11 +29,11 @@ export default function PropertyPage() {
   if (!property) {
     return (
       <Shell>
-        <PageBar title="Beachfront Estate" backHref="/" />
+        <PageBar title={t("detail.beachfrontEstate")} backHref="/" />
         <div className="empty">
-          <h3>This coastal sanctuary is no longer listed.</h3>
+          <h3>{t("detail.gone")}</h3>
           <Link className="btn" href="/search">
-            Explore beachfront stays
+            {t("detail.exploreStays")}
           </Link>
         </div>
       </Shell>
@@ -42,7 +44,7 @@ export default function PropertyPage() {
     e.preventDefault();
     if (!property) return;
     if (!buyerName.trim() || !buyerPhone.trim()) {
-      showToast("Please provide your name and phone number.");
+      showToast(t("toast.needNamePhone"));
       return;
     }
     setSubmittedViewing(true);
@@ -58,12 +60,19 @@ export default function PropertyPage() {
     } catch {
       /* ignore if offline */
     }
-    showToast("Private viewing request received. A confidential advisor will contact you.");
+    showToast(t("toast.viewingReceived"));
     setTimeout(() => {
       setViewingModalOpen(false);
       setSubmittedViewing(false);
     }, 2000);
   }
+
+  const stats = [
+    t("detail.statGuests", { n: property.guests }),
+    t("detail.statSuites", { n: property.bedrooms }),
+    t("detail.statBeds", { n: property.beds }),
+    t("detail.statBaths", { n: property.bathrooms }),
+  ];
 
   return (
     <Shell dock="bar">
@@ -75,10 +84,10 @@ export default function PropertyPage() {
             className="icon-btn"
             type="button"
             aria-pressed={isSaved(property.id)}
-            aria-label={`Save ${property.name}`}
+            aria-label={t(isSaved(property.id) ? "a11y.removeName" : "a11y.saveName", { name: property.name })}
             onClick={() => {
               toggleSaved(property.id);
-              showToast(isSaved(property.id) ? `Removed ${property.name}` : `Saved ${property.name}`);
+              showToast(t(isSaved(property.id) ? "toast.removed" : "toast.saved", { name: property.name }));
             }}
           >
             <Icon name={isSaved(property.id) ? "heart-fill" : "heart"} />
@@ -102,10 +111,10 @@ export default function PropertyPage() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="pill forest" style={{ fontSize: 11, padding: "2px 8px" }}>
-              Presentation Mode
+              {t("detail.presentationMode")}
             </span>
             <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 500 }}>
-              Unbranded client view · direct host info hidden
+              {t("detail.presentationSub")}
             </span>
           </div>
           <button
@@ -114,10 +123,10 @@ export default function PropertyPage() {
             style={{ fontSize: 11, padding: "4px 8px", height: "auto" }}
             onClick={() => {
               setPresentationMode(false);
-              showToast("Exited Client Presentation Mode");
+              showToast(t("toast.exitedPresentation"));
             }}
           >
-            Exit
+            {t("action.exit")}
           </button>
         </div>
       ) : null}
@@ -141,7 +150,7 @@ export default function PropertyPage() {
         </span>
       </div>
       <p className="pad muted" style={{ marginTop: 8, fontSize: 13, fontWeight: 700 }}>
-        + 18 curated architectural photos
+        {t("detail.morePhotos")}
       </p>
 
       <div className="pad mt stack">
@@ -152,7 +161,7 @@ export default function PropertyPage() {
             </p>
             {property.isForSale ? (
               <span className="pill info" style={{ fontWeight: 800 }}>
-                Listed for Sale
+                {t("property.listedForSale")}
               </span>
             ) : null}
           </div>
@@ -162,8 +171,8 @@ export default function PropertyPage() {
           <p className="p-loc">{property.location}</p>
           <div className="row mt" style={{ marginTop: 8 }}>
             <Rating rating={property.rating} reviews={property.reviews} />
-            {property.guestFavourite ? <span className="pill ok">Guest favourite</span> : null}
-            <span className="pill forest">Direct High-Tide Boundary: {property.tideDistanceMeters}m</span>
+            {property.guestFavourite ? <span className="pill ok">{t("property.guestFavourite")}</span> : null}
+            <span className="pill forest">{t("detail.tideBoundary", { m: property.tideDistanceMeters })}</span>
           </div>
         </div>
 
@@ -172,9 +181,9 @@ export default function PropertyPage() {
           <div className="card" style={{ border: "1.5px solid var(--terracotta)", background: "var(--surface)" }}>
             <div className="between">
               <span className="p-sale-tag" style={{ margin: 0, textTransform: "uppercase", fontSize: 12, letterSpacing: ".08em" }}>
-                Acquisition Opportunity
+                {t("detail.acquisitionOpportunity")}
               </span>
-              <span className="pill forest" style={{ fontSize: 11 }}>Clean CRZ Title</span>
+              <span className="pill forest" style={{ fontSize: 11 }}>{t("detail.cleanCrzTitle")}</span>
             </div>
             <div className="between mt" style={{ alignItems: "baseline" }}>
               <div>
@@ -182,7 +191,9 @@ export default function PropertyPage() {
                   {formatInrCrores(property.salePrice)}
                 </p>
                 <p className="sub" style={{ fontSize: 13, color: "var(--muted)", marginTop: 2 }}>
-                  {property.landArea || "Coastal Estate Ground"} · Unrestricted Sea Rights
+                  {t("detail.groundAndRights", {
+                    ground: property.landArea || t("detail.coastalEstateGround"),
+                  })}
                 </p>
               </div>
               <button
@@ -190,7 +201,7 @@ export default function PropertyPage() {
                 type="button"
                 onClick={() => setViewingModalOpen(true)}
               >
-                Schedule Walkthrough
+                {t("detail.scheduleWalkthroughShort")}
               </button>
             </div>
           </div>
@@ -198,12 +209,7 @@ export default function PropertyPage() {
 
         {/* Space Stats */}
         <div className="stats">
-          {[
-            [`${property.guests} guests capacity`, "users"],
-            [`${property.bedrooms} ocean suites`, "home"],
-            [`${property.beds} master beds`, "home"],
-            [`${property.bathrooms} ensuite baths`, "home"],
-          ].map(([label]) => (
+          {stats.map((label) => (
             <div key={label} className="stat">
               <p className="nb" style={{ fontSize: 15, fontWeight: 700 }}>
                 {label}
@@ -214,33 +220,33 @@ export default function PropertyPage() {
 
         {/* Coastal Boundary Section */}
         <div>
-          <h3 className="sec-title">Coastal Shoreline & Privacy Boundary</h3>
+          <h3 className="sec-title">{t("detail.shorelineTitle")}</h3>
           <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-            Strict oceanfront geometry. Every foot of this estate touches coastal sand without public roads intervening.
+            {t("detail.shorelineBody")}
           </p>
           <div className="spec-grid">
             <div className="spec-box">
-              <span className="k">Beach Frontage</span>
+              <span className="k">{t("detail.beachFrontageLabel")}</span>
               <span className="v">
                 <Icon name="waves" style={{ width: 14, height: 14, color: "var(--moss)" }} />
                 {property.beachFrontage}
               </span>
-              <span className="sub">Uninterrupted shoreline</span>
+              <span className="sub">{t("detail.subUninterrupted")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">High-Tide Line</span>
-              <span className="v">{property.tideDistanceMeters} Meters</span>
-              <span className="sub">Direct ocean view</span>
+              <span className="k">{t("detail.highTideLine")}</span>
+              <span className="v">{t("detail.meters", { n: property.tideDistanceMeters })}</span>
+              <span className="sub">{t("detail.subDirectOcean")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">Sand Access</span>
-              <span className="v">Private Boardwalk</span>
-              <span className="sub">Direct gate to dune</span>
+              <span className="k">{t("detail.sandAccess")}</span>
+              <span className="v">{t("detail.privateBoardwalk")}</span>
+              <span className="sub">{t("detail.subGateToDune")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">Coastal Zone</span>
+              <span className="k">{t("detail.coastalZone")}</span>
               <span className="v">{property.coastalZone}</span>
-              <span className="sub">Verified clearance</span>
+              <span className="sub">{t("detail.subVerifiedClearance")}</span>
             </div>
           </div>
         </div>
@@ -248,10 +254,10 @@ export default function PropertyPage() {
         {/* Automotive Sanctuary & Garage Showcase */}
         <div>
           <div className="between">
-            <h3 className="sec-title">Automotive Sanctuary & Garage</h3>
+            <h3 className="sec-title">{t("detail.garageTitle")}</h3>
             <span className="pill forest">
               <Icon name="car" style={{ width: 13, height: 13 }} />
-              {property.garage.capacity}-Vehicle Capacity
+              {t("detail.vehicleCapacity", { n: property.garage.capacity })}
             </span>
           </div>
           <p className="mt" style={{ fontSize: 13.5, color: "var(--fg)", lineHeight: 1.5 }}>
@@ -259,42 +265,42 @@ export default function PropertyPage() {
           </p>
           <div className="spec-grid">
             <div className="spec-box">
-              <span className="k">Garage Architecture</span>
+              <span className="k">{t("detail.garageArchitecture")}</span>
               <span className="v">{property.garage.name}</span>
-              <span className="sub">Salt-spray insulated</span>
+              <span className="sub">{t("detail.subSaltInsulated")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">Supercar Low-Ramp</span>
+              <span className="k">{t("detail.supercarLowRamp")}</span>
               <span className="v">
-                {property.garage.supercarFriendly ? "Ready (<7° Angle)" : "Standard Incline"}
+                {t(property.garage.supercarFriendly ? "detail.rampReady" : "detail.standardIncline")}
               </span>
-              <span className="sub">{property.garage.supercarFriendly ? "Zero frame scrape" : "SUV & Cruiser"}</span>
+              <span className="sub">{t(property.garage.supercarFriendly ? "detail.subZeroScrape" : "detail.subSuvCruiser")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">EV High-Output</span>
+              <span className="k">{t("detail.evHighOutput")}</span>
               <span className="v">
                 <Icon name="bolt" style={{ width: 14, height: 14, color: "var(--primary)" }} />
-                {property.garage.evChargingKw}kW Output
+                {t("detail.kwOutput", { kw: property.garage.evChargingKw })}
               </span>
-              <span className="sub">Intelligent load balancer</span>
+              <span className="sub">{t("detail.subLoadBalancer")}</span>
             </div>
             <div className="spec-box">
-              <span className="k">Marine Washdown</span>
+              <span className="k">{t("detail.marineWashdown")}</span>
               <span className="v">
-                {property.garage.washdownStation ? "Deionized Fresh Water" : "Standard Wash"}
+                {t(property.garage.washdownStation ? "detail.deionized" : "detail.standardWash")}
               </span>
-              <span className="sub">Strips ocean mist</span>
+              <span className="sub">{t("detail.subStripsMist")}</span>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 className="sec-title">About this coastal estate</h3>
+          <h3 className="sec-title">{t("detail.aboutTitle")}</h3>
           <p className="mt" style={{ lineHeight: 1.6 }}>{property.blurb}</p>
         </div>
 
         <div>
-          <h3 className="sec-title">Curated amenities</h3>
+          <h3 className="sec-title">{t("detail.amenitiesTitle")}</h3>
           <div className="amen mt">
             {property.amenities.map((item) => (
               <div className="a" key={item}>
@@ -306,8 +312,8 @@ export default function PropertyPage() {
         </div>
 
         <div>
-          <h3 className="sec-title">Where you&apos;ll be</h3>
-          <p className="muted">Direct ocean shoreline. Confidential coordinates and private gate entry code provided upon reservation.</p>
+          <h3 className="sec-title">{t("detail.whereTitle")}</h3>
+          <p className="muted">{t("detail.whereBody")}</p>
           <div className="card mt" style={{ minHeight: 140, background: "var(--surface-2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span className="muted" style={{ fontSize: 13, fontWeight: 600 }}>
               {property.location} · {property.coastalZone}
@@ -316,12 +322,12 @@ export default function PropertyPage() {
         </div>
 
         <div>
-          <h3 className="sec-title">Estate covenants</h3>
+          <h3 className="sec-title">{t("detail.covenantsTitle")}</h3>
           <ul className="stack sm" style={{ paddingLeft: 18, marginTop: 10 }}>
-            <li>Private coastal arrival and garage check-in after 2:00 PM</li>
-            <li>Check-out before 11:00 AM</li>
-            <li>Enclosed garage bays restricted to registered guest vehicles</li>
-            <li>Direct beach quiet hours after 11:00 PM</li>
+            <li>{t("detail.covenant1")}</li>
+            <li>{t("detail.covenant2")}</li>
+            <li>{t("detail.covenant3")}</li>
+            <li>{t("detail.covenant4")}</li>
           </ul>
         </div>
       </div>
@@ -335,16 +341,16 @@ export default function PropertyPage() {
                 {formatInrCrores(property.salePrice)}
               </p>
               <p className="muted" style={{ fontSize: 11, margin: 0 }}>
-                Asking · or ₹{property.price.toLocaleString("en-IN")}/night stay
+                {t("detail.askingOrStay", { price: property.price.toLocaleString("en-IN") })}
               </p>
             </div>
           ) : (
             <div>
               <p className="p-price num" style={{ margin: 0 }}>
-                <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
+                <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
               </p>
               <p className="muted" style={{ fontSize: 12 }}>
-                Exclusive coastal stay
+                {t("detail.exclusiveStay")}
               </p>
             </div>
           )}
@@ -358,18 +364,18 @@ export default function PropertyPage() {
                 onClick={() => {
                   if (typeof navigator !== "undefined" && navigator.clipboard) {
                     navigator.clipboard.writeText(window.location.href);
-                    showToast("Unbranded client link copied");
+                    showToast(t("toast.linkCopied"));
                   }
                 }}
               >
-                Copy Link
+                {t("action.copyLink")}
               </button>
               <button
                 className="btn accent sm"
                 type="button"
                 onClick={() => setViewingModalOpen(true)}
               >
-                Schedule Walkthrough
+                {t("detail.scheduleWalkthroughShort")}
               </button>
             </>
           ) : (
@@ -380,7 +386,7 @@ export default function PropertyPage() {
                   type="button"
                   onClick={() => setViewingModalOpen(true)}
                 >
-                  Private Viewing
+                  {t("action.privateViewing")}
                 </button>
               ) : null}
               <Link
@@ -391,7 +397,7 @@ export default function PropertyPage() {
                     : `/login?next=${encodeURIComponent(`/book/${property.id}`)}`
                 }
               >
-                Reserve Stay
+                {t("action.reserveStay")}
               </Link>
             </>
           )}
@@ -402,36 +408,36 @@ export default function PropertyPage() {
       <BaseSheet
         open={viewingModalOpen}
         onOpenChange={setViewingModalOpen}
-        title="Schedule Private Walkthrough"
+        title={t("buy.scheduleWalkthrough")}
       >
         {submittedViewing ? (
           <div className="stack center pad" style={{ padding: "20px 0" }}>
             <div className="pill ok" style={{ margin: "0 auto", padding: "8px 16px" }}>
-              Request Received
+              {t("buy.requestReceived")}
             </div>
-            <h3 style={{ marginTop: 12 }}>Confidential advisor assigned.</h3>
+            <h3 style={{ marginTop: 12 }}>{t("buy.advisorAssigned")}</h3>
             <p className="muted" style={{ fontSize: 13 }}>
-              We will contact you directly to arrange an on-site architectural tour and coordinate garage access.
+              {t("detail.tourBody")}
             </p>
           </div>
         ) : (
           <form className="stack" onSubmit={handleRequestViewing}>
             <p className="muted" style={{ fontSize: 13 }}>
-              Arrange a private on-site inspection for <strong>{property.name}</strong> ({property.beachFrontage}).
+              {t("detail.arrangeInspection", { name: property.name, frontage: property.beachFrontage })}
             </p>
             <label className="field">
-              <span>Full Name</span>
+              <span>{t("buy.fieldBuyerName")}</span>
               <input
                 className="ctrl"
                 type="text"
-                placeholder="Investor or Buyer Name"
+                placeholder={t("detail.namePlaceholder")}
                 value={buyerName}
                 onChange={(e) => setBuyerName(e.target.value)}
                 required
               />
             </label>
             <label className="field">
-              <span>Direct Phone</span>
+              <span>{t("buy.fieldPhone")}</span>
               <input
                 className="ctrl"
                 type="tel"
@@ -442,19 +448,19 @@ export default function PropertyPage() {
               />
             </label>
             <label className="field">
-              <span>Automotive & Timeline Mandate (Optional)</span>
+              <span>{t("detail.mandateField")}</span>
               <textarea
                 className="ctrl"
                 rows={2}
-                placeholder="Specific vehicle dimensions, garage inspection needs, or target acquisition date..."
+                placeholder={t("detail.mandatePlaceholder")}
                 value={buyerNote}
                 onChange={(e) => setBuyerNote(e.target.value)}
               />
             </label>
             <div className="between mt">
-              <span className="pill forest">Confidential & Direct</span>
+              <span className="pill forest">{t("detail.confidentialDirect")}</span>
               <button className="btn accent" type="submit">
-                Confirm Walkthrough
+                {t("action.confirmWalkthrough")}
               </button>
             </div>
           </form>

@@ -3,20 +3,22 @@
 import Link from "next/link";
 import { PageBar, Shell } from "@/components/shell";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export default function NotificationsPage() {
   const { notes } = useStore();
+  const t = useT();
 
   return (
     <Shell>
-      <PageBar title="Notifications" backHref="/profile" />
+      <PageBar title={t("notifications.title")} backHref="/profile" />
       <div className="stack pad mt">
         {notes.length === 0 ? (
           <div className="empty">
-            <h3>You&apos;re all caught up.</h3>
-            <p>Booking confirmations, gate codes, host messages and check-in details will appear here as you book stays.</p>
+            <h3>{t("notifications.empty")}</h3>
+            <p>{t("notifications.emptyBody")}</p>
             <Link className="btn mt" href="/">
-              Explore farmhouses
+              {t("saved.explore")}
             </Link>
           </div>
         ) : (

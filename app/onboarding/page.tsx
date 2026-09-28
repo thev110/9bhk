@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { defaultUser, useStore, type UserRole } from "@/lib/store";
 import { Icon } from "@/components/icon";
+import { useT } from "@/lib/i18n";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { signIn, showToast } = useStore();
+  const t = useT();
 
   const [step, setStep] = useState<"role" | "details" | "complete">("role");
   const [role, setRole] = useState<UserRole>("buyer");
@@ -34,7 +36,7 @@ export default function OnboardingPage() {
 
   function handleComplete() {
     if (!name.trim()) {
-      showToast("Please enter your name");
+      showToast(t("onboarding.toastNeedName"));
       return;
     }
     setBusy(true);
@@ -55,13 +57,13 @@ export default function OnboardingPage() {
     setTimeout(() => {
       setBusy(false);
       if (role === "realtor") {
-        showToast("Realtor Workspace activated. RERA credentials recorded.");
+        showToast(t("onboarding.toastRealtorActivated"));
         router.push("/realtor");
       } else if (role === "seller") {
-        showToast("Welcome owner. Proceeding to estate listing.");
+        showToast(t("onboarding.toastSellerWelcome"));
         router.push("/host/new");
       } else {
-        showToast("Welcome to 9bhk Coastal.");
+        showToast(t("onboarding.toastBuyerWelcome"));
         router.push(buyerIntent === "buy" ? "/buy" : "/");
       }
     }, 600);
@@ -78,20 +80,20 @@ export default function OnboardingPage() {
             onClick={() => router.push("/")}
             style={{ fontSize: 12 }}
           >
-            Explore as Guest
+            {t("onboarding.exploreAsGuest")}
           </button>
         </div>
 
         {step === "role" && (
           <div className="stack mt" style={{ marginTop: 24 }}>
             <span className="pill forest" style={{ alignSelf: "flex-start" }}>
-              Direct Beachfront & Automotive Marketplace
+              {t("onboarding.marketplacePill")}
             </span>
             <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36, lineHeight: 1.1 }}>
-              How will you experience the coast?
+              {t("onboarding.heroTitle")}
             </h1>
             <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
-              Select your mandate to personalize your listings, client management, and architectural tools.
+              {t("onboarding.heroBody")}
             </p>
 
             <div className="stack" style={{ gap: 12, marginTop: 16 }}>
@@ -114,9 +116,9 @@ export default function OnboardingPage() {
                       <Icon name="compass" style={{ width: 18, height: 18, color: "var(--forest)" }} />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Buyer or Coastal Guest</h3>
+                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleBuyer")}</h3>
                       <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        Acquire or reserve verified direct oceanfront beach houses & collector vaults.
+                        {t("onboarding.roleBuyerBody")}
                       </p>
                     </div>
                   </div>
@@ -125,7 +127,7 @@ export default function OnboardingPage() {
                     name="userRole"
                     checked={role === "buyer"}
                     onChange={() => setRole("buyer")}
-                    aria-label="Buyer or Coastal Guest"
+                    aria-label={t("onboarding.roleBuyer")}
                   />
                 </div>
               </div>
@@ -149,9 +151,9 @@ export default function OnboardingPage() {
                       <Icon name="key" style={{ width: 18, height: 18, color: "var(--forest)" }} />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Licensed Realtor / Broker</h3>
+                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleRealtor")}</h3>
                       <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        Unbranded presentation mode, private client roster, and 1.5%–2% co-broking lock.
+                        {t("onboarding.roleRealtorBody")}
                       </p>
                     </div>
                   </div>
@@ -160,7 +162,7 @@ export default function OnboardingPage() {
                     name="userRole"
                     checked={role === "realtor"}
                     onChange={() => setRole("realtor")}
-                    aria-label="Licensed Realtor / Broker"
+                    aria-label={t("onboarding.roleRealtor")}
                   />
                 </div>
               </div>
@@ -184,9 +186,9 @@ export default function OnboardingPage() {
                       <Icon name="home" style={{ width: 18, height: 18, color: "var(--forest)" }} />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>Estate Owner or Seller</h3>
+                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleSeller")}</h3>
                       <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        List genuine oceanfront land & villas for crore-denominated sale or curated stays.
+                        {t("onboarding.roleSellerBody")}
                       </p>
                     </div>
                   </div>
@@ -195,7 +197,7 @@ export default function OnboardingPage() {
                     name="userRole"
                     checked={role === "seller"}
                     onChange={() => setRole("seller")}
-                    aria-label="Estate Owner or Seller"
+                    aria-label={t("onboarding.roleSeller")}
                   />
                 </div>
               </div>
@@ -207,7 +209,13 @@ export default function OnboardingPage() {
               style={{ marginTop: 24 }}
               onClick={() => setStep("details")}
             >
-              Continue as {role === "realtor" ? "Realtor" : role === "seller" ? "Estate Owner" : "Buyer"}
+              {t("onboarding.continueAs", {
+                role: role === "realtor"
+                  ? t("onboarding.roleRealtorShort")
+                  : role === "seller"
+                  ? t("onboarding.roleSellerShort")
+                  : t("onboarding.roleBuyerShort"),
+              })}
             </button>
           </div>
         )}
@@ -215,14 +223,14 @@ export default function OnboardingPage() {
         {step === "details" && (
           <div className="stack mt" style={{ marginTop: 24 }}>
             <span className="pill forest" style={{ alignSelf: "flex-start" }}>
-              Profile & Mandate Credentials
+              {t("onboarding.credentialsPill")}
             </span>
             <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32 }}>
               {role === "realtor"
-                ? "Agent & Agency Registration"
+                ? t("onboarding.titleRealtor")
                 : role === "seller"
-                ? "Estate Verification Details"
-                : "Personalize Your Search"}
+                ? t("onboarding.titleSeller")
+                : t("onboarding.titleBuyer")}
             </h2>
 
             <form
@@ -234,11 +242,11 @@ export default function OnboardingPage() {
               }}
             >
               <label className="field">
-                <span>{role === "realtor" ? "Principal Agent Name" : "Full Name"}</span>
+                <span>{role === "realtor" ? t("onboarding.fieldPrincipalAgent") : t("onboarding.fieldFullName")}</span>
                 <input
                   className="ctrl"
                   type="text"
-                  placeholder="e.g. Vikramaditya Chandran"
+                  placeholder={t("onboarding.namePlaceholder")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -246,7 +254,7 @@ export default function OnboardingPage() {
               </label>
 
               <label className="field">
-                <span>Direct Contact Phone</span>
+                <span>{t("onboarding.fieldPhone")}</span>
                 <input
                   className="ctrl"
                   type="tel"
@@ -260,18 +268,18 @@ export default function OnboardingPage() {
               {role === "realtor" && (
                 <>
                   <label className="field">
-                    <span>Agency / Firm Name</span>
+                    <span>{t("onboarding.fieldAgency")}</span>
                     <input
                       className="ctrl"
                       type="text"
-                      placeholder="e.g. Bayview Private Advisory"
+                      placeholder={t("onboarding.agencyPlaceholder")}
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
                     />
                   </label>
 
                   <label className="field">
-                    <span>RERA License ID / Certificate</span>
+                    <span>{t("onboarding.fieldRera")}</span>
                     <input
                       className="ctrl"
                       type="text"
@@ -280,20 +288,20 @@ export default function OnboardingPage() {
                       onChange={(e) => setReraNumber(e.target.value)}
                     />
                     <span className="help" style={{ fontSize: 11, color: "var(--muted)" }}>
-                      Enables co-broking attribution and verified agent checkmark.
+                      {t("onboarding.reraHelp")}
                     </span>
                   </label>
 
                   <label className="field">
-                    <span>Typical Client Acquisition Range</span>
+                    <span>{t("onboarding.fieldAcquisitionRange")}</span>
                     <select
                       className="ctrl"
                       value={budgetBracket}
                       onChange={(e) => setBudgetBracket(e.target.value)}
                     >
-                      <option value="₹5 Cr – ₹15 Cr">₹5 Cr – ₹15 Cr (Boutique Dune Stretches)</option>
-                      <option value="₹15 Cr – ₹35 Cr">₹15 Cr – ₹35 Cr (Supercar Vault Estates)</option>
-                      <option value="₹35 Cr – ₹100+ Cr">₹35 Cr – ₹100+ Cr (Signature Bay Frontages)</option>
+                      <option value="₹5 Cr – ₹15 Cr">{t("onboarding.budgetBoutique")}</option>
+                      <option value="₹15 Cr – ₹35 Cr">{t("onboarding.budgetSupercar")}</option>
+                      <option value="₹35 Cr – ₹100+ Cr">{t("onboarding.budgetSignature")}</option>
                     </select>
                   </label>
                 </>
@@ -302,29 +310,29 @@ export default function OnboardingPage() {
               {role === "buyer" && (
                 <>
                   <label className="field">
-                    <span>Primary Coastal Interest</span>
+                    <span>{t("onboarding.fieldCoastalInterest")}</span>
                     <select
                       className="ctrl"
                       value={buyerIntent}
                       onChange={(e) => setBuyerIntent(e.target.value as any)}
                     >
-                      <option value="both">Both Buying & Private Stays</option>
-                      <option value="buy">Direct Property Acquisition (For Sale)</option>
-                      <option value="rent">Private Beachfront Stays Only</option>
+                      <option value="both">{t("onboarding.intentBoth")}</option>
+                      <option value="buy">{t("onboarding.intentBuy")}</option>
+                      <option value="rent">{t("onboarding.intentRent")}</option>
                     </select>
                   </label>
 
                   <label className="field">
-                    <span>Automotive Accommodations</span>
+                    <span>{t("onboarding.fieldAutomotive")}</span>
                     <select
                       className="ctrl"
                       value={garageNeed}
                       onChange={(e) => setGarageNeed(e.target.value)}
                     >
-                      <option value="collector_vault">Subterranean Collector&apos;s Vault (&lt;7° ramp)</option>
-                      <option value="marine_port">Beach & Marine Port (Boat Trailer Slipway)</option>
-                      <option value="ev_pavilion">High-Output EV Pavilion (22kW+ DC)</option>
-                      <option value="teak_portico">Coastal Teak Open Portico</option>
+                      <option value="collector_vault">{t("onboarding.optionCollectorVault")}</option>
+                      <option value="marine_port">{t("onboarding.optionMarinePort")}</option>
+                      <option value="ev_pavilion">{t("onboarding.optionEvPavilion")}</option>
+                      <option value="teak_portico">{t("onboarding.optionTeakPortico")}</option>
                     </select>
                   </label>
                 </>
@@ -332,11 +340,11 @@ export default function OnboardingPage() {
 
               {role === "seller" && (
                 <label className="field">
-                  <span>Ocean Frontage Linear Feet</span>
+                  <span>{t("onboarding.fieldFrontage")}</span>
                   <input
                     className="ctrl"
                     type="text"
-                    placeholder="e.g. 150 ft uninterrupted beach"
+                    placeholder={t("onboarding.frontagePlaceholder")}
                     value={beachFrontage}
                     onChange={(e) => setBeachFrontage(e.target.value)}
                   />
@@ -350,14 +358,14 @@ export default function OnboardingPage() {
                   onClick={() => setStep("role")}
                   disabled={busy}
                 >
-                  Back
+                  {t("onboarding.back")}
                 </button>
                 <button
                   type="submit"
                   className="btn block"
                   disabled={busy}
                 >
-                  {busy ? "Activating Profile…" : "Complete Onboarding"}
+                  {busy ? t("onboarding.activating") : t("onboarding.complete")}
                 </button>
               </div>
             </form>

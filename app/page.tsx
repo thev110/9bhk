@@ -11,25 +11,29 @@ import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { BaseSheet } from "@/components/base-sheet";
+import { useT } from "@/lib/i18n";
+import { vibeLabel } from "@/lib/i18n/vibes";
+import type { DictKey } from "@/lib/i18n/en";
 
-function greeting(): string {
+function greetingKey(): DictKey {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return "home.greeting.morning";
+  if (hour < 17) return "home.greeting.afternoon";
+  return "home.greeting.evening";
 }
 
 export default function HomePage() {
   const router = useRouter();
   const { city, setCity } = useStore();
   const { properties } = useCatalog();
+  const t = useT();
   const [q, setQ] = useState("");
   const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
   const [guests, setGuests] = useState(2);
-  const [hello, setHello] = useState("Good evening");
+  const [helloKey, setHelloKey] = useState<DictKey>("home.greeting.evening");
 
   useEffect(() => {
-    setHello(greeting());
+    setHelloKey(greetingKey());
   }, []);
 
   const featured = properties.filter((p) => p.group === "featured");
@@ -53,26 +57,26 @@ export default function HomePage() {
       <BrandBar onLocation={() => setSheet("where")} />
       <section className="greet">
         <div className="between" style={{ alignItems: "center" }}>
-          <p className="hello" style={{ margin: 0 }}>{hello}</p>
+          <p className="hello" style={{ margin: 0 }}>{t(helloKey)}</p>
           <div className="row" style={{ gap: 6 }}>
             <span
               className="chip is-active"
               style={{ minHeight: 30, padding: "0 10px", fontSize: 12 }}
             >
-              Stays
+              {t("nav.explore")}
             </span>
             <Link
               href="/buy"
               className="chip"
               style={{ minHeight: 30, padding: "0 10px", fontSize: 12 }}
             >
-              Buy
+              {t("nav.buy")}
             </Link>
           </div>
         </div>
-        <h1 style={{ marginTop: 8 }}>Direct beachfront sanctuaries</h1>
+        <h1 style={{ marginTop: 8 }}>{t("home.title")}</h1>
         <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-          Private shoreline estates with collector-grade automotive accommodations. Zero inland compromises.
+          {t("home.subtitle")}
         </p>
       </section>
 
@@ -81,8 +85,8 @@ export default function HomePage() {
           <Icon name="search" className="ico s-ico" />
           <input
             type="search"
-            placeholder="Search beachfront estates, dunes or garages"
-            aria-label="Search beachfront estates, dunes or garages"
+            placeholder={t("home.searchPlaceholder")}
+            aria-label={t("home.searchPlaceholder")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -90,45 +94,45 @@ export default function HomePage() {
             type="button"
             className="cmdk-trigger-btn"
             onClick={() => window.dispatchEvent(new Event("open-command-menu"))}
-            aria-label="Open command palette"
-            title="Press ⌘K or Ctrl+K to search"
+            aria-label={t("a11y.openCommandPalette")}
+            title={t("a11y.commandHint")}
           >
             <kbd>⌘K</kbd>
           </button>
-          <button className="search-submit" type="submit" aria-label="Search">
+          <button className="search-submit" type="submit" aria-label={t("a11y.search")}>
             <Icon name="arrow" />
           </button>
         </form>
-        <div className="summary" role="group" aria-label="Trip details">
+        <div className="summary" role="group" aria-label={t("a11y.tripDetails")}>
           <button className="sum-cell" type="button" onClick={() => setSheet("where")}>
             <span className="k">
               <Icon name="pin" />
-              Where
+              {t("home.where")}
             </span>
             <span className="v">{city}</span>
           </button>
           <button className="sum-cell" type="button" onClick={() => setSheet("when")}>
             <span className="k">
               <Icon name="calendar" />
-              When
+              {t("home.when")}
             </span>
-            <span className="v">Add dates</span>
+            <span className="v">{t("home.addDates")}</span>
           </button>
           <button className="sum-cell" type="button" onClick={() => setSheet("guests")}>
             <span className="k">
               <Icon name="users" />
-              Guests
+              {t("home.guests")}
             </span>
-            <span className="v">{guests} guests</span>
+            <span className="v">{t("home.guestCount", { n: guests })}</span>
           </button>
         </div>
       </section>
 
       <section className="section">
         <div className="section-head">
-          <h2>Made for slow weekends</h2>
+          <h2>{t("home.sectionSlowWeekends")}</h2>
           <button className="see-all" type="button" onClick={() => router.push("/search")}>
-            See all <Icon name="arrow" />
+            {t("home.seeAll")} <Icon name="arrow" />
           </button>
         </div>
         <div className="rail" role="list">
@@ -140,7 +144,7 @@ export default function HomePage() {
 
       <section className="section">
         <div className="section-head">
-          <h2>Explore by vibe</h2>
+          <h2>{t("home.sectionVibe")}</h2>
         </div>
         <div className="chips" role="list">
           {VIBES.map((vibe) => (
@@ -151,7 +155,7 @@ export default function HomePage() {
               onClick={() => router.push(`/search?vibe=${encodeURIComponent(vibe)}`)}
             >
               <Icon name={vibeIcon(vibe)} />
-              {vibe}
+              {vibeLabel(t, vibe)}
             </button>
           ))}
         </div>
@@ -159,9 +163,9 @@ export default function HomePage() {
 
       <section className="section">
         <div className="section-head">
-          <h2>Escapes near you</h2>
+          <h2>{t("home.sectionNearby")}</h2>
           <button className="see-all" type="button" onClick={() => router.push(`/search?city=${encodeURIComponent(city)}`)}>
-            See all <Icon name="arrow" />
+            {t("home.seeAll")} <Icon name="arrow" />
           </button>
         </div>
         <div className="rail" role="list">
@@ -173,7 +177,7 @@ export default function HomePage() {
 
       <section className="section">
         <div className="section-head">
-          <h2>Popular farmhouses</h2>
+          <h2>{t("home.sectionPopular")}</h2>
         </div>
         <div className="stack-cards">
           {popular.map((p) => (
@@ -185,20 +189,20 @@ export default function HomePage() {
       <section className="section pad">
         <div className="card">
           <p className="eyebrow" style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--moss)" }}>
-            Own a coastal holding?
+            {t("home.hostEyebrow")}
           </p>
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 28, marginTop: 6 }}>
-            List your beachfront estate for sale or private stay.
+            {t("home.hostTitle")}
           </h2>
           <div className="row mt" style={{ flexWrap: "wrap", gap: 8 }}>
             <button className="btn sm" type="button" onClick={() => router.push("/host/new?mode=sale")}>
-              List for Sale
+              {t("home.listForSale")}
             </button>
             <button className="btn outline sm" type="button" onClick={() => router.push("/host/new")}>
-              Host Guests
+              {t("home.hostGuests")}
             </button>
             <button className="btn ghost sm" type="button" onClick={() => router.push("/realtor")}>
-              Realtor Portal →
+              {t("home.realtorPortal")}
             </button>
           </div>
         </div>
@@ -207,7 +211,7 @@ export default function HomePage() {
       <BaseSheet
         open={sheet === "where"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="Where to?"
+        title={t("home.whereTitle")}
       >
         <div className="stack">
           {CITIES.map((c) => (
@@ -230,9 +234,9 @@ export default function HomePage() {
       <BaseSheet
         open={sheet === "when"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="When are you going?"
+        title={t("home.whenTitle")}
       >
-        <p className="muted">Pick dates on a farmhouse when you check availability. Minimum stay is 2 nights.</p>
+        <p className="muted">{t("home.whenBody")}</p>
         <button
           className="btn block mt"
           type="button"
@@ -241,32 +245,32 @@ export default function HomePage() {
             search();
           }}
         >
-          Browse available stays
+          {t("home.browseStays")}
         </button>
       </BaseSheet>
 
       <BaseSheet
         open={sheet === "guests"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="Guests"
+        title={t("home.guests")}
       >
         <div className="between">
           <div>
-            <strong>Guests</strong>
-            <p className="muted">Any age counts here</p>
+            <strong>{t("home.guests")}</strong>
+            <p className="muted">{t("home.anyAgeCounts")}</p>
           </div>
           <div className="stepper">
-            <button type="button" aria-label="Fewer guests" onClick={() => setGuests((n) => Math.max(1, n - 1))}>
+            <button type="button" aria-label={t("a11y.fewerGuests")} onClick={() => setGuests((n) => Math.max(1, n - 1))}>
               <Icon name="minus" />
             </button>
             <span className="val num">{guests}</span>
-            <button type="button" aria-label="More guests" onClick={() => setGuests((n) => Math.min(16, n + 1))}>
+            <button type="button" aria-label={t("a11y.moreGuests")} onClick={() => setGuests((n) => Math.min(16, n + 1))}>
               <Icon name="plus" />
             </button>
           </div>
         </div>
         <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
-          Done
+          {t("action.done")}
         </button>
       </BaseSheet>
     </Shell>

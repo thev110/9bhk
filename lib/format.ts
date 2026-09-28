@@ -17,12 +17,14 @@ export function quote(nightly: number, cleaning: number, nights: number) {
   return { stay, cleaning, tax, discount: 0, total: beforeTax + tax };
 }
 
-export function formatRange(checkIn: string, checkOut: string): string {
+export function formatRange(checkIn: string, checkOut: string, tag = "en-IN"): string {
   const a = new Date(`${checkIn}T00:00:00`);
   const b = new Date(`${checkOut}T00:00:00`);
   const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-  const day = (d: Date) => d.toLocaleDateString("en-IN", { day: "numeric" });
-  const mon = (d: Date) => d.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+  // Month/day names follow the active locale (en-IN / ta-IN / te-IN); the
+  // separators below are locale-neutral so the range reads consistently.
+  const day = (d: Date) => d.toLocaleDateString(tag, { day: "numeric" });
+  const mon = (d: Date) => d.toLocaleDateString(tag, { month: "short", year: "numeric" });
   if (sameMonth) return `${day(a)}–${day(b)} ${mon(b)}`;
   return `${day(a)} ${mon(a)} – ${day(b)} ${mon(b)}`;
 }

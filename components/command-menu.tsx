@@ -8,6 +8,7 @@ import { useCatalog } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 import { CITIES } from "@/lib/format";
 import { VIBES } from "@/lib/properties";
+import { useT } from "@/lib/i18n";
 
 export function CommandMenu() {
   const [mounted, setMounted] = useState(false);
@@ -15,6 +16,7 @@ export function CommandMenu() {
   const router = useRouter();
   const { properties } = useCatalog();
   const { setCity, showToast } = useStore();
+  const t = useT();
 
   useEffect(() => {
     setMounted(true);
@@ -45,19 +47,19 @@ export function CommandMenu() {
   return (
     <div className="cmdk-scrim" onClick={() => setOpen(false)}>
       <div className="cmdk-modal" onClick={(e) => e.stopPropagation()}>
-        <Command label="Global Command Palette">
+        <Command label={t("cmdk.label")}>
           <div className="cmdk-header">
             <Icon name="search" className="cmdk-search-ico" />
-            <Command.Input placeholder="Search beachfront estates, garage types, coastal frontage… (ESC)" autoFocus />
-            <button className="cmdk-close" type="button" onClick={() => setOpen(false)} aria-label="Close search">
+            <Command.Input placeholder={t("cmdk.placeholder")} autoFocus />
+            <button className="cmdk-close" type="button" onClick={() => setOpen(false)} aria-label={t("a11y.closeSearch")}>
               <kbd>ESC</kbd>
             </button>
           </div>
 
           <Command.List className="cmdk-list">
-            <Command.Empty className="cmdk-empty">No coastal estates or commands match that search.</Command.Empty>
+            <Command.Empty className="cmdk-empty">{t("cmdk.empty")}</Command.Empty>
 
-            <Command.Group heading="Exclusive Coastal Sanctuaries">
+            <Command.Group heading={t("cmdk.groupEstates")}>
               {properties.slice(0, 5).map((p) => (
                 <Command.Item
                   key={p.id}
@@ -69,57 +71,59 @@ export function CommandMenu() {
                   <div className="cmdk-item-main">
                     <strong>{p.name}</strong>
                     <span>
-                      {p.location} · {p.beachFrontage.split(" ")[0]}ft Beach
-                      {p.isForSale && p.salePrice ? ` · ${p.salePrice >= 10000000 ? `₹${(p.salePrice / 10000000).toFixed(1)}Cr` : ""}` : ` · ₹${p.price.toLocaleString("en-IN")}/nt`}
+                      {p.location} · {t("cmdk.ftBeach", { ft: p.beachFrontage.split(" ")[0] })}
+                      {p.isForSale && p.salePrice
+                        ? ` · ${p.salePrice >= 10000000 ? `₹${(p.salePrice / 10000000).toFixed(1)}Cr` : ""}`
+                        : ` · ₹${p.price.toLocaleString("en-IN")}/nt`}
                     </span>
                   </div>
                 </Command.Item>
               ))}
             </Command.Group>
 
-            <Command.Group heading="Primary Portals & Actions">
+            <Command.Group heading={t("cmdk.groupPortals")}>
               <Command.Item value="buy marketplace properties for sale acquisition" onSelect={() => run(() => router.push("/buy"))} className="cmdk-item">
                 <Icon name="award" />
-                <span>Buy Marketplace (Estates For Sale)</span>
+                <span>{t("cmdk.buyMarketplace")}</span>
               </Command.Item>
               <Command.Item value="realtor broker portal client onboarding mandates" onSelect={() => run(() => router.push("/realtor"))} className="cmdk-item">
                 <Icon name="key" />
-                <span>Realtor & Broker Portal</span>
+                <span>{t("cmdk.realtorPortal")}</span>
               </Command.Item>
               <Command.Item value="home explore beachfront stays" onSelect={() => run(() => router.push("/"))} className="cmdk-item">
                 <Icon name="compass" />
-                <span>Explore Beachfront Stays</span>
+                <span>{t("cmdk.exploreStays")}</span>
               </Command.Item>
               <Command.Item value="host list estate sell property" onSelect={() => run(() => router.push("/host/new"))} className="cmdk-item">
                 <Icon name="home" />
-                <span>List an Estate (For Sale / Rent)</span>
+                <span>{t("cmdk.listEstate")}</span>
               </Command.Item>
               <Command.Item value="saved wishlists" onSelect={() => run(() => router.push("/saved"))} className="cmdk-item">
                 <Icon name="heart" />
-                <span>Saved Sanctuaries</span>
+                <span>{t("cmdk.savedSanctuaries")}</span>
               </Command.Item>
               <Command.Item value="trips bookings" onSelect={() => run(() => router.push("/trips"))} className="cmdk-item">
                 <Icon name="map" />
-                <span>My Trips</span>
+                <span>{t("cmdk.myTrips")}</span>
               </Command.Item>
               <Command.Item value="profile account" onSelect={() => run(() => router.push("/profile"))} className="cmdk-item">
                 <Icon name="user" />
-                <span>Profile & Settings</span>
+                <span>{t("cmdk.profileSettings")}</span>
               </Command.Item>
               <Command.Item value="admin operations console" onSelect={() => run(() => router.push("/admin"))} className="cmdk-item">
                 <Icon name="shield" />
-                <span>Admin Operations Console</span>
+                <span>{t("cmdk.adminConsole")}</span>
               </Command.Item>
             </Command.Group>
 
-            <Command.Group heading="Automotive & Garage Architecture">
+            <Command.Group heading={t("cmdk.groupGarage")}>
               <Command.Item
                 value="subterranean collector vault supercar"
                 onSelect={() => run(() => router.push("/buy?garage=collector_vault"))}
                 className="cmdk-item"
               >
                 <Icon name="car" />
-                <span>Subterranean Collector Vaults (Supercar Low-Ramp)</span>
+                <span>{t("cmdk.collectorVaults")}</span>
               </Command.Item>
               <Command.Item
                 value="marine port slipway boat trailer"
@@ -127,7 +131,7 @@ export function CommandMenu() {
                 className="cmdk-item"
               >
                 <Icon name="waves" />
-                <span>Beach & Marine Slipway Ports</span>
+                <span>{t("cmdk.marineSlipway")}</span>
               </Command.Item>
               <Command.Item
                 value="ev high-output pavilion charging fast"
@@ -135,7 +139,7 @@ export function CommandMenu() {
                 className="cmdk-item"
               >
                 <Icon name="bolt" />
-                <span>High-Output EV Pavilions (50kW+ DC)</span>
+                <span>{t("cmdk.evPavilions")}</span>
               </Command.Item>
               <Command.Item
                 value="coastal teak portico shade"
@@ -143,11 +147,11 @@ export function CommandMenu() {
                 className="cmdk-item"
               >
                 <Icon name="car" />
-                <span>Coastal Teak Open Porticos</span>
+                <span>{t("cmdk.teakPorticos")}</span>
               </Command.Item>
             </Command.Group>
 
-            <Command.Group heading="Filter by Coastal Zone">
+            <Command.Group heading={t("cmdk.groupZone")}>
               {CITIES.map((c) => (
                 <Command.Item
                   key={c}
@@ -161,14 +165,14 @@ export function CommandMenu() {
                   className="cmdk-item"
                 >
                   <Icon name="pin" />
-                  <span>Estates along {c}</span>
+                  <span>{t("cmdk.estatesAlong", { city: c })}</span>
                 </Command.Item>
               ))}
             </Command.Group>
           </Command.List>
 
           <div className="cmdk-footer">
-            <span>Tip: Press <strong>⌘K</strong> or <strong>Ctrl+K</strong> anytime</span>
+            <span>{t("cmdk.tip")}</span>
           </div>
         </Command>
       </div>

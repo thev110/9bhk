@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export function FavButton({
   id,
@@ -15,18 +16,19 @@ export function FavButton({
   small?: boolean;
 }) {
   const { isSaved, toggleSaved, showToast } = useStore();
+  const t = useT();
   const on = isSaved(id);
   return (
     <button
       className={`fav${small ? " sm" : ""}${on ? " is-fav" : ""}`}
       type="button"
       aria-pressed={on}
-      aria-label={`${on ? "Remove" : "Save"} ${name}`}
+      aria-label={t(on ? "a11y.removeName" : "a11y.saveName", { name })}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         toggleSaved(id);
-        showToast(on ? `Removed ${name}` : `Saved ${name}`);
+        showToast(t(on ? "toast.removed" : "toast.saved", { name }));
       }}
     >
       <Icon name="heart" className="ico h-line" />
@@ -36,15 +38,16 @@ export function FavButton({
 }
 
 export function TabBar({ current }: { current: "explore" | "buy" | "saved" | "trips" | "profile" }) {
+  const t = useT();
   const items = [
-    { id: "explore", href: "/", label: "Stays", icon: "compass" },
-    { id: "buy", href: "/buy", label: "Buy", icon: "key" },
-    { id: "saved", href: "/saved", label: "Wishlists", icon: "heart" },
-    { id: "trips", href: "/trips", label: "Trips", icon: "map" },
-    { id: "profile", href: "/profile", label: "Profile", icon: "user" },
+    { id: "explore", href: "/", label: t("nav.explore"), icon: "compass" },
+    { id: "buy", href: "/buy", label: t("nav.buy"), icon: "key" },
+    { id: "saved", href: "/saved", label: t("nav.saved"), icon: "heart" },
+    { id: "trips", href: "/trips", label: t("nav.trips"), icon: "map" },
+    { id: "profile", href: "/profile", label: t("nav.profile"), icon: "user" },
   ] as const;
   return (
-    <nav className="tabbar" aria-label="Primary">
+    <nav className="tabbar" aria-label={t("nav.primary")}>
       {items.map((item) => (
         <Link
           key={item.id}
@@ -71,6 +74,7 @@ export function Toast() {
 
 export function BrandBar({ onLocation }: { onLocation: () => void }) {
   const { city } = useStore();
+  const t = useT();
   return (
     <header className="appbar">
       <div className="appbar-inner">
@@ -80,7 +84,7 @@ export function BrandBar({ onLocation }: { onLocation: () => void }) {
           </span>
           <span className="brand-name">9bhk.app</span>
         </Link>
-        <button className="loc-btn" type="button" onClick={onLocation} aria-label={`Change location, currently ${city}`}>
+        <button className="loc-btn" type="button" onClick={onLocation} aria-label={t("brand.changeLocation", { city })}>
           <Icon name="pin" />
           {city}
           <Icon name="chev" className="chev" />
@@ -100,15 +104,16 @@ export function PageBar({
   right?: React.ReactNode;
 }) {
   const router = useRouter();
+  const t = useT();
   return (
     <header className="appbar">
       <div className="appbar-inner">
         {backHref ? (
-          <Link href={backHref} className="icon-btn" aria-label="Back">
+          <Link href={backHref} className="icon-btn" aria-label={t("nav.back")}>
             <Icon name="back" />
           </Link>
         ) : (
-          <button className="icon-btn" type="button" aria-label="Back" onClick={() => router.back()}>
+          <button className="icon-btn" type="button" aria-label={t("nav.back")} onClick={() => router.back()}>
             <Icon name="back" />
           </button>
         )}

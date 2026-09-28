@@ -9,7 +9,12 @@ import { PROPERTIES, formatInrCrores } from "@/lib/properties";
 import { emptyDraft, useStore, type ListingDraft } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
 import { saveProperty, uploadPropertyPhotos } from "@/lib/supabase/properties";
+import { useT } from "@/lib/i18n";
+import { garageLabel } from "@/lib/i18n/garage";
+import type { DictKey } from "@/lib/i18n/en";
 
+// Amenity and property-type values are persisted to the listing record and
+// matched against the search index, so they stay as stored data — not copy.
 const AMENITIES = ["Pool", "BBQ", "Bonfire", "Wi-Fi", "AC", "Parking", "Kitchen", "Pet friendly", "Indoor games", "Outdoor games", "Projector & music", "Caretaker", "Power backup"];
 const TYPES = [
   "Oceanfront Estate",
@@ -18,29 +23,42 @@ const TYPES = [
   "Cove Beachfront Villa",
 ];
 const GARAGE_OPTIONS = [
-  { id: "collector_vault", label: "Collector's Vault (<7° Supercar Ramp)" },
-  { id: "marine_port", label: "Beach & Marine Port (Jet Ski Slip)" },
-  { id: "ev_pavilion", label: "Executive EV Pavilion (DC Fast Charge)" },
-  { id: "teak_portico", label: "Coastal Teak Portico (Pergola)" },
-];
+  { id: "collector_vault", qualifier: "host.qualifierLowRamp" },
+  { id: "marine_port", qualifier: "host.qualifierJetSkiSlip" },
+  { id: "ev_pavilion", qualifier: "host.qualifierDcFastCharge" },
+  { id: "teak_portico", qualifier: "host.qualifierPergola" },
+] as const satisfies readonly { id: string; qualifier: DictKey }[];
 const PHOTOS = PROPERTIES.slice(0, 6);
 
+const SECTIONS = [
+  "host.sectionBasics",
+  "host.sectionLocation",
+  "host.sectionSpace",
+  "host.sectionAmenities",
+  "host.sectionPhotos",
+  "host.sectionPrice",
+  "host.sectionAvailability",
+  "host.sectionPreview",
+  "host.sectionPublish",
+] as const satisfies readonly DictKey[];
+
 const TITLES = [
-  "Tell us about your coastal estate",
-  "Where is the shoreline boundary?",
-  "How much space?",
-  "Garage & automotive specifications",
-  "Add high-res photos",
-  "Set pricing & acquisition terms",
-  "Availability & private access",
-  "Preview your coastal listing",
-  "Ready to publish?",
-];
+  "host.titleBasics",
+  "host.titleShoreline",
+  "host.titleSpace",
+  "host.titleGarage",
+  "host.titlePhotos",
+  "host.titlePricing",
+  "host.titleAvailability",
+  "host.titlePreview",
+  "host.titlePublish",
+] as const satisfies readonly DictKey[];
 
 export default function ListingWizard() {
   const router = useRouter();
   const { draft, setDraft, showToast } = useStore();
   const { reload } = useCatalog();
+  const t = useT();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ListingDraft>(draft ?? emptyDraft());
   const [done, setDone] = useState(false);
@@ -52,7 +70,7 @@ export default function ListingWizard() {
 
   async function next() {
     if (step === 0 && form.name.trim().length < 3) {
-      showToast("Add a property name guests will recognise.");
+      showToast(t("host.errNameShort"));
       return;
     }
     if (step === 8) {
@@ -62,7 +80,7 @@ export default function ListingWizard() {
         reload();
         setDone(true);
       } catch (error) {
-        showToast(error instanceof Error ? error.message : "Could not save the listing");
+        showToast(error instanceof Error ? error.message : t("host.errSaveFailed"));
       }
       return;
     }
@@ -78,7 +96,7 @@ export default function ListingWizard() {
       const urls = await uploadPropertyPhotos(files);
       patch({ photos: [...form.photos, ...urls] });
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Photo upload failed");
+      showToast(error instanceof Error ? error.message : t("host.errPhotoUpload"));
     } finally {
       setUploading(false);
     }
@@ -87,12 +105,12 @@ export default function ListingWizard() {
   if (done) {
     return (
       <Shell>
-        <PageBar title="New listing" backHref="/host" />
+        <PageBar title={t("host.newListing")} backHref="/host" />
         <div className="pad mt stack">
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36 }}>Submitted for review</h1>
-          <p>{form.name || "Your farmhouse"} is saved, including its photos. Guests can see it on Explore.</p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36 }}>{t("host.submittedTitle")}</h1>
+          <p>{t("host.savedBody", { name: form.name || t("host.untitledFarmhouse") })}</p>
           <button className="btn block" type="button" onClick={() => router.push("/host")}>
-            Back to hosting
+            {t("host.backToHosting")}
           </button>
         </div>
       </Shell>
@@ -103,33 +121,33 @@ export default function ListingWizard() {
 
   return (
     <Shell>
-      <PageBar title="New listing" backHref="/host" />
+      <PageBar title={t("host.newListing")} backHref="/host" />
       <div className="pad mt">
         <p className="muted">
-          Step {step + 1} of 9 · {["Basics", "Location", "Space", "Amenities", "Photos", "Price", "Availability", "Preview", "Publish"][step]}
+          {t("host.sectionOf", { n: step + 1, total: 9, section: t(SECTIONS[step]) })}
         </p>
         <div className="pbar mt">
           <i style={{ width: `${((step + 1) / 9) * 100}%` }} />
         </div>
         <h1 className="mt" style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32 }}>
-          {TITLES[step]}
+          {t(TITLES[step])}
         </h1>
       </div>
 
       <div className="pad mt stack">
         {step === 0 ? (
           <>
-            <p className="muted">The name and short description guests see first.</p>
+            <p className="muted">{t("host.stepBasics")}</p>
             <label className="field">
-              Property name
+              {t("host.fieldPropertyName")}
               <input className="ctrl" value={form.name} onChange={(e) => patch({ name: e.target.value })} />
             </label>
             <label className="field">
-              Short description
+              {t("host.fieldShortDescription")}
               <textarea className="ctrl" rows={3} value={form.description} onChange={(e) => patch({ description: e.target.value })} />
-              <span className="help">One or two lines. You can expand this later.</span>
+              <span className="help">{t("host.helpShortDescription")}</span>
             </label>
-            <p>Property type</p>
+            <p>{t("host.fieldPropertyType")}</p>
             <div className="chips" style={{ paddingInline: 0 }}>
               {TYPES.map((type) => (
                 <button key={type} className={`chip${form.type === type ? " is-active" : ""}`} type="button" onClick={() => patch({ type })}>
@@ -139,8 +157,8 @@ export default function ListingWizard() {
             </div>
             <div className="between">
               <div>
-                <strong>Maximum guests</strong>
-                <p className="muted">Any age counts here</p>
+                <strong>{t("host.maximumGuests")}</strong>
+                <p className="muted">{t("home.anyAgeCounts")}</p>
               </div>
               <div className="stepper">
                 <button type="button" onClick={() => patch({ guests: Math.max(1, form.guests - 1) })}>
@@ -154,8 +172,8 @@ export default function ListingWizard() {
             </div>
             <div className="between" style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
               <div>
-                <strong>List for Sale (Acquisition)</strong>
-                <p className="muted" style={{ fontSize: 12 }}>Make this estate purchasable in the Buy tab</p>
+                <strong>{t("host.listForSaleAcquisition")}</strong>
+                <p className="muted" style={{ fontSize: 12 }}>{t("host.listForSaleHelp")}</p>
               </div>
               <button
                 type="button"
@@ -169,9 +187,9 @@ export default function ListingWizard() {
 
         {step === 1 ? (
           <>
-            <p className="muted">Guests only see the exact pin after booking.</p>
+            <p className="muted">{t("host.stepLocation")}</p>
             <label className="field">
-              City or region
+              {t("host.fieldCityOrRegion")}
               <select className="ctrl" value={form.city} onChange={(e) => patch({ city: e.target.value })}>
                 {CITIES.map((c) => (
                   <option key={c}>{c}</option>
@@ -179,42 +197,42 @@ export default function ListingWizard() {
               </select>
             </label>
             <label className="field">
-              Area or landmark
+              {t("host.fieldArea")}
               <input className="ctrl" value={form.area} onChange={(e) => patch({ area: e.target.value })} />
             </label>
             <label className="field">
-              Street address
+              {t("host.fieldStreetAddress")}
               <input className="ctrl" value={form.address} onChange={(e) => patch({ address: e.target.value })} />
-              <span className="help">Kept private until a booking is confirmed.</span>
+              <span className="help">{t("host.helpAddress")}</span>
             </label>
             <div className="card" style={{ minHeight: 120, background: "var(--surface-2)" }}>
-              Drag the pin to your gate
+              {t("host.dragPin")}
             </div>
           </>
         ) : null}
 
         {step === 2 ? (
           <>
-            <p className="muted">Bedrooms, beds and bathrooms help guests plan the group.</p>
-            <Counter label="Bedrooms" value={form.bedrooms} onChange={(bedrooms) => patch({ bedrooms })} />
-            <Counter label="Beds" value={form.beds} onChange={(beds) => patch({ beds })} />
-            <Counter label="Bathrooms" value={form.bathrooms} onChange={(bathrooms) => patch({ bathrooms })} />
+            <p className="muted">{t("host.stepSpace")}</p>
+            <Counter label={t("host.fieldBedrooms")} value={form.bedrooms} onChange={(bedrooms) => patch({ bedrooms })} />
+            <Counter label={t("host.fieldBeds")} value={form.beds} onChange={(beds) => patch({ beds })} />
+            <Counter label={t("host.fieldBathrooms")} value={form.bathrooms} onChange={(bathrooms) => patch({ bathrooms })} />
           </>
         ) : null}
 
         {step === 3 ? (
           <>
-            <p className="muted">Specify coastal shoreline boundary and vehicle accommodations.</p>
+            <p className="muted">{t("host.stepGarage")}</p>
             <label className="field">
-              <span>Direct Beach Frontage</span>
+              <span>{t("host.fieldBeachFrontage")}</span>
               <input
                 className="ctrl"
-                placeholder="e.g. 180 ft direct oceanfront"
+                placeholder={t("host.beachFrontagePlaceholder")}
                 value={form.beachFrontage || ""}
                 onChange={(e) => patch({ beachFrontage: e.target.value })}
               />
             </label>
-            <p style={{ fontWeight: 800, marginTop: 12 }}>Automotive Garage Architecture</p>
+            <p style={{ fontWeight: 800, marginTop: 12 }}>{t("host.garageArchitecture")}</p>
             <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
               {GARAGE_OPTIONS.map((g) => (
                 <button
@@ -224,11 +242,11 @@ export default function ListingWizard() {
                   onClick={() => patch({ garageType: g.id })}
                 >
                   <Icon name="car" />
-                  {g.label}
+                  {garageLabel(t, g.id)} {t(g.qualifier)}
                 </button>
               ))}
             </div>
-            <p style={{ fontWeight: 800, marginTop: 16 }}>Curated Estate Amenities</p>
+            <p style={{ fontWeight: 800, marginTop: 16 }}>{t("host.curatedAmenities")}</p>
             <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
               {AMENITIES.map((item) => {
                 const on = form.amenities.includes(item);
@@ -249,9 +267,9 @@ export default function ListingWizard() {
 
         {step === 4 ? (
           <>
-            <p className="muted">Upload photos from your phone. They are stored with the listing.</p>
+            <p className="muted">{t("host.stepPhotos")}</p>
             <label className="btn block">
-              {uploading ? "Uploading…" : "Upload photos"}
+              {uploading ? t("host.uploading") : t("host.uploadPhotos")}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -281,34 +299,37 @@ export default function ListingWizard() {
                 );
               })}
             </div>
-            <p className="muted">{form.photos.length} photos added{form.photos.length ? " · cover set to the first shot." : "."}</p>
+            <p className="muted">
+              {t("host.photosAdded", { n: form.photos.length })}
+              {form.photos.length ? ` · ${t("host.coverFirstShot")}` : "."}
+            </p>
           </>
         ) : null}
 
         {step === 5 ? (
           <>
-            <p className="muted">Configure nightly stay rates and acquisition terms.</p>
+            <p className="muted">{t("host.stepPricing")}</p>
             {form.isForSale ? (
               <div className="card" style={{ background: "color-mix(in oklch, var(--accent) 8%, var(--surface))", border: "1.5px solid var(--accent)", marginBottom: 14 }}>
-                <p className="eyebrow" style={{ color: "var(--accent)" }}>Acquisition Terms</p>
+                <p className="eyebrow" style={{ color: "var(--accent)" }}>{t("host.acquisitionTerms")}</p>
                 <label className="field mt">
-                  <span>Asking Sale Price (₹)</span>
+                  <span>{t("host.fieldAskingSalePrice")}</span>
                   <input
                     className="ctrl"
                     inputMode="numeric"
-                    placeholder="e.g. 280000000 (28 Cr)"
+                    placeholder={t("host.askingPricePlaceholder")}
                     value={form.salePrice || ""}
                     onChange={(e) => patch({ salePrice: Number(e.target.value) || 0 })}
                   />
                   <span className="help" style={{ color: "var(--forest)", fontWeight: 700 }}>
-                    {form.salePrice ? `Acquisition asking: ${formatInrCrores(form.salePrice)}` : "Enter asking price in INR"}
+                    {form.salePrice ? t("host.acquisitionAsking", { price: formatInrCrores(form.salePrice) }) : t("host.helpEnterAskingPrice")}
                   </span>
                 </label>
                 <label className="field mt">
-                  <span>Land / Survey Area</span>
+                  <span>{t("host.fieldLandArea")}</span>
                   <input
                     className="ctrl"
-                    placeholder="e.g. 4.5 Grounds (10,800 sq.ft)"
+                    placeholder={t("host.landAreaPlaceholder")}
                     value={form.landArea || ""}
                     onChange={(e) => patch({ landArea: e.target.value })}
                   />
@@ -316,30 +337,30 @@ export default function ListingWizard() {
               </div>
             ) : null}
             <label className="field">
-              Base nightly price (₹)
+              {t("host.fieldBaseNightlyPrice")}
               <input className="ctrl" inputMode="numeric" value={form.price} onChange={(e) => patch({ price: Number(e.target.value) || 0 })} />
             </label>
             <label className="field">
-              Cleaning fee (₹)
+              {t("host.fieldCleaningFee")}
               <input className="ctrl" inputMode="numeric" value={form.cleaning} onChange={(e) => patch({ cleaning: Number(e.target.value) || 0 })} />
-              <span className="help">Charged once per stay.</span>
+              <span className="help">{t("host.helpChargedOnce")}</span>
             </label>
             <label className="field">
-              Security deposit (₹) — optional
+              {t("host.fieldSecurityDeposit")}
               <input className="ctrl" inputMode="numeric" value={form.deposit} onChange={(e) => patch({ deposit: Number(e.target.value) || 0 })} />
             </label>
-            <p className="muted">Seasonal and holiday price overrides are supported later through pricing rules.</p>
+            <p className="muted">{t("host.pricingRulesNote")}</p>
             <div className="card">
               <div className="sumline">
-                <span className="k">Guest pays for 2 nights</span>
+                <span className="k">{t("host.guestPaysTwoNights")}</span>
                 <span className="num">{inr(form.price * 2)}</span>
               </div>
               <div className="sumline">
-                <span className="k">Cleaning fee</span>
+                <span className="k">{t("host.cleaningFeeLabel")}</span>
                 <span className="num">{inr(form.cleaning)}</span>
               </div>
               <div className="sumline total">
-                <span className="k">Before taxes</span>
+                <span className="k">{t("host.beforeTaxes")}</span>
                 <span className="num">{inr(guestPays)}</span>
               </div>
             </div>
@@ -348,17 +369,17 @@ export default function ListingWizard() {
 
         {step === 6 ? (
           <>
-            <p className="muted">Block dates when the farmhouse is unavailable.</p>
+            <p className="muted">{t("host.blockDatesBody")}</p>
             <div className="legend">
-              <span>Open</span>
-              <span>Blocked</span>
+              <span>{t("host.calendarOpen")}</span>
+              <span>{t("host.calendarBlocked")}</span>
             </div>
             <label className="field">
-              Minimum stay (nights)
+              {t("host.fieldMinStay")}
               <select className="ctrl" value={form.minStay} onChange={(e) => patch({ minStay: Number(e.target.value) })}>
                 {[1, 2, 3, 5].map((n) => (
                   <option key={n} value={n}>
-                    {n} night{n > 1 ? "s" : ""}
+                    {n > 1 ? t("host.nightMany", { n }) : t("host.nightOne", { n })}
                   </option>
                 ))}
               </select>
@@ -369,33 +390,33 @@ export default function ListingWizard() {
         {step === 7 ? (
           <article className="card">
             {form.photos[0] ? <img src={form.photos[0]} alt="" style={{ borderRadius: 16, marginBottom: 12 }} /> : null}
-            <h3>{form.name || "Untitled farmhouse"}</h3>
+            <h3>{form.name || t("host.untitledFarmhouse")}</h3>
             <p className="muted">
               {form.city}
               {form.area ? ` · ${form.area}` : ""}
             </p>
-            <p>{form.description || "A short description will appear here."}</p>
+            <p>{form.description || t("host.previewDescriptionEmpty")}</p>
             <p className="muted">
-              {form.guests} guests · {form.bedrooms} bedrooms · {form.beds} beds · {form.bathrooms} bathrooms
+              {t("host.previewGuests", { n: form.guests })} · {t("host.previewBedrooms", { n: form.bedrooms })} · {t("host.previewBeds", { n: form.beds })} · {t("host.previewBathrooms", { n: form.bathrooms })}
             </p>
             <p className="p-price num">
-              {inr(form.price)} <span className="per">/ night</span>
+              {inr(form.price)} <span className="per">{t("property.perNight")}</span>
             </p>
           </article>
         ) : null}
 
         {step === 8 ? (
-          <p>Publishing sends this listing to review. You can still edit details after it is approved.</p>
+          <p>{t("host.stepPublish")}</p>
         ) : null}
 
         <div className="row">
           {step > 0 ? (
             <button className="btn outline" type="button" onClick={() => setStep((s) => s - 1)}>
-              Back
+              {t("action.back")}
             </button>
           ) : null}
           <button className="btn grow" type="button" onClick={next}>
-            {step === 8 ? "Submit for review" : "Continue"}
+            {step === 8 ? t("host.submitForReview") : t("action.continue")}
           </button>
         </div>
       </div>

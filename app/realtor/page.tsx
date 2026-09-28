@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { useStore, type RealtorClient } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { BaseSheet } from "@/components/base-sheet";
 import { useCatalog } from "@/lib/catalog";
 import { formatInrCrores } from "@/lib/properties";
@@ -13,6 +14,7 @@ import { formatInrCrores } from "@/lib/properties";
 export default function RealtorPortalPage() {
   const router = useRouter();
   const { clients, addClient, removeClient, presentationMode, setPresentationMode, showToast } = useStore();
+  const t = useT();
   const { properties } = useCatalog();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -36,7 +38,7 @@ export default function RealtorPortalPage() {
   function handleCreateClient(e: React.FormEvent) {
     e.preventDefault();
     if (!clientName.trim() || !clientPhone.trim()) {
-      showToast("Please provide client name and phone number.");
+      showToast(t("realtor.toastNeedNamePhone"));
       return;
     }
     const newClient: RealtorClient = {
@@ -53,7 +55,7 @@ export default function RealtorPortalPage() {
       createdAt: new Date().toISOString().split("T")[0],
     };
     addClient(newClient);
-    showToast(`Client "${newClient.name}" onboarded. Commission rights locked.`);
+    showToast(t("realtor.toastClientOnboarded", { name: newClient.name }));
     setAddModalOpen(false);
     // Reset form
     setClientName("");
@@ -65,7 +67,7 @@ export default function RealtorPortalPage() {
   return (
     <Shell>
       <PageBar
-        title="Realtor Portal"
+        title={t("realtor.portalTitle")}
         backHref="/buy"
         right={
           <button
@@ -74,10 +76,10 @@ export default function RealtorPortalPage() {
             onClick={() => {
               const next = !presentationMode;
               setPresentationMode(next);
-              showToast(next ? "Presentation Mode Activated: Direct owner contacts hidden." : "Presentation Mode Deactivated.");
+              showToast(next ? t("realtor.toastPresentationOn") : t("realtor.toastPresentationOff"));
             }}
           >
-            {presentationMode ? "Presentation Active" : "Presentation Mode"}
+            {presentationMode ? t("realtor.presentationActive") : t("realtor.presentationMode")}
           </button>
         }
       />
@@ -85,12 +87,12 @@ export default function RealtorPortalPage() {
       {/* Header Banner */}
       <header className="page-head">
         <div className="between">
-          <p className="eyebrow">Broker & Agency Workspace</p>
-          <span className="pill ok">RERA Verified</span>
+          <p className="eyebrow">{t("realtor.workspaceEyebrow")}</p>
+          <span className="pill ok">{t("realtor.reraVerified")}</span>
         </div>
-        <h1 style={{ fontSize: 32, marginTop: 4 }}>Client Onboarding & Mandates</h1>
+        <h1 style={{ fontSize: 32, marginTop: 4 }}>{t("realtor.mandatesTitle")}</h1>
         <p className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
-          {agencyName} · RERA #{reraNumber}
+          {agencyName}{t("realtor.agencyRera", { rera: reraNumber })}
         </p>
       </header>
 
@@ -100,13 +102,13 @@ export default function RealtorPortalPage() {
           <div className="card" style={{ background: "color-mix(in oklch, var(--accent) 12%, var(--surface))", border: "1px solid var(--accent)" }}>
             <div className="between">
               <div>
-                <strong>Client Presentation Mode is Live</strong>
+                <strong>{t("realtor.presentationLive")}</strong>
                 <p className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-                  Direct host contacts and internal margins are masked. When you present listings to your client, your agency credentials will appear.
+                  {t("realtor.presentationLiveBody")}
                 </p>
               </div>
               <button className="btn outline sm" type="button" onClick={() => setPresentationMode(false)}>
-                Disable
+                {t("realtor.presentationDisable")}
               </button>
             </div>
           </div>
@@ -118,34 +120,34 @@ export default function RealtorPortalPage() {
         <div className="stat">
           <p className="lb">
             <Icon name="users" />
-            Onboarded Clients
+            {t("realtor.statOnboardedClients")}
           </p>
           <p className="nb">{clients.length}</p>
-          <p className="sub">Lead lock guaranteed</p>
+          <p className="sub">{t("realtor.statLeadLock")}</p>
         </div>
         <div className="stat">
           <p className="lb">
             <Icon name="wallet" />
-            Active Mandates
+            {t("realtor.statActiveMandates")}
           </p>
           <p className="nb">₹{totalMandateValue} Cr</p>
-          <p className="sub">Total buying power</p>
+          <p className="sub">{t("realtor.statTotalBuyingPower")}</p>
         </div>
         <div className="stat">
           <p className="lb">
             <Icon name="home" />
-            Coastal Holdings
+            {t("realtor.statCoastalHoldings")}
           </p>
           <p className="nb">{salesProperties.length}</p>
-          <p className="sub">Direct beachfront estates</p>
+          <p className="sub">{t("realtor.statBeachfrontEstates")}</p>
         </div>
         <div className="stat">
           <p className="lb">
             <Icon name="shield" />
-            Co-Broking Fee
+            {t("realtor.statCoBrokingFee")}
           </p>
           <p className="nb">2.0%</p>
-          <p className="sub">Standard locked split</p>
+          <p className="sub">{t("realtor.statLockedSplit")}</p>
         </div>
       </div>
 
@@ -153,13 +155,13 @@ export default function RealtorPortalPage() {
       <div className="pad mt">
         <div className="between">
           <div>
-            <h2>Private Client Roster</h2>
+            <h2>{t("realtor.rosterTitle")}</h2>
             <p className="muted" style={{ fontSize: 12 }}>
-              Clients onboarded here are cryptographically bound to your agency profile.
+              {t("realtor.rosterBody")}
             </p>
           </div>
           <button className="btn sm" type="button" onClick={() => setAddModalOpen(true)}>
-            + Onboard Client
+            {t("realtor.onboardClient")}
           </button>
         </div>
 
@@ -179,7 +181,7 @@ export default function RealtorPortalPage() {
                   </span>
                   {client.confidential ? (
                     <div style={{ marginTop: 4 }}>
-                      <span className="pill warn" style={{ fontSize: 10 }}>NDA Protected</span>
+                      <span className="pill warn" style={{ fontSize: 10 }}>{t("realtor.ndaProtected")}</span>
                     </div>
                   ) : null}
                 </div>
@@ -187,10 +189,10 @@ export default function RealtorPortalPage() {
 
               <div className="mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 6 }}>
                 <p style={{ fontSize: 12.5, margin: 0 }}>
-                  <strong style={{ color: "var(--moss)" }}>Corridor:</strong> {client.preferredStretch}
+                  <strong style={{ color: "var(--moss)" }}>{t("realtor.labelCorridor")}</strong> {client.preferredStretch}
                 </p>
                 <p style={{ fontSize: 12.5, margin: 0 }}>
-                  <strong style={{ color: "var(--moss)" }}>Automotive Need:</strong> {client.garageNeed}
+                  <strong style={{ color: "var(--moss)" }}>{t("realtor.labelAutomotiveNeed")}</strong> {client.garageNeed}
                 </p>
                 {client.notes ? (
                   <p className="muted" style={{ fontSize: 12, fontStyle: "italic", margin: "4px 0 0" }}>
@@ -200,7 +202,7 @@ export default function RealtorPortalPage() {
               </div>
 
               <div className="between mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-                <span className="tiny">Added on {client.createdAt}</span>
+                <span className="tiny">{t("realtor.addedOn", { date: client.createdAt })}</span>
                 <div className="row" style={{ gap: 6 }}>
                   <button
                     className="btn outline sm"
@@ -210,7 +212,7 @@ export default function RealtorPortalPage() {
                       router.push("/buy");
                     }}
                   >
-                    Present Holdings
+                    {t("realtor.presentHoldings")}
                   </button>
                   <button
                     className="btn ghost sm"
@@ -218,10 +220,10 @@ export default function RealtorPortalPage() {
                     style={{ color: "var(--danger)" }}
                     onClick={() => {
                       removeClient(client.id);
-                      showToast(`Removed client ${client.name}`);
+                      showToast(t("realtor.toastClientRemoved", { name: client.name }));
                     }}
                   >
-                    Remove
+                    {t("realtor.removeClient")}
                   </button>
                 </div>
               </div>
@@ -233,16 +235,16 @@ export default function RealtorPortalPage() {
       {/* Listing Action for Realtors */}
       <section className="pad mt" style={{ marginBottom: 30 }}>
         <div className="card" style={{ background: "var(--surface-2)" }}>
-          <h3>Representing a coastal estate seller?</h3>
+          <h3>{t("realtor.sellerPrompt")}</h3>
           <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-            List your client&apos;s beachfront property with verified title documentation, garage specs, and exclusive co-broking visibility.
+            {t("realtor.sellerBody")}
           </p>
           <div className="row mt">
             <Link href="/host/new?mode=sale" className="btn sm">
-              List Property for Sale
+              {t("realtor.listForSale")}
             </Link>
             <Link href="/buy" className="btn outline sm">
-              View All Holdings
+              {t("realtor.viewAllHoldings")}
             </Link>
           </div>
         </div>
@@ -252,25 +254,25 @@ export default function RealtorPortalPage() {
       <BaseSheet
         open={addModalOpen}
         onOpenChange={setAddModalOpen}
-        title="Onboard Private Client"
+        title={t("realtor.sheetOnboardTitle")}
       >
         <form className="stack" onSubmit={handleCreateClient}>
           <p className="muted" style={{ fontSize: 13 }}>
-            Onboarding binds this buyer mandate to your agency ID, safeguarding your co-broking commission across all 9bhk coastal estates.
+            {t("realtor.sheetBody")}
           </p>
           <label className="field">
-            <span>Client Full Name / Entity Alias</span>
+            <span>{t("realtor.fieldClientName")}</span>
             <input
               className="ctrl"
               type="text"
-              placeholder="e.g. Vikramaditya K or Sovereign Family Trust"
+              placeholder={t("realtor.clientNamePlaceholder")}
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               required
             />
           </label>
           <label className="field">
-            <span>Direct Phone / WhatsApp</span>
+            <span>{t("realtor.fieldPhone")}</span>
             <input
               className="ctrl"
               type="tel"
@@ -281,7 +283,7 @@ export default function RealtorPortalPage() {
             />
           </label>
           <label className="field">
-            <span>Direct Email (Optional)</span>
+            <span>{t("realtor.fieldEmailOptional")}</span>
             <input
               className="ctrl"
               type="email"
@@ -293,7 +295,7 @@ export default function RealtorPortalPage() {
 
           <div className="between">
             <label className="field" style={{ flex: 1 }}>
-              <span>Min Budget (₹ Cr)</span>
+              <span>{t("realtor.fieldMinBudget")}</span>
               <input
                 className="ctrl"
                 type="number"
@@ -304,7 +306,7 @@ export default function RealtorPortalPage() {
               />
             </label>
             <label className="field" style={{ flex: 1 }}>
-              <span>Max Budget (₹ Cr)</span>
+              <span>{t("realtor.fieldMaxBudget")}</span>
               <input
                 className="ctrl"
                 type="number"
@@ -317,7 +319,7 @@ export default function RealtorPortalPage() {
           </div>
 
           <label className="field">
-            <span>Preferred Coastal Stretch</span>
+            <span>{t("realtor.fieldCoastalStretch")}</span>
             <select
               className="ctrl"
               value={preferredStretch}
@@ -331,23 +333,23 @@ export default function RealtorPortalPage() {
           </label>
 
           <label className="field">
-            <span>Automotive & Garage Requirement</span>
+            <span>{t("realtor.fieldGarageNeed")}</span>
             <select
               className="ctrl"
               value={garageNeed}
               onChange={(e) => setGarageNeed(e.target.value)}
             >
               <option value="Subterranean Collector Vault (<7° Supercar Ramp)">
-                Subterranean Collector Vault (&lt;7° Supercar Ramp)
+                {t("realtor.optionCollectorVault")}
               </option>
               <option value="Beach & Marine Port (Jet Ski / Boat Trailer Slip)">
-                Beach & Marine Port (Jet Ski / Boat Trailer Slip)
+                {t("realtor.optionMarinePort")}
               </option>
               <option value="Executive EV Pavilion (High Output 22-50kW Chargers)">
-                Executive EV Pavilion (High Output 22-50kW Chargers)
+                {t("realtor.optionEvPavilion")}
               </option>
               <option value="Coastal Teak Portico (Shaded Pergola for Cruisers)">
-                Coastal Teak Portico (Shaded Pergola for Cruisers)
+                {t("realtor.optionTeakPortico")}
               </option>
             </select>
           </label>
@@ -360,24 +362,24 @@ export default function RealtorPortalPage() {
             <div className="box" aria-checked={confidential}>
               {confidential ? <Icon name="check" style={{ color: "var(--on-primary)" }} /> : null}
             </div>
-            <span style={{ fontSize: 13, fontWeight: 600 }}>Enforce Buyer NDA & Confidentiality</span>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>{t("realtor.enforceNda")}</span>
           </div>
 
           <label className="field">
-            <span>Mandate Notes & Vehicle Types</span>
+            <span>{t("realtor.fieldMandateNotes")}</span>
             <textarea
               className="ctrl"
               rows={2}
-              placeholder="e.g. Collector of vintage Italian sports cars; requires zero salt mist intrusion..."
+              placeholder={t("realtor.mandateNotesPlaceholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
           </label>
 
           <div className="between mt">
-            <span className="pill forest">Lead Lock Active</span>
+            <span className="pill forest">{t("realtor.leadLockActive")}</span>
             <button className="btn accent" type="submit">
-              Complete Onboarding
+              {t("realtor.completeOnboarding")}
             </button>
           </div>
         </form>

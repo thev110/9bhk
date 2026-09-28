@@ -6,20 +6,38 @@ import { Shell } from "@/components/shell";
 import { formatRange, inr } from "@/lib/format";
 import { useCatalog } from "@/lib/catalog";
 import { useStore, type Booking } from "@/lib/store";
+import { useT } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n/use-t";
+import type { DictKey } from "@/lib/i18n/en";
 
-const TABS = ["Upcoming", "Past", "Cancelled"] as const;
+const TABS = [
+  { id: "Upcoming", key: "trips.tabUpcoming" },
+  { id: "Past", key: "trips.tabPast" },
+  { id: "Cancelled", key: "trips.tabCancelled" },
+] as const satisfies readonly { id: string; key: DictKey }[];
 
-function bucket(status: Booking["status"]): (typeof TABS)[number] {
+type TabId = (typeof TABS)[number]["id"];
+
+function bucket(status: Booking["status"]): TabId {
   if (status === "completed") return "Past";
   if (status === "cancelled") return "Cancelled";
   return "Upcoming";
 }
 
+const STATUS_KEY: Record<Booking["status"], DictKey> = {
+  confirmed: "booking.statusConfirmed",
+  awaiting: "booking.statusAwaiting",
+  completed: "booking.statusCompleted",
+  cancelled: "booking.statusCancelled",
+};
+
 export default function TripsPage() {
   const { bookings, user } = useStore();
   const { properties } = useCatalog();
+  const t = useT();
+  const { tag } = useLocale();
   const propertyFor = (id: string) => properties.find((item) => item.id === id);
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Upcoming");
+  const [tab, setTab] = useState<TabId>("Upcoming");
 
   const userBookings = useMemo(() => {
     if (!user) return [];
@@ -40,31 +58,34 @@ export default function TripsPage() {
     return (
       <Shell nav="trips">
         <header className="page-head">
-          <h1>Trips</h1>
+          <h1>{t("trips.title")}</h1>
         </header>
         <div className="empty">
-          <h3>Sign in to view your booked farmhouses and trips.</h3>
+          <h3>{t("trips.signInPrompt")}</h3>
           <Link className="btn" href="/login?next=/trips">
-            Sign in
+            {t("auth.signIn")}
           </Link>
           <Link className="btn outline mt" href="/">
-            Explore farmhouses
+            {t("saved.explore")}
           </Link>
         </div>
       </Shell>
     );
   }
 
+  const emptyKey: DictKey =
+    tab === "Upcoming" ? "trips.emptyUpcoming" : tab === "Cancelled" ? "trips.emptyCancelled" : "trips.emptyPast";
+
   return (
     <Shell nav="trips">
       <header className="page-head">
-        <h1>Trips</h1>
+        <h1>{t("trips.title")}</h1>
       </header>
       <div className="pad mt">
         <div className="seg" role="tablist">
-          {TABS.map((name) => (
-            <button key={name} type="button" role="tab" aria-selected={tab === name} onClick={() => setTab(name)}>
-              {name}
+          {TABS.map(({ id, key }) => (
+            <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
+              {t(key)}
             </button>
           ))}
         </div>
@@ -72,10 +93,10 @@ export default function TripsPage() {
 
       {list.length === 0 ? (
         <div className="empty">
-          <h3>{tab === "Upcoming" ? "No upcoming trips booked yet." : tab === "Cancelled" ? "No cancelled trips." : "Past stays will gather here."}</h3>
-          <p className="muted">Book a farmhouse getaway and it will appear here with directions and check-in instructions.</p>
+          <h3>{t(emptyKey)}</h3>
+          <p className="muted">{t("trips.emptyBody")}</p>
           <Link className="btn mt" href="/">
-            Explore farmhouses
+            {t("saved.explore")}
           </Link>
         </div>
       ) : (
@@ -87,25 +108,25 @@ export default function TripsPage() {
               <article className="card" key={booking.id}>
                 <div className="between">
                   <span className={`pill ${booking.status === "confirmed" ? "ok" : booking.status === "awaiting" ? "warn" : ""}`}>
-                    {booking.status === "confirmed" ? "Confirmed" : booking.status === "awaiting" ? "Awaiting host" : booking.status === "completed" ? "Completed" : "Cancelled"}
+                    {t(STATUS_KEY[booking.status])}
                   </span>
                   <strong className="num">{inr(booking.total)}</strong>
                 </div>
                 <h3 className="p-title mt">{property.name}</h3>
                 <p className="p-loc">{property.location}</p>
                 <p className="muted">
-                  {formatRange(booking.checkIn, booking.checkOut)} · {booking.adults + booking.children} guests
+                  {formatRange(booking.checkIn, booking.checkOut, tag)} · {t("home.guestCount", { n: booking.adults + booking.children })}
                 </p>
                 <button className="btn outline sm mt" type="button" onClick={() => setOpen(booking.id)}>
-                  View trip
+                  {t("trips.viewTrip")}
                 </button>
                 {booking.status === "completed" ? (
                   <div className="row mt">
                     <button className="btn ghost sm" type="button">
-                      Write a review
+                      {t("trips.writeReview")}
                     </button>
                     <Link className="btn sm" href={`/property/${property.id}`}>
-                      Book again
+                      {t("trips.bookAgain")}
                     </Link>
                   </div>
                 ) : null}
@@ -124,45 +145,51 @@ export default function TripsPage() {
 
 function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void }) {
   const { properties } = useCatalog();
+  const t = useT();
+  const { tag } = useLocale();
   const property = properties.find((item) => item.id === booking.propertyId);
   if (!property) return null;
+  const nights = Math.max(
+    1,
+    Math.round((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / 86400000),
+  );
   return (
     <>
       <div className="scrim is-open" onClick={onClose} />
-      <div className="sheet is-open" role="dialog" aria-modal="true" aria-label="Your trip">
+      <div className="sheet is-open" role="dialog" aria-modal="true" aria-label={t("a11y.yourTrip")}>
         <div className="sheet-grab" />
         <div className="sheet-head">
-          <h2>Your trip</h2>
-          <p className="muted">Booking #{booking.code}</p>
+          <h2>{t("trips.sheetTitle")}</h2>
+          <p className="muted">{t("trips.bookingRef", { code: booking.code })}</p>
         </div>
         <div className="card">
           <h3>{property.name}</h3>
           <div className="sumline">
-            <span className="k">Check-in</span>
-            <span>{formatRange(booking.checkIn, booking.checkIn)} · 2:00 PM</span>
+            <span className="k">{t("trips.checkIn")}</span>
+            <span>{formatRange(booking.checkIn, booking.checkIn, tag)} · 2:00 PM</span>
           </div>
           <div className="sumline">
-            <span className="k">Check-out</span>
-            <span>{formatRange(booking.checkOut, booking.checkOut)} · 11:00 AM</span>
+            <span className="k">{t("trips.checkOut")}</span>
+            <span>{formatRange(booking.checkOut, booking.checkOut, tag)} · 11:00 AM</span>
           </div>
           <div className="sumline">
-            <span className="k">Guests</span>
+            <span className="k">{t("home.guests")}</span>
             <span>
-              {booking.adults + booking.children} guests · {Math.max(1, Math.round((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / 86400000))} nights
+              {t("trips.guestsAndNights", { n: booking.adults + booking.children, nights })}
             </span>
           </div>
           <div className="sumline total">
-            <span className="k">Total paid</span>
+            <span className="k">{t("trips.totalPaid")}</span>
             <span className="num">{inr(booking.total)}</span>
           </div>
         </div>
-        <p className="muted mt">Free cancellation until 5 Jun 2026. After that, 50% refund until 10 Jun 2026.</p>
+        <p className="muted mt">{t("trips.cancellationNote")}</p>
         <div className="row mt">
           <button className="btn outline grow" type="button">
-            Contact host
+            {t("trips.contactHost")}
           </button>
           <button className="btn ghost grow" type="button">
-            Get help
+            {t("trips.getHelp")}
           </button>
         </div>
       </div>

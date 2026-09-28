@@ -7,6 +7,7 @@ import { PageBar, Shell } from "@/components/shell";
 import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { useStore } from "@/lib/store";
 import { signInWithGoogle } from "@/lib/supabase/browser";
+import { useT } from "@/lib/i18n";
 
 function afterAuth(): string {
   const next = new URLSearchParams(window.location.search).get("next") || "/";
@@ -16,6 +17,7 @@ function afterAuth(): string {
 export default function SignupPage() {
   const router = useRouter();
   const { signIn, markIntro, showToast } = useStore();
+  const t = useT();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -38,7 +40,7 @@ export default function SignupPage() {
         city: "Chennai",
       });
       markIntro();
-      showToast("Account created");
+      showToast(t("toast.accountCreated"));
       router.push(afterAuth());
     }, 500);
   }
@@ -46,10 +48,10 @@ export default function SignupPage() {
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     const next: Record<string, string> = {};
-    if (name.trim().length < 2) next.name = "Please add the name on the booking.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = "Enter a valid email address.";
-    if (password.length < 4) next.password = "Enter your password to continue.";
-    if (phone && phone.replace(/\D/g, "").length < 10) next.phone = "Used only to confirm your bookings.";
+    if (name.trim().length < 2) next.name = t("auth.errName");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = t("auth.errEmail");
+    if (password.length < 4) next.password = t("auth.errPassword");
+    if (phone && phone.replace(/\D/g, "").length < 10) next.phone = t("auth.phoneHelp");
     setErrors(next);
     if (Object.keys(next).length) return;
     create(name.trim(), email.trim(), phone.trim());
@@ -57,16 +59,16 @@ export default function SignupPage() {
 
   return (
     <Shell>
-      <PageBar title="Create account" backHref="/login" />
+      <PageBar title={t("auth.createAccount")} backHref="/login" />
       <div className="auth">
         <div className="auth-hero mt">
-          <img src="/assets/prop-mango-orchard.jpg" width={1080} height={720} alt="A stone cottage with a garden at a farmhouse" />
+          <img src="/assets/prop-mango-orchard.jpg" width={1080} height={720} alt={t("auth.heroAltSignup")} />
         </div>
         <div className="auth-body">
           <div className="stack sm">
-            <p className="auth-eyebrow">New to 9bhk</p>
-            <h2 className="auth-title">Create account</h2>
-            <p className="muted">Tell us who&apos;s escaping. Optional details can wait until your profile.</p>
+            <p className="auth-eyebrow">{t("auth.newToApp")}</p>
+            <h2 className="auth-title">{t("auth.createAccount")}</h2>
+            <p className="muted">{t("auth.signupTagline")}</p>
           </div>
           <div className="stack mt-lg">
             <button
@@ -75,21 +77,21 @@ export default function SignupPage() {
               disabled={busy}
               onClick={async () => {
                 const started = await signInWithGoogle(afterAuth());
-                if (!started) showToast("Google sign-in is not turned on yet. Add the Google client in Supabase first.");
+                if (!started) showToast(t("auth.googleDisabled"));
               }}
             >
               <GoogleMark />
-              {busy ? "Signing you in…" : "Continue with Google"}
+              {busy ? t("auth.signingIn") : t("auth.continueGoogle")}
             </button>
-            <div className="or">or sign up with email</div>
+            <div className="or">{t("auth.orSignupEmail")}</div>
             <form className="stack" noValidate onSubmit={onSubmit}>
               <div className="field">
-                <label htmlFor="signupName">Full name</label>
-                <input className="ctrl" id="signupName" autoComplete="name" placeholder="Your name" value={name} onChange={(ev) => setName(ev.target.value)} />
+                <label htmlFor="signupName">{t("profile.fieldFullName")}</label>
+                <input className="ctrl" id="signupName" autoComplete="name" placeholder={t("auth.namePlaceholder")} value={name} onChange={(ev) => setName(ev.target.value)} />
                 {errors.name ? <p className="help">{errors.name}</p> : null}
               </div>
               <div className="field">
-                <label htmlFor="signupEmail">Email</label>
+                <label htmlFor="signupEmail">{t("auth.fieldEmail")}</label>
                 <input
                   className="ctrl"
                   id="signupEmail"
@@ -103,29 +105,29 @@ export default function SignupPage() {
                 {errors.email ? <p className="help">{errors.email}</p> : null}
               </div>
               <div className="field">
-                <label htmlFor="signupPhone">Mobile number</label>
-                <input className="ctrl" id="signupPhone" inputMode="tel" autoComplete="tel" placeholder="Optional" value={phone} onChange={(ev) => setPhone(ev.target.value)} />
-                <p className="help">{errors.phone || "Used only to confirm your bookings."}</p>
+                <label htmlFor="signupPhone">{t("auth.fieldMobile")}</label>
+                <input className="ctrl" id="signupPhone" inputMode="tel" autoComplete="tel" placeholder={t("auth.phoneOptional")} value={phone} onChange={(ev) => setPhone(ev.target.value)} />
+                <p className="help">{errors.phone || t("auth.phoneHelp")}</p>
               </div>
               <PasswordField
                 id="signupPw"
-                label="Password"
+                label={t("auth.fieldPassword")}
                 value={password}
                 onChange={setPassword}
-                placeholder="Create a password"
+                placeholder={t("auth.createPasswordPlaceholder")}
                 autoComplete="new-password"
                 error={errors.password}
               />
               <button className="btn block lg" type="submit" disabled={busy}>
-                {busy ? "Creating your account…" : "Create account"}
+                {busy ? t("auth.creatingAccount") : t("auth.createAccount")}
               </button>
             </form>
-            <p className="muted">We never post anything without your permission.</p>
+            <p className="muted">{t("auth.postPermission")}</p>
           </div>
           <p className="tiny center mt-lg">
-            Already have an account?{" "}
+            {t("auth.alreadyAccount")} {" "}
             <Link className="inline-link" href={`/login${authSearch}`}>
-              Sign in
+              {t("auth.signIn")}
             </Link>
           </p>
         </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Manrope } from "next/font/google";
+import { Instrument_Serif, Manrope, Noto_Sans_Tamil, Noto_Sans_Telugu } from "next/font/google";
 import { Toaster } from "sonner";
 import { StoreProvider } from "@/lib/store";
 import { AuthSync } from "@/components/auth-sync";
@@ -18,6 +18,22 @@ const serif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-serif",
+  display: "swap",
+});
+
+// Tamil and Telugu have no glyph coverage in the Manrope/Instrument Serif
+// latin subsets, so they need their own faces or the UI renders as tofu.
+const tamil = Noto_Sans_Tamil({
+  subsets: ["tamil"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-tamil",
+  display: "swap",
+});
+
+const telugu = Noto_Sans_Telugu({
+  subsets: ["telugu"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-telugu",
   display: "swap",
 });
 
@@ -44,7 +60,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${serif.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${serif.variable} ${tamil.variable} ${telugu.variable}`}>
       <body>
         <StoreProvider>
           <AuthSync />

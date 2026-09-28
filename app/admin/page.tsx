@@ -7,9 +7,27 @@ import { Icon } from "@/components/icon";
 import { inr } from "@/lib/format";
 import { useStore, type Booking } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
+import { useT } from "@/lib/i18n";
+import type { DictKey } from "@/lib/i18n/en";
 import { browserSupabase, hasSupabase } from "@/lib/supabase/browser";
 
 const TABS = ["Overview", "Properties", "Reviews", "Users", "Bookings", "Verification"] as const;
+
+/** Tab id -> catalog key. The ids stay literal because state compares them. */
+const TAB_KEY: Record<(typeof TABS)[number], DictKey> = {
+  Overview: "admin.tabOverview",
+  Properties: "admin.tabProperties",
+  Reviews: "admin.tabReviews",
+  Users: "admin.tabUsers",
+  Bookings: "admin.tabBookings",
+  Verification: "admin.tabVerification",
+};
+
+const PROP_FILTER_KEY: Record<"all" | "published" | "draft", DictKey> = {
+  all: "admin.filterAll",
+  published: "admin.filterPublished",
+  draft: "admin.filterDraft",
+};
 
 type ReviewItem = {
   id: string;
@@ -22,6 +40,25 @@ type ReviewItem = {
   images: string[];
   docs: [string, "Verified" | "Pending" | "Missing"][];
   status: "pending" | "approved" | "changes" | "rejected";
+};
+
+/** Document checklist label -> catalog key. */
+const DOC_KEY: Record<string, DictKey> = {
+  "Ownership proof": "admin.docOwnershipProof",
+  "Property tax receipt": "admin.docTaxReceipt",
+  "Host ID": "admin.docHostId",
+  "Government ID": "admin.docGovernmentId",
+  "Phone + email": "admin.docPhoneEmail",
+  "Payout account": "admin.docPayoutAccount",
+};
+
+/** Document / verification state -> catalog key. */
+const STATE_KEY: Record<string, DictKey> = {
+  Verified: "admin.stateVerified",
+  Pending: "admin.statePending",
+  Missing: "admin.stateMissing",
+  "Docs in review": "admin.stateDocsInReview",
+  "Missing documents": "admin.stateMissingDocs",
 };
 
 const INITIAL_QUEUE: ReviewItem[] = [
@@ -102,6 +139,15 @@ type AdminUser = {
   status: "active" | "suspended";
 };
 
+/** Account role pill label -> catalog key. */
+const USER_ROLE_KEY: Record<AdminUser["role"], DictKey> = {
+  Guest: "admin.roleGuest",
+  Host: "admin.roleHost",
+  "Host · verified": "admin.roleHostVerified",
+  "Host · pending": "admin.roleHostPending",
+  Flagged: "admin.roleFlagged",
+};
+
 const INITIAL_USERS: AdminUser[] = [
   {
     initials: "AR",
@@ -152,6 +198,7 @@ const INITIAL_USERS: AdminUser[] = [
 export default function AdminPage() {
   const { showToast, bookings: storeBookings, addBooking } = useStore();
   const { properties: catalogProps, reload: reloadCatalog } = useCatalog();
+  const t = useT();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
   const [queue, setQueue] = useState<ReviewItem[]>(INITIAL_QUEUE);
   const [users, setUsers] = useState<AdminUser[]>(INITIAL_USERS);
@@ -282,13 +329,14 @@ export default function AdminPage() {
   const pendingReviews = useMemo(() => queue.filter((item) => item.status === "pending"), [queue]);
 
   function logActivity(text: string) {
-    setActivity((prev) => [`${text} · Just now`, ...prev.slice(0, 8)]);
+    setActivity((prev) => [`${text} · ${t("note.justNow")}`, ...prev.slice(0, 8)]);
   }
 
   async function togglePropertyStatus(id: string) {
     const target = adminProps.find((p) => p.id === id);
     if (!target) return;
     const nextStatus = target.status === "published" ? "draft" : "published";
+    const nextLabel = nextStatus === "published" ? t("admin.statePublished") : t("admin.stateDraft");
     setAdminProps((list) =>
       list.map((p) => (p.id === id ? { ...p, status: nextStatus } : p))
     );
@@ -296,14 +344,14 @@ export default function AdminPage() {
     if (supabase) {
       await supabase.from("bhk_properties").update({ status: nextStatus }).eq("id", id);
     }
-    showToast(`${target.name} is now ${nextStatus}`);
-    logActivity(`Property ${target.name} status updated to ${nextStatus}`);
+    showToast(t("admin.toastStatusNow", { name: target.name, status: nextLabel }));
+    logActivity(t("admin.logStatusUpdated", { name: target.name, status: nextLabel }));
   }
 
   async function savePrice(id: string) {
     const parsed = Number(newPrice);
     if (!parsed || parsed <= 0) {
-      showToast("Enter a valid price amount");
+      showToast(t("admin.toastErrPrice"));
       return;
     }
     const target = adminProps.find((p) => p.id === id);
@@ -315,8 +363,8 @@ export default function AdminPage() {
     if (supabase) {
       await supabase.from("bhk_properties").update({ price: parsed }).eq("id", id);
     }
-    showToast(`Updated nightly rate to ₹${parsed.toLocaleString("en-IN")}`);
-    logActivity(`Nightly rate for ${target.name} updated to ₹${parsed}`);
+    showToast(t("admin.toastPriceUpdated", { amount: parsed.toLocaleString("en-IN") }));
+    logActivity(t("admin.logPriceUpdated", { name: target.name, amount: parsed }));
     setEditPriceId(null);
     setNewPrice("");
   }
@@ -324,7 +372,7 @@ export default function AdminPage() {
   async function syncCatalogToDatabase() {
     const supabase = browserSupabase();
     if (!supabase) {
-      showToast("Supabase environment variables not configured in current environment");
+      showToast(t("admin.toastNoSupabase"));
       return;
     }
     setSyncing(true);
@@ -354,11 +402,11 @@ export default function AdminPage() {
       }));
       const { error } = await supabase.from("bhk_properties").upsert(rows, { onConflict: "id" });
       if (error) throw error;
-      showToast("All farmhouses synced to Supabase database!");
-      logActivity("Bulk synchronized catalog to Supabase (bhk_properties)");
+      showToast(t("admin.toastSynced"));
+      logActivity(t("admin.logBulkSynced"));
       reloadCatalog();
     } catch (err: any) {
-      showToast(`Sync failed: ${err.message}`);
+      showToast(t("admin.toastSyncFailed", { message: err.message }));
     } finally {
       setSyncing(false);
     }
@@ -366,16 +414,24 @@ export default function AdminPage() {
 
   function actReview(id: string, action: "approve" | "changes" | "reject") {
     const labels = {
-      approve: "Listing approved and published",
-      changes: "Changes requested from the host",
-      reject: "Listing rejected",
+      approve: t("admin.reviewApprovedPublished"),
+      changes: t("admin.reviewChangesRequested"),
+      reject: t("admin.reviewRejected"),
     };
     const target = queue.find((q) => q.id === id);
     setQueue((items) =>
       items.map((item) => (item.id === id ? { ...item, status: action === "approve" ? "approved" : action === "changes" ? "changes" : "rejected" } : item))
     );
     showToast(labels[action]);
-    logActivity(`${target?.name || id} ${action === "approve" ? "approved" : action === "changes" ? "changes requested" : "rejected"}`);
+    logActivity(
+      `${target?.name || id} ${
+        action === "approve"
+          ? t("admin.logApproved")
+          : action === "changes"
+            ? t("admin.logChangesRequested")
+            : t("admin.logRejected")
+      }`
+    );
   }
 
   function toggleSuspendUser(email: string) {
@@ -383,8 +439,13 @@ export default function AdminPage() {
       list.map((u) => {
         if (u.email === email) {
           const next = u.status === "active" ? "suspended" : "active";
-          showToast(next === "suspended" ? `Suspended ${u.name}` : `Reactivated ${u.name}`);
-          logActivity(`User ${u.name} status set to ${next}`);
+          showToast(next === "suspended" ? t("admin.toastUserSuspended", { name: u.name }) : t("admin.toastUserReactivated", { name: u.name }));
+          logActivity(
+            t("admin.logUserStatus", {
+              name: u.name,
+              status: next === "suspended" ? t("admin.stateSuspended") : t("admin.stateActive"),
+            })
+          );
           return { ...u, status: next };
         }
         return u;
@@ -399,8 +460,8 @@ export default function AdminPage() {
     setHostChecks((list) =>
       list.map((h) => {
         if (h.id === hostId) {
-          showToast(`Host ${h.name} verified — access granted`);
-          logActivity(`Host ${h.name} verified`);
+          showToast(t("admin.toastHostVerified", { name: h.name }));
+          logActivity(t("admin.logHostVerified", { name: h.name }));
           return {
             ...h,
             status: "Verified",
@@ -416,8 +477,8 @@ export default function AdminPage() {
     setPropChecks((list) =>
       list.map((p) => {
         if (p.id === propId) {
-          showToast(`${p.name} verified and ready to publish`);
-          logActivity(`Property ${p.name} verification completed`);
+          showToast(t("admin.toastPropertyVerified", { name: p.name }));
+          logActivity(t("admin.logPropertyVerification", { name: p.name }));
           return {
             ...p,
             status: "Verified",
@@ -442,8 +503,8 @@ export default function AdminPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast("Bookings exported to CSV");
-    logActivity("Exported bookings report CSV");
+    showToast(t("admin.toastExported"));
+    logActivity(t("admin.logExported"));
   }
 
   function generateDemoBooking() {
@@ -465,22 +526,22 @@ export default function AdminPage() {
       upiId: "9bhk@okhdfcbank",
       paymentRef: `UPI-${Math.floor(10000 + Math.random() * 90000)}`,
     });
-    showToast(`Test booking #${code} created!`);
-    logActivity(`Test booking #${code} generated`);
+    showToast(t("admin.toastTestBooking", { code }));
+    logActivity(t("admin.logTestBooking", { code }));
   }
 
   return (
     <Shell>
-      <PageBar title="Admin Operations" backHref="/profile" right={<span className="admin-flag"><Icon name="shield" />Staff</span>} />
+      <PageBar title={t("admin.pageBarTitle")} backHref="/profile" right={<span className="admin-flag"><Icon name="shield" />{t("admin.staff")}</span>} />
       
       <header className="page-head">
         <span className="admin-flag">
           <Icon name="shield" />
-          Restricted workspace
+          {t("admin.restrictedWorkspace")}
         </span>
-        <h1 style={{ marginTop: 10 }}>Operations console</h1>
+        <h1 style={{ marginTop: 10 }}>{t("admin.operationsConsole")}</h1>
         <p className="sub">
-          Review listings, verify hosts, manage bookings and run operations tools.
+          {t("admin.consoleSub")}
         </p>
       </header>
 
@@ -494,7 +555,7 @@ export default function AdminPage() {
               aria-selected={tab === name}
               onClick={() => setTab(name)}
             >
-              {name}
+              {t(TAB_KEY[name])}
               {name === "Reviews" && pendingReviews.length > 0 ? (
                 <span className="pill warn sm" style={{ marginLeft: 6, fontSize: 10 }}>{pendingReviews.length}</span>
               ) : null}
@@ -508,24 +569,24 @@ export default function AdminPage() {
         <div className="pad mt stack">
           <div className="stats">
             <button className="stat" type="button" onClick={() => setTab("Properties")} style={{ textAlign: "left", background: "none", border: 0, cursor: "pointer", width: "100%" }}>
-              <span className="lb"><Icon name="home" />Properties</span>
+              <span className="lb"><Icon name="home" />{t("admin.statProperties")}</span>
               <span className="nb num">{adminProps.length}</span>
-              <span className="sub">{adminProps.filter(p => (p.status || "published") === "published").length} active stays</span>
+              <span className="sub">{t("admin.activeStays", { n: adminProps.filter(p => (p.status || "published") === "published").length })}</span>
             </button>
             <button className="stat" type="button" onClick={() => setTab("Users")} style={{ textAlign: "left", background: "none", border: 0, cursor: "pointer", width: "100%" }}>
-              <span className="lb"><Icon name="users" />Users</span>
-              <span className="nb num">{users.length} active</span>
-              <span className="sub">Accounts directory</span>
+              <span className="lb"><Icon name="users" />{t("admin.statUsers")}</span>
+              <span className="nb num">{t("admin.usersActive", { n: users.length })}</span>
+              <span className="sub">{t("admin.accountsDirectory")}</span>
             </button>
             <button className="stat" type="button" onClick={() => setTab("Bookings")} style={{ textAlign: "left", background: "none", border: 0, cursor: "pointer", width: "100%" }}>
-              <span className="lb"><Icon name="calendar" />Bookings</span>
+              <span className="lb"><Icon name="calendar" />{t("admin.statBookings")}</span>
               <span className="nb num">{storeBookings.length}</span>
-              <span className="sub">Live marketplace</span>
+              <span className="sub">{t("admin.liveMarketplace")}</span>
             </button>
             <button className="stat" type="button" onClick={() => setTab("Verification")} style={{ textAlign: "left", background: "none", border: 0, cursor: "pointer", width: "100%" }}>
-              <span className="lb"><Icon name="shield" />Verification</span>
+              <span className="lb"><Icon name="shield" />{t("admin.statVerification")}</span>
               <span className="nb num">{hostChecks.filter(h => h.status !== "Verified").length + propChecks.filter(p => p.status !== "Verified").length}</span>
-              <span className="sub">Queued checks</span>
+              <span className="sub">{t("admin.queuedChecks")}</span>
             </button>
           </div>
 
@@ -534,10 +595,10 @@ export default function AdminPage() {
             <div className="between" style={{ alignItems: "center" }}>
               <div className="row" style={{ alignItems: "center", gap: 8 }}>
                 <span className={`pill ${dbStatus === "connected" ? "ok" : "warn"}`}>
-                  {dbStatus === "connected" ? "🟢 Database Connected" : "🟡 Local Mode"}
+                  {dbStatus === "connected" ? `🟢 ${t("admin.dbConnected")}` : `🟡 ${t("admin.dbLocalMode")}`}
                 </span>
                 <strong style={{ fontSize: 14 }}>
-                  {dbStatus === "connected" ? "Live Supabase Connection" : "Local Prototype State"}
+                  {dbStatus === "connected" ? t("admin.liveSupabase") : t("admin.localPrototype")}
                 </strong>
               </div>
               <button
@@ -547,82 +608,80 @@ export default function AdminPage() {
                 onClick={syncCatalogToDatabase}
               >
                 <Icon name="refresh" />
-                {syncing ? "Syncing..." : "Sync Catalog to DB"}
+                {syncing ? t("admin.syncing") : t("admin.syncCatalogToDb")}
               </button>
             </div>
             <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
-              {dbStatus === "connected"
-                ? "Active tables: bhk_properties, bhk_bookings, bhk_profiles, bhk_notifications. All admin status toggles and price updates persist directly to Supabase."
-                : "No remote database URL detected in this environment. Properties, bookings and reviews are managed reactively in local state."}
+              {dbStatus === "connected" ? t("admin.dbActiveTables") : t("admin.dbNoRemote")}
             </p>
           </div>
 
           <div className="card">
-            <h3>Management & Queues</h3>
+            <h3>{t("admin.managementQueues")}</h3>
             <button className="mi" type="button" onClick={() => setTab("Properties")}>
               <Icon name="home" />
-              <span className="lb">Farmhouse directory</span>
-              <span className="meta">{adminProps.length} stays</span>
+              <span className="lb">{t("admin.farmhouseDirectory")}</span>
+              <span className="meta">{t("search.staysCount", { n: adminProps.length })}</span>
             </button>
             <button className="mi" type="button" onClick={() => setTab("Reviews")}>
               <Icon name="award" />
-              <span className="lb">Property reviews</span>
-              <span className="meta">{pendingReviews.length} waiting</span>
+              <span className="lb">{t("admin.propertyReviews")}</span>
+              <span className="meta">{t("admin.waitingCount", { n: pendingReviews.length })}</span>
             </button>
             <button className="mi" type="button" onClick={() => setTab("Verification")}>
               <Icon name="shield" />
-              <span className="lb">Verification queue</span>
-              <span className="meta">2 checks pending</span>
+              <span className="lb">{t("admin.verificationQueue")}</span>
+              <span className="meta">{t("admin.checksPending", { n: 2 })}</span>
             </button>
             <button className="mi" type="button" onClick={() => setTab("Bookings")}>
               <Icon name="list" />
-              <span className="lb">Bookings manager</span>
-              <span className="meta">{storeBookings.length} total</span>
+              <span className="lb">{t("admin.bookingsManager")}</span>
+              <span className="meta">{t("admin.totalCount", { n: storeBookings.length })}</span>
             </button>
           </div>
 
           {/* Operations Tools Toolbar */}
           <div className="card">
-            <h3>Operations Tools</h3>
+            <h3>{t("admin.operationsTools")}</h3>
             <p className="muted" style={{ fontSize: 13, margin: "4px 0 12px" }}>
-              Quick administrative triggers and system utilities:
+              {t("admin.toolsIntro")}
             </p>
             <div className="row wrap" style={{ gap: 8 }}>
               <button
                 className="btn sm outline"
                 type="button"
                 onClick={() => {
-                  showToast("Catalog & server cache refreshed");
-                  logActivity("System catalog cache flushed");
+                  showToast(t("admin.toastCacheRefreshed"));
+                  logActivity(t("admin.logCacheFlushed"));
                 }}
               >
-                <Icon name="refresh" /> Refresh Cache
+                <Icon name="refresh" /> {t("admin.refreshCache")}
               </button>
               <button className="btn sm outline" type="button" onClick={exportCsv}>
-                <Icon name="download" /> Export Bookings CSV
+                <Icon name="download" /> {t("admin.exportBookingsCsv")}
               </button>
               <button className="btn sm outline" type="button" onClick={generateDemoBooking}>
-                <Icon name="plus" /> New Test Booking
+                <Icon name="plus" /> {t("admin.newTestBooking")}
               </button>
               <button
                 className="btn sm outline"
                 type="button"
                 onClick={() => {
                   setQueue(INITIAL_QUEUE);
-                  showToast("Review queues restored to sample state");
-                  logActivity("Sample review queue reset");
+                  showToast(t("admin.toastQueuesRestored"));
+                  logActivity(t("admin.logQueuesReset"));
                 }}
               >
-                Reset Demo Queues
+                {t("admin.resetDemoQueues")}
               </button>
             </div>
           </div>
 
           <div className="card">
             <div className="between">
-              <h3>Recent activity</h3>
+              <h3>{t("admin.recentActivity")}</h3>
               <button className="lnk" type="button" onClick={() => setAuditLogOpen(true)}>
-                View audit log
+                {t("admin.viewAuditLog")}
               </button>
             </div>
             {activity.map((line, i) => (
@@ -640,9 +699,9 @@ export default function AdminPage() {
         <div className="pad mt stack">
           <div className="between" style={{ alignItems: "center" }}>
             <div>
-              <h2>Farmhouses & Database</h2>
+              <h2>{t("admin.farmhousesDatabase")}</h2>
               <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>
-                {dbStatus === "connected" ? "🟢 Live connected to Supabase bhk_properties" : "🟡 Local mock catalog mode"}
+                {dbStatus === "connected" ? `🟢 ${t("admin.liveSupabaseTable")}` : `🟡 ${t("admin.localMockMode")}`}
               </p>
             </div>
             <button
@@ -652,7 +711,7 @@ export default function AdminPage() {
               onClick={syncCatalogToDatabase}
             >
               <Icon name="refresh" />
-              {syncing ? "Syncing..." : "Sync to DB"}
+              {syncing ? t("admin.syncing") : t("admin.syncToDb")}
             </button>
           </div>
 
@@ -666,7 +725,7 @@ export default function AdminPage() {
                 onClick={() => setPropFilter(filter)}
                 style={{ textTransform: "capitalize" }}
               >
-                {filter} ({filter === "all" ? adminProps.length : adminProps.filter((p) => (p.status || "published") === filter).length})
+                {t(PROP_FILTER_KEY[filter])} ({filter === "all" ? adminProps.length : adminProps.filter((p) => (p.status || "published") === filter).length})
               </button>
             ))}
           </div>
@@ -688,15 +747,15 @@ export default function AdminPage() {
                         <div className="between" style={{ alignItems: "flex-start" }}>
                           <h3 style={{ fontSize: 16, margin: 0 }}>{p.name}</h3>
                           <span className={`pill sm ${isPublished ? "ok" : "warn"}`}>
-                            {isPublished ? "Published" : "Draft"}
+                            {isPublished ? t("admin.statePublished") : t("admin.stateDraft")}
                           </span>
                         </div>
                         <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>
-                          {p.location} · {p.guests} guests · {p.bedrooms} BHK
+                          {p.location} · {t("home.guestCount", { n: p.guests })} · {p.bedrooms} BHK
                         </p>
                         <div className="row" style={{ alignItems: "center", gap: 8, marginTop: 6 }}>
                           <strong className="num" style={{ fontSize: 14 }}>
-                            ₹{p.price.toLocaleString("en-IN")} / night
+                            {t("admin.pricePerNight", { amount: p.price.toLocaleString("en-IN") })}
                           </strong>
                           <button
                             className="lnk"
@@ -707,7 +766,7 @@ export default function AdminPage() {
                               setNewPrice(String(p.price));
                             }}
                           >
-                            Edit rate
+                            {t("admin.editRate")}
                           </button>
                         </div>
                       </div>
@@ -719,15 +778,15 @@ export default function AdminPage() {
                           type="number"
                           className="ctrl"
                           style={{ minHeight: 36, padding: "6px 10px", fontSize: 13 }}
-                          placeholder="New nightly price (₹)"
+                          placeholder={t("admin.newPricePlaceholder")}
                           value={newPrice}
                           onChange={(e) => setNewPrice(e.target.value)}
                         />
                         <button className="btn sm" type="button" onClick={() => savePrice(p.id)}>
-                          Save
+                          {t("action.save")}
                         </button>
                         <button className="btn ghost sm" type="button" onClick={() => setEditPriceId(null)}>
-                          Cancel
+                          {t("action.cancel")}
                         </button>
                       </div>
                     ) : null}
@@ -738,10 +797,10 @@ export default function AdminPage() {
                         type="button"
                         onClick={() => togglePropertyStatus(p.id)}
                       >
-                        {isPublished ? "Unpublish stay" : "Publish to explore"}
+                        {isPublished ? t("admin.unpublishStay") : t("admin.publishToExplore")}
                       </button>
                       <Link className="btn ghost sm grow center" href={`/property/${p.id}`} target="_blank">
-                        View stay <Icon name="arrow" />
+                        {t("admin.viewStay")} <Icon name="arrow" />
                       </Link>
                     </div>
                   </article>
@@ -755,17 +814,17 @@ export default function AdminPage() {
       {tab === "Reviews" ? (
         <div className="pad mt stack">
           <div className="between">
-            <h2>Property review queue</h2>
-            <span className="pill warn sm">{pendingReviews.length} in this batch</span>
+            <h2>{t("admin.reviewQueue")}</h2>
+            <span className="pill warn sm">{t("admin.inThisBatch", { n: pendingReviews.length })}</span>
           </div>
 
           {pendingReviews.length === 0 ? (
             <div className="empty">
               <Icon name="check" />
-              <h3>Review queue is clear!</h3>
-              <p>All submitted farmhouses have been reviewed and decided.</p>
+              <h3>{t("admin.queueClear")}</h3>
+              <p>{t("admin.queueClearBody")}</p>
               <button className="btn sm" type="button" onClick={() => setQueue(INITIAL_QUEUE)}>
-                Reload sample queue
+                {t("admin.reloadSampleQueue")}
               </button>
             </div>
           ) : (
@@ -782,25 +841,25 @@ export default function AdminPage() {
 
                 <div className="between" style={{ marginTop: 12 }}>
                   <span className="pill info sm">{item.when}</span>
-                  <span className="tiny muted">Listing #{item.id}</span>
+                  <span className="tiny muted">{t("admin.listingRef", { id: item.id })}</span>
                 </div>
 
                 <h3 style={{ marginTop: 6, fontSize: 18 }}>{item.name}</h3>
                 <p className="tiny muted">{item.meta}</p>
 
                 <div className="stack xs mt">
-                  <div className="sumline"><span className="k">Host</span><span>{item.host}</span></div>
-                  <div className="sumline"><span className="k">Nightly price</span><span className="num">{item.price}</span></div>
-                  <div className="sumline"><span className="k">Amenities</span><span className="tiny">{item.amenities}</span></div>
+                  <div className="sumline"><span className="k">{t("admin.fieldHost")}</span><span>{item.host}</span></div>
+                  <div className="sumline"><span className="k">{t("admin.fieldNightlyPrice")}</span><span className="num">{item.price}</span></div>
+                  <div className="sumline"><span className="k">{t("admin.fieldAmenities")}</span><span className="tiny">{item.amenities}</span></div>
                 </div>
 
-                <p className="sec-title" style={{ fontSize: 13, marginTop: 14 }}>Submitted documents</p>
+                <p className="sec-title" style={{ fontSize: 13, marginTop: 14 }}>{t("admin.submittedDocuments")}</p>
                 <div className="card tight" style={{ marginTop: 6 }}>
                   {item.docs.map(([doc, state]) => (
                     <div className="doc-row" key={doc}>
-                      <span className="nm"><Icon name="shield" />{doc}</span>
+                      <span className="nm"><Icon name="shield" />{DOC_KEY[doc] ? t(DOC_KEY[doc]) : doc}</span>
                       <span className={`pill sm ${state === "Verified" ? "ok" : state === "Pending" ? "warn" : "danger"}`}>
-                        {state}
+                        {STATE_KEY[state] ? t(STATE_KEY[state]) : state}
                       </span>
                     </div>
                   ))}
@@ -808,13 +867,13 @@ export default function AdminPage() {
 
                 <div className="row wrap mt" style={{ gap: 8 }}>
                   <button className="btn sm grow" type="button" onClick={() => actReview(item.id, "approve")}>
-                    Approve
+                    {t("admin.approve")}
                   </button>
                   <button className="btn outline sm grow" type="button" onClick={() => actReview(item.id, "changes")}>
-                    Request changes
+                    {t("admin.requestChanges")}
                   </button>
                   <button className="btn danger sm grow" type="button" onClick={() => actReview(item.id, "reject")}>
-                    Reject
+                    {t("admin.reject")}
                   </button>
                 </div>
               </article>
@@ -827,13 +886,13 @@ export default function AdminPage() {
       {tab === "Users" ? (
         <div className="stack pad mt">
           <div className="between">
-            <h2>User & host directory</h2>
+            <h2>{t("admin.userHostDirectory")}</h2>
             <button
               className="btn sm outline"
               type="button"
-              onClick={() => showToast("User directory synced with Supabase Auth")}
+              onClick={() => showToast(t("admin.toastUsersSynced"))}
             >
-              <Icon name="refresh" /> Sync Users
+              <Icon name="refresh" /> {t("admin.syncUsers")}
             </button>
           </div>
 
@@ -845,12 +904,12 @@ export default function AdminPage() {
                   <div className="between">
                     <strong>{person.name}</strong>
                     <span className={`pill sm ${person.status === "suspended" ? "danger" : person.role.includes("verified") ? "ok" : person.role.includes("pending") ? "warn" : "forest"}`}>
-                      {person.status === "suspended" ? "Suspended" : person.role}
+                      {person.status === "suspended" ? t("admin.stateSuspended") : t(USER_ROLE_KEY[person.role])}
                     </span>
                   </div>
                   <p className="tiny muted" style={{ marginTop: 2 }}>{person.meta}</p>
                   <p className="tiny muted">
-                    {person.trips ? `${person.trips} trips · ` : ""}{person.listings ? `${person.listings} listings · ${person.stays} stays` : person.flags || "No flags"}
+                    {person.trips ? `${t("admin.tripsCount", { n: person.trips })} · ` : ""}{person.listings ? `${t("admin.listingsCount", { n: person.listings })} · ${t("search.staysCount", { n: String(person.stays) })}` : person.flags || t("admin.noFlags")}
                   </p>
                   <div className="row mt" style={{ gap: 8 }}>
                     <button
@@ -858,14 +917,14 @@ export default function AdminPage() {
                       type="button"
                       onClick={() => setActiveUserModal(person)}
                     >
-                      View record
+                      {t("admin.viewRecord")}
                     </button>
                     <button
                       className={`btn sm ${person.status === "active" ? "danger" : "outline"}`}
                       type="button"
                       onClick={() => toggleSuspendUser(person.email)}
                     >
-                      {person.status === "active" ? "Suspend" : "Reactivate"}
+                      {person.status === "active" ? t("admin.suspend") : t("admin.reactivate")}
                     </button>
                   </div>
                 </div>
@@ -879,9 +938,9 @@ export default function AdminPage() {
       {tab === "Bookings" ? (
         <div className="pad mt stack">
           <div className="between">
-            <h2>Bookings manager</h2>
+            <h2>{t("admin.bookingsManager")}</h2>
             <button className="btn sm" type="button" onClick={exportCsv}>
-              <Icon name="download" /> Export CSV
+              <Icon name="download" /> {t("admin.exportCsv")}
             </button>
           </div>
 
@@ -890,40 +949,40 @@ export default function AdminPage() {
               <article className="card" key={b.id}>
                 <div className="between">
                   <span className={`pill sm ${b.status === "confirmed" ? "ok" : b.status === "awaiting" ? "warn" : "muted"}`}>
-                    {b.status === "confirmed" ? "Confirmed" : b.status === "awaiting" ? "Awaiting host" : b.status}
+                    {b.status === "confirmed" ? t("booking.statusConfirmed") : b.status === "awaiting" ? t("booking.statusAwaiting") : b.status}
                   </span>
                   <strong className="num">{inr(b.total)}</strong>
                 </div>
                 <h3 style={{ marginTop: 6, fontSize: 16 }}>{b.propertyName || b.propertyId}</h3>
-                <p className="tiny muted">Booking #{b.code} · Guest {b.guestName}</p>
-                <p className="tiny muted">{b.checkIn} to {b.checkOut} · {b.adults + b.children} guests</p>
-                {b.paymentRef ? <p className="tiny muted">UPI Reference: {b.paymentRef}</p> : null}
+                <p className="tiny muted">{t("trips.bookingRef", { code: b.code })} · {t("admin.guestNamed", { name: b.guestName })}</p>
+                <p className="tiny muted">{t("admin.dateRange", { from: b.checkIn, to: b.checkOut })} · {t("home.guestCount", { n: b.adults + b.children })}</p>
+                {b.paymentRef ? <p className="tiny muted">{t("admin.upiReference", { ref: b.paymentRef })}</p> : null}
 
                 <div className="row wrap mt" style={{ gap: 8 }}>
                   <button className="btn sm outline grow" type="button" onClick={() => setActiveBookingModal(b)}>
-                    View details
+                    {t("admin.viewDetails")}
                   </button>
                   {b.status === "awaiting" ? (
                     <button
                       className="btn sm grow"
                       type="button"
                       onClick={() => {
-                        showToast(`Booking #${b.code} confirmed for guest`);
-                        logActivity(`Booking #${b.code} manually approved`);
+                        showToast(t("admin.toastBookingConfirmed", { code: b.code }));
+                        logActivity(t("admin.logBookingApproved", { code: b.code }));
                       }}
                     >
-                      Approve stay
+                      {t("admin.approveStay")}
                     </button>
                   ) : null}
                   <button
                     className="btn sm danger grow"
                     type="button"
                     onClick={() => {
-                      showToast(`Refund issued for booking #${b.code}`);
-                      logActivity(`Refund ₹${b.total} issued for #${b.code}`);
+                      showToast(t("admin.toastRefundIssued", { code: b.code }));
+                      logActivity(t("admin.logRefundIssued", { amount: b.total, code: b.code }));
                     }}
                   >
-                    Issue refund
+                    {t("admin.issueRefund")}
                   </button>
                 </div>
               </article>
@@ -935,7 +994,7 @@ export default function AdminPage() {
       {/* ── VERIFICATION TAB ────────────────────────────────────── */}
       {tab === "Verification" ? (
         <div className="pad mt stack">
-          <h2>Identity & property verification</h2>
+          <h2>{t("admin.identityVerification")}</h2>
           <div className="seg" role="tablist">
             <button
               type="button"
@@ -943,7 +1002,7 @@ export default function AdminPage() {
               aria-selected={verifySeg === "host"}
               onClick={() => setVerifySeg("host")}
             >
-              Host verification
+              {t("admin.hostVerification")}
             </button>
             <button
               type="button"
@@ -951,7 +1010,7 @@ export default function AdminPage() {
               aria-selected={verifySeg === "property"}
               onClick={() => setVerifySeg("property")}
             >
-              Property verification
+              {t("admin.propertyVerification")}
             </button>
           </div>
 
@@ -964,13 +1023,13 @@ export default function AdminPage() {
                       <span className="avatar sm">{host.initials}</span>
                       <strong>{host.name}</strong>
                     </span>
-                    <span className={`pill sm ${host.status === "Verified" ? "ok" : "warn"}`}>{host.status}</span>
+                    <span className={`pill sm ${host.status === "Verified" ? "ok" : "warn"}`}>{STATE_KEY[host.status] ? t(STATE_KEY[host.status]) : host.status}</span>
                   </div>
                   <div className="card tight mt">
                     {host.docs.map((d) => (
                       <div className="doc-row" key={d.label}>
-                        <span className="nm"><Icon name="shield" />{d.label}</span>
-                        <span className={`pill sm ${d.state === "Verified" ? "ok" : "warn"}`}>{d.state}</span>
+                        <span className="nm"><Icon name="shield" />{DOC_KEY[d.label] ? t(DOC_KEY[d.label]) : d.label}</span>
+                        <span className={`pill sm ${d.state === "Verified" ? "ok" : "warn"}`}>{STATE_KEY[d.state] ? t(STATE_KEY[d.state]) : d.state}</span>
                       </div>
                     ))}
                   </div>
@@ -981,17 +1040,17 @@ export default function AdminPage() {
                       disabled={host.status === "Verified"}
                       onClick={() => handleVerifyHost(host.id)}
                     >
-                      {host.status === "Verified" ? "Host verified" : "Verify host"}
+                      {host.status === "Verified" ? t("admin.hostVerifiedBtn") : t("admin.verifyHost")}
                     </button>
                     <button
                       className="btn sm outline grow"
                       type="button"
                       onClick={() => {
-                        showToast(`Document upload reminder sent to ${host.name}`);
-                        logActivity(`Requested docs from ${host.name}`);
+                        showToast(t("admin.toastDocReminder", { name: host.name }));
+                        logActivity(t("admin.logDocsRequested", { name: host.name }));
                       }}
                     >
-                      Request info
+                      {t("admin.requestInfo")}
                     </button>
                   </div>
                 </article>
@@ -1004,16 +1063,16 @@ export default function AdminPage() {
                   <div className="between">
                     <strong>{prop.name}</strong>
                     <span className={`pill sm ${prop.status === "Verified" ? "ok" : prop.status === "Missing documents" ? "danger" : "info"}`}>
-                      {prop.status}
+                      {STATE_KEY[prop.status] ? t(STATE_KEY[prop.status]) : prop.status}
                     </span>
                   </div>
                   <p className="tiny muted">{prop.location}</p>
                   <div className="card tight mt">
                     {prop.docs.map((d) => (
                       <div className="doc-row" key={d.label}>
-                        <span className="nm"><Icon name="shield" />{d.label}</span>
+                        <span className="nm"><Icon name="shield" />{DOC_KEY[d.label] ? t(DOC_KEY[d.label]) : d.label}</span>
                         <span className={`pill sm ${d.state === "Verified" ? "ok" : d.state === "Pending" ? "warn" : "danger"}`}>
-                          {d.state}
+                          {STATE_KEY[d.state] ? t(STATE_KEY[d.state]) : d.state}
                         </span>
                       </div>
                     ))}
@@ -1025,17 +1084,17 @@ export default function AdminPage() {
                       disabled={prop.status === "Verified"}
                       onClick={() => handleVerifyProperty(prop.id)}
                     >
-                      {prop.status === "Verified" ? "Verified" : "Mark verified"}
+                      {prop.status === "Verified" ? t("admin.stateVerified") : t("admin.markVerified")}
                     </button>
                     <button
                       className="btn sm outline grow"
                       type="button"
                       onClick={() => {
-                        showToast(`Ownership document request sent for ${prop.name}`);
-                        logActivity(`Requested deed from host for ${prop.name}`);
+                        showToast(t("admin.toastOwnershipRequest", { name: prop.name }));
+                        logActivity(t("admin.logDeedRequested", { name: prop.name }));
                       }}
                     >
-                      Request info
+                      {t("admin.requestInfo")}
                     </button>
                   </div>
                 </article>
@@ -1047,7 +1106,7 @@ export default function AdminPage() {
 
       {/* User Record Modal */}
       <div className={`scrim${activeUserModal ? " is-open" : ""}`} onClick={() => setActiveUserModal(null)} />
-      <div className={`sheet${activeUserModal ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label="User record">
+      <div className={`sheet${activeUserModal ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label={t("admin.a11yUserRecord")}>
         <div className="sheet-grab" />
         {activeUserModal ? (
           <div className="pad stack">
@@ -1057,12 +1116,12 @@ export default function AdminPage() {
                 {activeUserModal.status}
               </span>
             </div>
-            <p className="muted">{activeUserModal.role}</p>
+            <p className="muted">{t(USER_ROLE_KEY[activeUserModal.role])}</p>
             <div className="card">
-              <div className="sumline"><span className="k">Email</span><span>{activeUserModal.email}</span></div>
-              <div className="sumline"><span className="k">Phone</span><span>{activeUserModal.phone}</span></div>
-              <div className="sumline"><span className="k">Trips</span><span>{activeUserModal.trips || 0}</span></div>
-              <div className="sumline"><span className="k">Listings</span><span>{activeUserModal.listings || 0}</span></div>
+              <div className="sumline"><span className="k">{t("profile.fieldEmail")}</span><span>{activeUserModal.email}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldPhone")}</span><span>{activeUserModal.phone}</span></div>
+              <div className="sumline"><span className="k">{t("nav.trips")}</span><span>{activeUserModal.trips || 0}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldListings")}</span><span>{activeUserModal.listings || 0}</span></div>
             </div>
             <div className="row" style={{ gap: 8 }}>
               <button
@@ -1070,10 +1129,10 @@ export default function AdminPage() {
                 type="button"
                 onClick={() => toggleSuspendUser(activeUserModal.email)}
               >
-                {activeUserModal.status === "active" ? "Suspend Account" : "Reactivate Account"}
+                {activeUserModal.status === "active" ? t("admin.suspendAccount") : t("admin.reactivateAccount")}
               </button>
               <button className="btn outline" type="button" onClick={() => setActiveUserModal(null)}>
-                Close
+                {t("action.close")}
               </button>
             </div>
           </div>
@@ -1082,25 +1141,25 @@ export default function AdminPage() {
 
       {/* Booking Record Modal */}
       <div className={`scrim${activeBookingModal ? " is-open" : ""}`} onClick={() => setActiveBookingModal(null)} />
-      <div className={`sheet${activeBookingModal ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label="Booking record">
+      <div className={`sheet${activeBookingModal ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label={t("admin.a11yBookingRecord")}>
         <div className="sheet-grab" />
         {activeBookingModal ? (
           <div className="pad stack">
             <div className="between">
-              <h2>Booking #{activeBookingModal.code}</h2>
+              <h2>{t("trips.bookingRef", { code: activeBookingModal.code })}</h2>
               <span className="pill ok sm">{activeBookingModal.status}</span>
             </div>
             <div className="card">
-              <div className="sumline"><span className="k">Property</span><span>{activeBookingModal.propertyName || activeBookingModal.propertyId}</span></div>
-              <div className="sumline"><span className="k">Guest name</span><span>{activeBookingModal.guestName}</span></div>
-              <div className="sumline"><span className="k">Guest email</span><span>{activeBookingModal.guestEmail}</span></div>
-              <div className="sumline"><span className="k">Guest phone</span><span>{activeBookingModal.guestPhone}</span></div>
-              <div className="sumline"><span className="k">Dates</span><span>{activeBookingModal.checkIn} to {activeBookingModal.checkOut}</span></div>
-              <div className="sumline"><span className="k">UPI Ref</span><span>{activeBookingModal.paymentRef || "Pending host check"}</span></div>
-              <div className="sumline total"><span className="k">Total</span><span className="num">{inr(activeBookingModal.total)}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldProperty")}</span><span>{activeBookingModal.propertyName || activeBookingModal.propertyId}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldGuestName")}</span><span>{activeBookingModal.guestName}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldGuestEmail")}</span><span>{activeBookingModal.guestEmail}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldGuestPhone")}</span><span>{activeBookingModal.guestPhone}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldDates")}</span><span>{t("admin.dateRange", { from: activeBookingModal.checkIn, to: activeBookingModal.checkOut })}</span></div>
+              <div className="sumline"><span className="k">{t("admin.fieldUpiRef")}</span><span>{activeBookingModal.paymentRef || t("admin.pendingHostCheck")}</span></div>
+              <div className="sumline total"><span className="k">{t("admin.fieldTotal")}</span><span className="num">{inr(activeBookingModal.total)}</span></div>
             </div>
             <button className="btn block" type="button" onClick={() => setActiveBookingModal(null)}>
-              Done
+              {t("action.done")}
             </button>
           </div>
         ) : null}
@@ -1108,21 +1167,21 @@ export default function AdminPage() {
 
       {/* Audit Log Modal */}
       <div className={`scrim${auditLogOpen ? " is-open" : ""}`} onClick={() => setAuditLogOpen(false)} />
-      <div className={`sheet${auditLogOpen ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label="Audit log">
+      <div className={`sheet${auditLogOpen ? " is-open" : ""}`} role="dialog" aria-modal="true" aria-label={t("admin.a11yAuditLog")}>
         <div className="sheet-grab" />
         <div className="pad stack">
-          <h2>Admin audit log</h2>
-          <p className="muted">All administrative and operational transactions are logged with staff identity.</p>
+          <h2>{t("admin.auditLog")}</h2>
+          <p className="muted">{t("admin.auditLogBody")}</p>
           <div className="card">
             {activity.map((item, idx) => (
               <div className="sumline" key={idx} style={{ padding: "6px 0", fontSize: 13 }}>
                 <span>{item}</span>
-                <span className="pill sm">Staff: admin@9bhk.app</span>
+                <span className="pill sm">{t("admin.auditActor")}</span>
               </div>
             ))}
           </div>
           <button className="btn block" type="button" onClick={() => setAuditLogOpen(false)}>
-            Close
+            {t("action.close")}
           </button>
         </div>
       </div>

@@ -10,11 +10,13 @@ import { formatInrCrores, type GarageType, type Property } from "@/lib/propertie
 import { useCatalog } from "@/lib/catalog";
 import { BaseSheet } from "@/components/base-sheet";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export default function BuyPage() {
   const router = useRouter();
   const { city, addViewingRequest, showToast } = useStore();
   const { properties } = useCatalog();
+  const t = useT();
 
   const [selectedGarage, setSelectedGarage] = useState<string>("all");
   const [minFrontage, setMinFrontage] = useState<boolean>(false);
@@ -52,13 +54,15 @@ export default function BuyPage() {
           propertyName: inquiryProperty.name,
           buyerName: buyerName.trim(),
           buyerPhone: buyerPhone.trim(),
-          automotiveMandate: isRealtor ? `Broker Mandate: ${buyerAgency.trim()}` : undefined,
+          automotiveMandate: isRealtor
+            ? t("buy.brokerMandate", { agency: buyerAgency.trim() })
+            : undefined,
         });
       } catch {
         /* ignore if offline */
       }
     }
-    showToast("Private acquisition walkthrough request recorded.");
+    showToast(t("toast.walkthroughRecorded"));
     setTimeout(() => {
       setInquiryProperty(null);
       setSubmitted(false);
@@ -75,35 +79,35 @@ export default function BuyPage() {
       {/* Header / Mode Switcher */}
       <section className="greet">
         <div className="between" style={{ alignItems: "center" }}>
-          <p className="hello" style={{ margin: 0 }}>Acquisitions & Estates</p>
+          <p className="hello" style={{ margin: 0 }}>{t("buy.hello")}</p>
           <div className="row" style={{ gap: 6 }}>
             <Link
               href="/"
               className="chip"
               style={{ minHeight: 32, padding: "0 10px", fontSize: 12 }}
             >
-              Stays
+              {t("nav.explore")}
             </Link>
             <span
               className="chip is-active"
               style={{ minHeight: 32, padding: "0 10px", fontSize: 12 }}
             >
-              Buy
+              {t("nav.buy")}
             </span>
           </div>
         </div>
         <h1 style={{ fontSize: 32, marginTop: 10 }}>
-          Direct Oceanfront Estates
+          {t("buy.title")}
         </h1>
         <p className="muted" style={{ fontSize: 13.5, marginTop: 4, lineHeight: 1.4 }}>
-          Private freehold beach houses with certified coastal clearance, uninterrupted high-tide boundaries, and climate-controlled automotive accommodations.
+          {t("buy.subtitle")}
         </p>
       </section>
 
       {/* Tactical Garage & Shoreline Filters */}
       <section className="pad mt">
         <p className="eyebrow" style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--moss)", marginBottom: 8 }}>
-          Automotive & Coastal Filter
+          {t("buy.filterEyebrow")}
         </p>
         <div className="chips" role="list">
           <button
@@ -111,7 +115,7 @@ export default function BuyPage() {
             type="button"
             onClick={() => setSelectedGarage("all")}
           >
-            All Estates
+            {t("buy.filterAll")}
           </button>
           <button
             className={`chip${selectedGarage === "collector_vault" ? " is-active" : ""}`}
@@ -119,7 +123,7 @@ export default function BuyPage() {
             onClick={() => setSelectedGarage(selectedGarage === "collector_vault" ? "all" : "collector_vault")}
           >
             <Icon name="car" />
-            Collector Vault
+            {t("garage.collectorVault")}
           </button>
           <button
             className={`chip${selectedGarage === "marine_port" ? " is-active" : ""}`}
@@ -127,7 +131,7 @@ export default function BuyPage() {
             onClick={() => setSelectedGarage(selectedGarage === "marine_port" ? "all" : "marine_port")}
           >
             <Icon name="waves" />
-            Marine Port
+            {t("garage.marinePort")}
           </button>
           <button
             className={`chip${selectedGarage === "ev_pavilion" ? " is-active" : ""}`}
@@ -135,7 +139,7 @@ export default function BuyPage() {
             onClick={() => setSelectedGarage(selectedGarage === "ev_pavilion" ? "all" : "ev_pavilion")}
           >
             <Icon name="bolt" />
-            EV Pavilion
+            {t("garage.evPavilion")}
           </button>
           <button
             className={`chip${supercarOnly ? " is-active" : ""}`}
@@ -143,7 +147,7 @@ export default function BuyPage() {
             onClick={() => setSupercarOnly(!supercarOnly)}
           >
             <Icon name="car" />
-            Supercar Low-Ramp (&lt;7°)
+            {t("buy.filterSupercar")}
           </button>
           <button
             className={`chip${minFrontage ? " is-active" : ""}`}
@@ -151,7 +155,7 @@ export default function BuyPage() {
             onClick={() => setMinFrontage(!minFrontage)}
           >
             <Icon name="waves" />
-            &gt;150 ft Frontage
+            {t("buy.filterFrontage")}
           </button>
         </div>
       </section>
@@ -159,8 +163,8 @@ export default function BuyPage() {
       {/* Property Cards Listed For Sale */}
       <section className="section">
         <div className="section-head">
-          <h2>Available Coastal Holdings ({salesProperties.length})</h2>
-          <span className="tiny" style={{ fontWeight: 600 }}>Bay of Bengal Corridor</span>
+          <h2>{t("buy.availableHoldings", { n: salesProperties.length })}</h2>
+          <span className="tiny" style={{ fontWeight: 600 }}>{t("buy.corridor")}</span>
         </div>
         <div className="stack-cards">
           {salesProperties.map((p) => (
@@ -170,7 +174,7 @@ export default function BuyPage() {
                   <img src={p.image} alt={p.alt} />
                 </Link>
                 <span className="badge-sale">
-                  {p.landArea || "Coastal Estate"}
+                  {p.landArea || t("property.coastalEstate")}
                 </span>
                 <span className="badge-coastal">
                   <Icon name="waves" />
@@ -187,7 +191,7 @@ export default function BuyPage() {
                     <p style={{ fontSize: 18, fontWeight: 800, color: "var(--forest)", margin: 0 }}>
                       {formatInrCrores(p.salePrice || 0)}
                     </p>
-                    <p className="tiny" style={{ margin: 0 }}>Asking Price</p>
+                    <p className="tiny" style={{ margin: 0 }}>{t("buy.askingPrice")}</p>
                   </div>
                 </div>
 
@@ -195,15 +199,15 @@ export default function BuyPage() {
                 <div className="row wrap mt" style={{ gap: 6, marginTop: 10 }}>
                   <div className="p-garage-pill" style={{ margin: 0 }}>
                     <Icon name="car" />
-                    <span>{p.garage.name} ({p.garage.capacity} Cars)</span>
+                    <span>{t("buy.garageCars", { garage: p.garage.name, n: p.garage.capacity })}</span>
                   </div>
                   {p.garage.supercarFriendly ? (
-                    <span className="pill ok" style={{ fontSize: 11 }}>Supercar Ready</span>
+                    <span className="pill ok" style={{ fontSize: 11 }}>{t("buy.supercarReady")}</span>
                   ) : null}
                   {p.garage.evChargingKw >= 22 ? (
-                    <span className="pill forest" style={{ fontSize: 11 }}>{p.garage.evChargingKw}kW DC</span>
+                    <span className="pill forest" style={{ fontSize: 11 }}>{t("property.evKw", { kw: p.garage.evChargingKw })}</span>
                   ) : null}
-                  <span className="pill muted" style={{ fontSize: 11 }}>Tide Line: {p.tideDistanceMeters}m</span>
+                  <span className="pill muted" style={{ fontSize: 11 }}>{t("buy.tideLine", { m: p.tideDistanceMeters })}</span>
                 </div>
 
                 <p className="mt" style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.4 }}>
@@ -212,14 +216,14 @@ export default function BuyPage() {
 
                 <div className="between mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)" }}>
                   <Link href={`/property/${p.id}`} className="btn outline sm">
-                    Inspect Specs
+                    {t("buy.inspectSpecs")}
                   </Link>
                   <button
                     className="btn accent sm"
                     type="button"
                     onClick={() => setInquiryProperty(p)}
                   >
-                    Schedule Private Walkthrough
+                    {t("buy.scheduleWalkthrough")}
                   </button>
                 </div>
               </div>
@@ -233,22 +237,22 @@ export default function BuyPage() {
         <div className="card" style={{ background: "color-mix(in oklch, var(--primary) 8%, var(--surface))", border: "1px solid var(--moss)" }}>
           <div className="between">
             <p className="eyebrow" style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--forest)" }}>
-              Realtor & Broker Portal
+              {t("cmdk.realtorPortal")}
             </p>
-            <span className="pill forest">Client Sovereignty</span>
+            <span className="pill forest">{t("buy.clientSovereignty")}</span>
           </div>
           <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 26, marginTop: 6 }}>
-            Representing high-net-worth coastal buyers?
+            {t("buy.brokerQuestion")}
           </h2>
           <p className="muted" style={{ fontSize: 13, marginTop: 4, lineHeight: 1.45 }}>
-            Onboard your clients to lock in co-broking commission splits, protect private buyer contact information, and enable Presentation Mode with your agency credentials.
+            {t("buy.brokerBody")}
           </p>
           <div className="row mt">
             <Link href="/realtor" className="btn sm">
-              Open Realtor Workspace
+              {t("buy.openWorkspace")}
             </Link>
             <Link href="/host/new?mode=sale" className="btn outline sm">
-              List Beach House For Sale
+              {t("buy.listForSale")}
             </Link>
           </div>
         </div>
@@ -258,36 +262,39 @@ export default function BuyPage() {
       <BaseSheet
         open={Boolean(inquiryProperty)}
         onOpenChange={(open) => !open && setInquiryProperty(null)}
-        title="Schedule Private Walkthrough"
+        title={t("buy.scheduleWalkthrough")}
       >
         {submitted ? (
           <div className="stack center pad" style={{ padding: "20px 0" }}>
             <div className="pill ok" style={{ margin: "0 auto", padding: "8px 16px" }}>
-              Request Received
+              {t("buy.requestReceived")}
             </div>
-            <h3 style={{ marginTop: 12 }}>Confidential advisor assigned.</h3>
+            <h3 style={{ marginTop: 12 }}>{t("buy.advisorAssigned")}</h3>
             <p className="muted" style={{ fontSize: 13 }}>
-              We will coordinate directly with you {isRealtor ? "and your agency" : ""} to schedule an on-site architectural walkthrough.
+              {t("buy.coordinateBody", { withAgency: isRealtor ? t("buy.coordinateAgency") : "" })}
             </p>
           </div>
         ) : (
           <form className="stack" onSubmit={handleInquiry}>
             <p className="muted" style={{ fontSize: 13 }}>
-              Inquiring for <strong>{inquiryProperty?.name}</strong> ({formatInrCrores(inquiryProperty?.salePrice || 0)}).
+              {t("buy.inquiringFor", {
+                name: inquiryProperty?.name ?? "",
+                price: formatInrCrores(inquiryProperty?.salePrice || 0),
+              })}
             </p>
             <label className="field">
-              <span>Full Name</span>
+              <span>{t("buy.fieldBuyerName")}</span>
               <input
                 className="ctrl"
                 type="text"
-                placeholder="Buyer or Principal Name"
+                placeholder={t("buy.namePlaceholder")}
                 value={buyerName}
                 onChange={(e) => setBuyerName(e.target.value)}
                 required
               />
             </label>
             <label className="field">
-              <span>Direct Phone</span>
+              <span>{t("buy.fieldPhone")}</span>
               <input
                 className="ctrl"
                 type="tel"
@@ -302,16 +309,16 @@ export default function BuyPage() {
               <div className="box" aria-checked={isRealtor}>
                 {isRealtor ? <Icon name="check" style={{ color: "var(--on-primary)" }} /> : null}
               </div>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>I am representing a client as a realtor / broker</span>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{t("buy.representingClient")}</span>
             </div>
 
             {isRealtor ? (
               <label className="field">
-                <span>Brokerage / Agency Name</span>
+                <span>{t("buy.fieldAgency")}</span>
                 <input
                   className="ctrl"
                   type="text"
-                  placeholder="e.g. Sotheby's Realty / Knight Frank / Independent RERA"
+                  placeholder={t("buy.agencyPlaceholder")}
                   value={buyerAgency}
                   onChange={(e) => setBuyerAgency(e.target.value)}
                 />
@@ -319,9 +326,9 @@ export default function BuyPage() {
             ) : null}
 
             <div className="between mt">
-              <span className="pill forest">Discreet & Direct</span>
+              <span className="pill forest">{t("buy.discreet")}</span>
               <button className="btn accent" type="submit">
-                Submit Acquisition Inquiry
+                {t("buy.submitInquiry")}
               </button>
             </div>
           </form>

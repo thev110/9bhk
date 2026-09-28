@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useT } from "@/lib/i18n";
 import { Icon } from "./icon";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PwaMobileHandler() {
+  const t = useT();
   const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -87,13 +89,13 @@ export function PwaMobileHandler() {
   if (!showPrompt || pathname !== "/") return null;
 
   return (
-    <div className="pwa-banner" role="dialog" aria-label="Install app">
+    <div className="pwa-banner" role="dialog" aria-label={t("pwa.installLabel")}>
       <div className="pwa-banner-card">
         <button
           className="pwa-close-btn"
           type="button"
           onClick={dismiss}
-          aria-label="Dismiss app install banner"
+          aria-label={t("pwa.dismissLabel")}
         >
           <Icon name="close" />
         </button>
@@ -107,12 +109,8 @@ export function PwaMobileHandler() {
             className="pwa-app-icon"
           />
           <div className="pwa-banner-text">
-            <strong>Install 9bhk app</strong>
-            <p>
-              {isIos
-                ? "Tap Share > 'Add to Home Screen' for the full app experience."
-                : "Add to home screen for fast bookings and full-screen stays."}
-            </p>
+            <strong>{t("pwa.bannerTitle")}</strong>
+            <p>{isIos ? t("pwa.iosBody") : t("pwa.androidBody")}</p>
           </div>
         </div>
 
@@ -120,17 +118,17 @@ export function PwaMobileHandler() {
           {deferredPrompt ? (
             <button className="btn sm block" type="button" onClick={handleInstall}>
               <Icon name="download" />
-              Install app
+              {t("pwa.installLabel")}
             </button>
           ) : isIos ? (
             <div className="pwa-ios-instructions">
               <span>
-                <Icon name="share" /> Tap <strong>Share</strong> &gt; <strong>Add to Home Screen</strong>
+                <Icon name="share" /> {t("pwa.stepsTap")} <strong>{t("pwa.stepsShare")}</strong> &gt; <strong>{t("pwa.stepsAddToHome")}</strong>
               </span>
             </div>
           ) : (
             <button className="btn sm block" type="button" onClick={dismiss}>
-              Got it
+              {t("pwa.dismissAction")}
             </button>
           )}
         </div>

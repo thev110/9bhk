@@ -6,10 +6,13 @@ import NumberFlow from "@number-flow/react";
 import { formatInrCrores, type Property } from "@/lib/properties";
 import { Icon } from "./icon";
 import { FavButton } from "./shell";
+import { useT } from "@/lib/i18n";
+import { garageLabel } from "@/lib/i18n/garage";
 
 export function Rating({ rating, reviews }: { rating: number; reviews: number }) {
+  const t = useT();
   return (
-    <span className="rating">
+    <span className="rating" aria-label={t("a11y.rating", { rating: rating.toFixed(1), reviews })}>
       <Icon name="star" />
       {rating.toFixed(1)} <span className="rc">({reviews})</span>
     </span>
@@ -17,6 +20,7 @@ export function Rating({ rating, reviews }: { rating: number; reviews: number })
 }
 
 export function RailCard({ property }: { property: Property }) {
+  const t = useT();
   return (
     <motion.article
       className="p-card"
@@ -29,16 +33,16 @@ export function RailCard({ property }: { property: Property }) {
           <img src={property.image} width={800} height={1000} alt={property.alt} />
         </Link>
         {property.isForSale ? (
-          <span className="badge-sale">For Sale</span>
+          <span className="badge-sale">{t("property.forSale")}</span>
         ) : property.guestFavourite ? (
           <span className="badge-guest">
             <Icon name="award" />
-            Guest favourite
+            {t("property.guestFavourite")}
           </span>
         ) : null}
         <span className="badge-coastal">
           <Icon name="waves" />
-          {property.beachFrontage.split(" ")[0]} ft Beach
+          {t("property.beachFrontage", { ft: property.beachFrontage.split(" ")[0] })}
         </span>
         <FavButton id={property.id} name={property.name} />
       </div>
@@ -54,16 +58,18 @@ export function RailCard({ property }: { property: Property }) {
           <div className="p-garage-pill" title={property.garage.description}>
             <Icon name="car" />
             <span>
-              {property.garage.capacity}-Car {property.garage.supercarFriendly ? "· Supercar Ready" : "Bay"}
+              {property.garage.supercarFriendly
+                ? t("property.supercarReady", { n: property.garage.capacity })
+                : t("property.carBay", { n: property.garage.capacity })}
             </span>
           </div>
           {property.isForSale && property.salePrice ? (
             <p className="p-sale-tag">
-              <span>Acquisition: {formatInrCrores(property.salePrice)}</span>
+              <span>{t("property.acquisition", { price: formatInrCrores(property.salePrice) })}</span>
             </p>
           ) : (
             <p className="p-price num">
-              <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
+              <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
             </p>
           )}
         </div>
@@ -73,6 +79,7 @@ export function RailCard({ property }: { property: Property }) {
 }
 
 export function FeatureCard({ property }: { property: Property }) {
+  const t = useT();
   return (
     <motion.article
       className="f-card"
@@ -85,7 +92,9 @@ export function FeatureCard({ property }: { property: Property }) {
           <img src={property.image} width={1080} height={720} alt={property.alt} />
         </Link>
         {property.isForSale ? (
-          <span className="badge-sale">For Sale · {property.landArea || "Coastal Estate"}</span>
+          <span className="badge-sale">
+            {t("property.forSale")} · {property.landArea || t("property.coastalEstate")}
+          </span>
         ) : null}
         <span className="badge-coastal">
           <Icon name="waves" />
@@ -112,23 +121,24 @@ export function FeatureCard({ property }: { property: Property }) {
           <div className="row wrap mt" style={{ marginTop: 8 }}>
             <div className="p-garage-pill" title={property.garage.description}>
               <Icon name="car" />
-              <span>{property.garage.name} ({property.garage.capacity} Vehicles)</span>
+              <span>{t("property.vehicles", { garage: property.garage.name, n: property.garage.capacity })}</span>
             </div>
             {property.garage.evChargingKw >= 22 ? (
               <span className="pill forest">
                 <Icon name="bolt" style={{ width: 12, height: 12 }} />
-                {property.garage.evChargingKw}kW DC
+                {t("property.evKw", { kw: property.garage.evChargingKw })}
               </span>
             ) : null}
           </div>
           <p className="p-price num" style={{ marginTop: 10 }}>
             {property.isForSale && property.salePrice ? (
               <>
-                <span>{formatInrCrores(property.salePrice)}</span> <span className="per">asking price</span>
+                <span>{formatInrCrores(property.salePrice)}</span>{" "}
+                <span className="per">{t("property.askingPrice")}</span>
               </>
             ) : (
               <>
-                <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
+                <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
               </>
             )}
           </p>
@@ -139,13 +149,14 @@ export function FeatureCard({ property }: { property: Property }) {
 }
 
 export function NearbyCard({ property }: { property: Property }) {
+  const t = useT();
   return (
     <Link href={`/property/${property.id}`} className="n-card" style={{ textDecoration: "none", color: "inherit" }}>
       <div className="n-thumb">
         <img src={property.image} width={400} height={400} alt={property.alt} />
         {property.isForSale ? (
           <span className="badge-sale" style={{ fontSize: 9, padding: "2px 6px", top: 4, left: 4 }}>
-            Sale
+            {t("property.sale")}
           </span>
         ) : null}
       </div>
@@ -154,14 +165,18 @@ export function NearbyCard({ property }: { property: Property }) {
         <p className="p-loc">{property.beachFrontage}</p>
         <div className="p-garage-pill" style={{ margin: 0, padding: "2px 6px", fontSize: 10 }}>
           <Icon name="car" style={{ width: 11, height: 11 }} />
-          <span>{property.garage.capacity}-Car {property.garage.supercarFriendly ? "Vault" : "Port"}</span>
+          <span>
+            {property.garage.supercarFriendly
+              ? t("property.carVault", { n: property.garage.capacity })
+              : t("property.carPort", { n: property.garage.capacity })}
+          </span>
         </div>
         <p className="p-price num" style={{ marginTop: 4 }}>
           {property.isForSale && property.salePrice ? (
             formatInrCrores(property.salePrice)
           ) : (
             <>
-              <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
+              <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
             </>
           )}
         </p>
@@ -171,6 +186,7 @@ export function NearbyCard({ property }: { property: Property }) {
 }
 
 export function ResultCard({ property }: { property: Property }) {
+  const t = useT();
   return (
     <article className="rowcard hit">
       <div className="thumb">
@@ -197,7 +213,7 @@ export function ResultCard({ property }: { property: Property }) {
         <div className="p-garage-pill" style={{ marginTop: 5 }}>
           <Icon name="car" />
           <span>
-            {property.garage.capacity}-Car {property.garage.type === "collector_vault" ? "Collector Vault" : property.garage.type === "marine_port" ? "Marine Port" : property.garage.type === "ev_pavilion" ? "EV Pavilion" : "Teak Portico"}
+            {property.garage.capacity}-Car {garageLabel(t, property.garage.type)}
           </span>
         </div>
         <div className="between" style={{ marginTop: 8 }}>
@@ -207,7 +223,7 @@ export function ResultCard({ property }: { property: Property }) {
               formatInrCrores(property.salePrice)
             ) : (
               <>
-                <NumberFlow value={property.price} prefix="₹" /> <span className="per">/ night</span>
+                <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
               </>
             )}
           </span>

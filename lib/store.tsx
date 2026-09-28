@@ -8,10 +8,15 @@ import {
   persistBooking,
   persistClient,
   persistConfirmation,
+  persistLocale,
   persistProfile,
   persistViewingRequest,
 } from "@/lib/supabase/sync";
 import { signOutSupabase } from "@/lib/supabase/browser";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n/types";
+import { dictionaries } from "@/lib/i18n/dictionaries";
+import { translate } from "@/lib/i18n/t";
+import type { DictKey } from "@/lib/i18n/en";
 
 export type BookingStatus = "confirmed" | "awaiting" | "completed" | "cancelled";
 
@@ -47,6 +52,7 @@ export type User = {
   reraNumber?: string;
   verifiedBroker?: boolean;
   commissionRate?: number;
+  locale?: Locale;
 };
 
 export type AppNote = {
@@ -108,6 +114,7 @@ type Persisted = {
   notes: AppNote[];
   clients: RealtorClient[];
   presentationMode?: boolean;
+  locale: Locale;
 };
 
 const STORAGE_KEY = "9bhk-state";
@@ -160,6 +167,7 @@ type Store = Persisted & {
   confirmBooking: (id: string) => void;
   addClient: (client: RealtorClient) => void;
   removeClient: (id: string) => void;
+  setLocale: (locale: Locale) => void;
   addViewingRequest: (req: {
     propertyId: string;
     propertyName: string;
@@ -198,6 +206,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
     ],
     presentationMode: false,
+    locale: DEFAULT_LOCALE,
   });
   const [ready, setReady] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -223,6 +232,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           notes: parsed.notes ?? [],
           clients: parsed.clients && parsed.clients.length ? parsed.clients : curr.clients,
           presentationMode: parsed.presentationMode ?? false,
+          locale: LOCALES.includes(parsed.locale) ? (parsed.locale as Locale) : DEFAULT_LOCALE,
         }));
       }
     } catch {
@@ -243,6 +253,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const api = useMemo<Store>(() => {
+    // Notes are generated in the store rather than a component, so translate
+    // against the active catalog directly instead of going through useT().
+    const tr = (key: DictKey, vars?: Record<string, string | number>) =>
+      translate(dictionaries[state.locale] ?? dictionaries[DEFAULT_LOCALE], key, vars);
+
     return {
       ...state,
       ready,
@@ -251,6 +266,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       toast,
       showToast,
       setCity: (city) => setState((s) => ({ ...s, city })),
+      setLocale: (locale) => {
+        setState((s) => ({
+          ...s,
+          locale,
+          // Mirror onto the signed-in user so persistProfile carries it forward
+          user: s.user ? { ...s.user, locale } : s.user,
+        }));
+        if (typeof window !== "undefined") void persistLocale(locale);
+      },
       toggleSaved: (id) =>
         setState((s) => ({
           ...s,
@@ -290,10 +314,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           notes: [
             {
               id: `note-${booking.id}`,
-              title: "Payment sent",
-              body: `${booking.propertyName || "Your farmhouse"} is waiting for the host to confirm. You'll be notified when the stay is booked.`,
+              title: tr("note.paymentSentTitle"),
+              body: tr("note.paymentSentBody", {
+                property: booking.propertyName || tr("note.yourFarmhouse"),
+              }),
               href: "/trips",
-              when: "Just now",
+              when: tr("note.justNow"),
             },
             ...s.notes,
           ],
@@ -312,10 +338,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             notes: [
               {
                 id: `confirmed-${id}`,
-                title: "Stay is booked",
-                body: `${booking.propertyName || "Your farmhouse"} is confirmed. Check Trips for arrival details.`,
+                title: tr("note.stayBookedTitle"),
+                body: tr("note.stayBookedBody", {
+                  property: booking.propertyName || tr("note.yourFarmhouse"),
+                }),
                 href: "/trips",
-                when: "Just now",
+                when: tr("note.justNow"),
               },
               ...s.notes,
             ],

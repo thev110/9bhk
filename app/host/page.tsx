@@ -5,32 +5,34 @@ import { useState } from "react";
 import { PageBar, Shell } from "@/components/shell";
 import { useStore } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
+import { useT } from "@/lib/i18n";
 
 export default function HostPage() {
   const { draft, user, updateUser, showToast } = useStore();
   const { properties } = useCatalog();
+  const t = useT();
   const [upi, setUpi] = useState(user?.upiId ?? "");
   return (
     <Shell>
       <PageBar
-        title="Hosting"
+        title={t("host.hosting")}
         backHref="/profile"
         right={
           <Link className="btn sm" href="/">
-            Switch to guest
+            {t("host.switchToGuest")}
           </Link>
         }
       />
       <header className="page-head">
-        <p className="eyebrow">Host workspace</p>
-        <h1>Your hosting at a glance</h1>
+        <p className="eyebrow">{t("host.workspace")}</p>
+        <h1>{t("host.overviewTitle")}</h1>
       </header>
       <div className="pad mt">
         <div className="card">
-          <h3>Payout UPI</h3>
-          <p className="muted">Guests pay this UPI ID when they book. You confirm the stay after the money arrives.</p>
+          <h3>{t("host.payoutUpi")}</h3>
+          <p className="muted">{t("host.payoutUpiBody")}</p>
           <label className="field mt">
-            UPI ID
+            {t("host.fieldUpiId")}
             <input className="ctrl" value={upi} placeholder="name@okhdfcbank" onChange={(e) => setUpi(e.target.value)} />
           </label>
           <button
@@ -38,40 +40,40 @@ export default function HostPage() {
             type="button"
             onClick={() => {
               updateUser({ upiId: upi.trim() });
-              showToast("UPI ID saved");
+              showToast(t("host.toastUpiSaved"));
             }}
           >
-            Save UPI
+            {t("host.saveUpi")}
           </button>
         </div>
       </div>
       <div className="stats pad mt">
         <div className="stat">
-          <p className="lb">Upcoming stays</p>
+          <p className="lb">{t("host.statUpcoming")}</p>
           <p className="nb">4</p>
-          <p className="sub">next check-in in 3 days</p>
+          <p className="sub">{t("host.statNextCheckin")}</p>
         </div>
         <div className="stat">
-          <p className="lb">This month</p>
+          <p className="lb">{t("host.statThisMonth")}</p>
           <p className="nb">₹86,400</p>
-          <p className="sub">across 3 farmhouses</p>
+          <p className="sub">{t("host.statAcrossFarmhouses")}</p>
         </div>
         <div className="stat">
-          <p className="lb">Occupancy</p>
+          <p className="lb">{t("host.statOccupancy")}</p>
           <p className="nb">68%</p>
-          <p className="sub">last 30 days</p>
+          <p className="sub">{t("host.statLast30")}</p>
         </div>
         <div className="stat">
-          <p className="lb">Views</p>
+          <p className="lb">{t("host.statViews")}</p>
           <p className="nb">1,240</p>
-          <p className="sub">+18% vs last month</p>
+          <p className="sub">{t("host.statViewsDelta")}</p>
         </div>
       </div>
 
       <div className="between pad mt">
-        <h2>Your properties</h2>
+        <h2>{t("host.yourProperties")}</h2>
         <Link className="btn sm" href="/host/new">
-          Add
+          {t("host.add")}
         </Link>
       </div>
       <div className="stack pad mt">
@@ -80,16 +82,16 @@ export default function HostPage() {
             <img src={item.image} alt="" style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 12 }} />
             <div className="between mt">
               <h3>{item.name}</h3>
-              <span className="pill ok">Published</span>
+              <span className="pill ok">{t("host.statusPublished")}</span>
             </div>
             <p className="muted">{item.location}</p>
             <p>{item.highlights}</p>
             <div className="row mt">
               <Link className="btn outline sm" href={`/property/${item.id}`}>
-                View
+                {t("host.view")}
               </Link>
               <Link className="btn ghost sm" href="/host/bookings">
-                Bookings
+                {t("host.bookings")}
               </Link>
             </div>
           </article>
@@ -97,33 +99,33 @@ export default function HostPage() {
         {draft ? (
           <article className="card">
             <div className="between">
-              <h3>{draft.name || "Untitled farmhouse"}</h3>
-              <span className="pill warn">{draft.status === "pending" ? "Pending review" : "Draft"}</span>
+              <h3>{draft.name || t("host.untitledFarmhouse")}</h3>
+              <span className="pill warn">{draft.status === "pending" ? t("host.statusPendingReview") : t("host.statusDraft")}</span>
             </div>
             <p className="muted">{draft.city}</p>
             <Link className="btn outline sm mt" href="/host/new">
-              Resume
+              {t("host.resume")}
             </Link>
           </article>
         ) : null}
         <div className="card">
-          <h3>Ready to host your first escape?</h3>
-          <p className="muted">Add the details once — guests see it in search straight away.</p>
+          <h3>{t("host.emptyTitle")}</h3>
+          <p className="muted">{t("host.emptyBody")}</p>
           <Link className="btn mt" href="/host/new">
-            List your farmhouse
+            {t("host.listYourFarmhouse")}
           </Link>
         </div>
       </div>
 
       <div className="pad mt">
-        <h2>Hosting tools</h2>
+        <h2>{t("host.hostingTools")}</h2>
         <div className="menu mt">
           <Link className="mi" href="/host/bookings">
-            <span className="lb">Bookings</span>
-            <span className="meta">4 upcoming</span>
+            <span className="lb">{t("host.bookings")}</span>
+            <span className="meta">{t("profile.upcomingCount", { n: 4 })}</span>
           </Link>
           <Link className="mi" href="/host/bookings?tab=earnings">
-            <span className="lb">Earnings</span>
+            <span className="lb">{t("host.earnings")}</span>
             <span className="meta">₹86,400</span>
           </Link>
         </div>

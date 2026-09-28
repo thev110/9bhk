@@ -10,10 +10,13 @@ import { useCatalog } from "@/lib/catalog";
 import { CITIES } from "@/lib/format";
 import { BaseSheet } from "@/components/base-sheet";
 import { Icon } from "@/components/icon";
+import { useT } from "@/lib/i18n";
+import { filterLabel } from "@/lib/i18n/vibes";
 
 function SearchScreen() {
   const params = useSearchParams();
   const router = useRouter();
+  const t = useT();
   const initialQ = params.get("q") ?? "";
   const initialVibe = params.get("vibe") ?? "";
   const initialCity = params.get("city") ?? "";
@@ -48,7 +51,7 @@ function SearchScreen() {
 
   return (
     <Shell>
-      <PageBar title="Search" backHref="/" />
+      <PageBar title={t("search.title")} backHref="/" />
       <div className="pad mt">
         <form
           className="searchbar"
@@ -61,8 +64,8 @@ function SearchScreen() {
           <input
             type="search"
             value={q}
-            placeholder="Search places, areas or farmhouses"
-            aria-label="Search places, areas or farmhouses"
+            placeholder={t("search.placeholder")}
+            aria-label={t("search.placeholder")}
             onChange={(e) => setQ(e.target.value)}
           />
           {q ? (
@@ -71,31 +74,31 @@ function SearchScreen() {
               className="ctrl-act"
               style={{ position: "static", transform: "none" }}
               onClick={() => setQ("")}
-              aria-label="Clear search"
+              aria-label={t("a11y.clearSearch")}
             >
               <Icon name="close" />
             </button>
           ) : null}
         </form>
 
-        <div className="summary mt" role="group" aria-label="Trip details">
+        <div className="summary mt" role="group" aria-label={t("a11y.tripDetails")}>
           <button className="sum-cell" type="button" onClick={() => setSheet("where")}>
             <span className="k">
-              <Icon name="pin" /> Where
+              <Icon name="pin" /> {t("home.where")}
             </span>
-            <span className="v">{city || "Anywhere"}</span>
+            <span className="v">{city || t("home.anywhere")}</span>
           </button>
           <button className="sum-cell" type="button" onClick={() => setSheet("when")}>
             <span className="k">
-              <Icon name="calendar" /> When
+              <Icon name="calendar" /> {t("home.when")}
             </span>
-            <span className="v">Add dates</span>
+            <span className="v">{t("home.addDates")}</span>
           </button>
           <button className="sum-cell" type="button" onClick={() => setSheet("guests")}>
             <span className="k">
-              <Icon name="users" /> Guests
+              <Icon name="users" /> {t("home.guests")}
             </span>
-            <span className="v">{guests} guests</span>
+            <span className="v">{t("home.guestCount", { n: guests })}</span>
           </button>
         </div>
       </div>
@@ -109,24 +112,24 @@ function SearchScreen() {
             aria-pressed={active.includes(filter)}
             onClick={() => toggle(filter)}
           >
-            {filter}
+            {filterLabel(t, filter)}
           </button>
         ))}
       </div>
 
       <div className="between pad mt" style={{ alignItems: "center" }}>
         <p className="muted" style={{ fontWeight: 600, fontSize: 13.5 }}>
-          {results.length} {results.length === 1 ? "stay" : "stays"}
+          {t(results.length === 1 ? "search.resultCountOne" : "search.resultCountMany", { n: results.length })}
         </p>
         <div className="sort-dropdown-wrap">
           <label className="sr" htmlFor="sort">
-            Sort results
+            {t("a11y.sortResults")}
           </label>
-          <select id="sort" className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort results">
-            <option value="recommended">Recommended</option>
-            <option value="low">Price: low to high</option>
-            <option value="high">Price: high to low</option>
-            <option value="rating">Top rated</option>
+          <select id="sort" className="sort-select" value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t("a11y.sortResults")}>
+            <option value="recommended">{t("search.sortRecommended")}</option>
+            <option value="low">{t("search.sortLow")}</option>
+            <option value="high">{t("search.sortHigh")}</option>
+            <option value="rating">{t("search.sortRating")}</option>
           </select>
           <Icon name="chev" className="sort-chevron" />
         </div>
@@ -134,8 +137,8 @@ function SearchScreen() {
 
       {results.length === 0 ? (
         <div className="empty">
-          <h3>No farmhouses match those filters.</h3>
-          <p>Try widening the search or clearing a filter or two.</p>
+          <h3>{t("search.emptyTitle")}</h3>
+          <p>{t("search.emptyBody")}</p>
           <button
             className="btn sm mt"
             type="button"
@@ -146,7 +149,7 @@ function SearchScreen() {
               setGuests(2);
             }}
           >
-            Clear all filters
+            {t("search.clearAll")}
           </button>
         </div>
       ) : (
@@ -161,7 +164,7 @@ function SearchScreen() {
       <BaseSheet
         open={sheet === "where"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="Where to?"
+        title={t("home.whereTitle")}
       >
         <div className="stack">
           <button
@@ -173,8 +176,8 @@ function SearchScreen() {
             }}
           >
             <Icon name="compass" />
-            <span className="lb">Anywhere</span>
-            <span className="meta">{properties.length} stays</span>
+            <span className="lb">{t("home.anywhere")}</span>
+            <span className="meta">{t("search.staysCount", { n: properties.length })}</span>
           </button>
           {CITIES.map((c) => (
             <button
@@ -188,7 +191,11 @@ function SearchScreen() {
             >
               <Icon name="pin" />
               <span className="lb">{c}</span>
-              <span className="meta">{properties.filter((p) => p.city === c || p.location.includes(c)).length} stays</span>
+              <span className="meta">
+                {t("search.staysCount", {
+                  n: properties.filter((p) => p.city === c || p.location.includes(c)).length,
+                })}
+              </span>
             </button>
           ))}
         </div>
@@ -198,14 +205,14 @@ function SearchScreen() {
       <BaseSheet
         open={sheet === "when"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="When are you going?"
+        title={t("home.whenTitle")}
       >
         <div className="stack">
           <p className="muted" style={{ lineHeight: 1.6 }}>
-            Farmhouses maintain custom availability calendars. Pick your check-in dates directly on any stay page to see live weekend rates and lock in your reservation.
+            {t("search.whenBody")}
           </p>
           <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
-            View all available dates
+            {t("search.viewAllDates")}
           </button>
         </div>
       </BaseSheet>
@@ -214,18 +221,18 @@ function SearchScreen() {
       <BaseSheet
         open={sheet === "guests"}
         onOpenChange={(open) => !open && setSheet(null)}
-        title="Number of guests"
+        title={t("search.guestsTitle")}
       >
         <div className="stack">
           <div className="between" style={{ alignItems: "center", padding: "12px 0" }}>
             <div>
-              <strong style={{ fontSize: 16 }}>Total guests</strong>
-              <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>Adults, kids and visitors</p>
+              <strong style={{ fontSize: 16 }}>{t("search.totalGuests")}</strong>
+              <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>{t("search.adultsKids")}</p>
             </div>
             <div className="stepper">
               <button
                 type="button"
-                aria-label="Fewer guests"
+                aria-label={t("a11y.fewerGuests")}
                 onClick={() => setGuests((n) => Math.max(1, n - 1))}
               >
                 <Icon name="minus" />
@@ -233,7 +240,7 @@ function SearchScreen() {
               <span className="val num">{guests}</span>
               <button
                 type="button"
-                aria-label="More guests"
+                aria-label={t("a11y.moreGuests")}
                 onClick={() => setGuests((n) => Math.min(24, n + 1))}
               >
                 <Icon name="plus" />
@@ -241,7 +248,7 @@ function SearchScreen() {
             </div>
           </div>
           <button className="btn block mt" type="button" onClick={() => setSheet(null)}>
-            Apply {guests} {guests === 1 ? "guest" : "guests"}
+            {t(guests === 1 ? "search.applyGuestOne" : "search.applyGuestMany", { n: guests })}
           </button>
         </div>
       </BaseSheet>
@@ -251,8 +258,17 @@ function SearchScreen() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<Shell><PageBar title="Search" backHref="/" /></Shell>}>
+    <Suspense fallback={<SearchFallback />}>
       <SearchScreen />
     </Suspense>
+  );
+}
+
+function SearchFallback() {
+  const t = useT();
+  return (
+    <Shell>
+      <PageBar title={t("search.title")} backHref="/" />
+    </Shell>
   );
 }

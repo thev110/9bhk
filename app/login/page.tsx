@@ -8,6 +8,7 @@ import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { OtpField } from "@/components/otp-field";
 import { defaultUser, useStore } from "@/lib/store";
 import { signInWithGoogle } from "@/lib/supabase/browser";
+import { useT } from "@/lib/i18n";
 
 function afterAuth(): string {
   const next = new URLSearchParams(window.location.search).get("next") || "/";
@@ -17,6 +18,7 @@ function afterAuth(): string {
 export default function LoginPage() {
   const router = useRouter();
   const { signIn, markIntro, showToast } = useStore();
+  const t = useT();
   const [authMode, setAuthMode] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +40,7 @@ export default function LoginPage() {
     window.setTimeout(() => {
       signIn(next);
       markIntro();
-      showToast("Signed in successfully");
+      showToast(t("toast.signedIn"));
       router.push(afterAuth());
     }, 400);
   }
@@ -46,7 +48,7 @@ export default function LoginPage() {
   function sendOtp() {
     const cleanPhone = phone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      setPhoneError("Enter a valid 10-digit mobile number.");
+      setPhoneError(t("auth.errPhone"));
       return;
     }
     setPhoneError("");
@@ -54,13 +56,13 @@ export default function LoginPage() {
     window.setTimeout(() => {
       setBusy(false);
       setOtpSent(true);
-      showToast("OTP sent! (Use demo code: 492018)");
+      showToast(t("auth.otpSent"));
     }, 600);
   }
 
   function verifyOtp() {
     if (otp.length < 6) {
-      showToast("Enter the full 6-digit OTP code.");
+      showToast(t("auth.errOtpShort"));
       return;
     }
     const cleanPhone = phone.trim();
@@ -76,8 +78,8 @@ export default function LoginPage() {
     e.preventDefault();
     const badEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const badPassword = password.length < 4;
-    setEmailError(badEmail ? "Enter a valid email address." : "");
-    setPasswordError(badPassword ? "Enter your password to continue." : "");
+    setEmailError(badEmail ? t("auth.errEmail") : "");
+    setPasswordError(badPassword ? t("auth.errPassword") : "");
     if (badEmail || badPassword) return;
     const derivedName = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     enter({
@@ -90,16 +92,16 @@ export default function LoginPage() {
 
   return (
     <Shell>
-      <PageBar title="Sign in" backHref="/" />
+      <PageBar title={t("auth.signIn")} backHref="/" />
       <div className="auth auth-compact">
         <div className="auth-hero auth-hero-compact mt">
-          <img src="/assets/prop-guava-house.jpg" width={1080} height={720} alt="A farmhouse veranda opening onto a green garden" />
+          <img src="/assets/prop-guava-house.jpg" width={1080} height={720} alt={t("auth.heroAltLogin")} />
         </div>
         <div className="auth-body">
           <div className="stack sm">
-            <p className="auth-eyebrow">Welcome</p>
-            <h2 className="auth-title">Sign in to 9bhk</h2>
-            <p className="muted">Book farmhouses, view trips and save escapes.</p>
+            <p className="auth-eyebrow">{t("auth.welcome")}</p>
+            <h2 className="auth-title">{t("auth.signInToApp")}</h2>
+            <p className="muted">{t("auth.tagline")}</p>
           </div>
           <div className="stack mt-lg">
             <button
@@ -108,11 +110,11 @@ export default function LoginPage() {
               disabled={busy}
               onClick={async () => {
                 const started = await signInWithGoogle(afterAuth());
-                if (!started) showToast("Google sign-in is not turned on yet. Add the Google client in Supabase first.");
+                if (!started) showToast(t("auth.googleDisabled"));
               }}
             >
               <GoogleMark />
-              Continue with Google
+              {t("auth.continueGoogle")}
             </button>
             <div className="seg" role="tablist">
               <button
@@ -121,7 +123,7 @@ export default function LoginPage() {
                 aria-selected={authMode === "email"}
                 onClick={() => setAuthMode("email")}
               >
-                Sign in with email
+                {t("auth.signInEmail")}
               </button>
               <button
                 type="button"
@@ -129,14 +131,14 @@ export default function LoginPage() {
                 aria-selected={authMode === "otp"}
                 onClick={() => setAuthMode("otp")}
               >
-                Sign in with OTP
+                {t("auth.signInOtp")}
               </button>
             </div>
 
             {authMode === "email" ? (
               <form className="stack" noValidate onSubmit={withEmail}>
                 <div className="field">
-                  <label htmlFor="loginEmail">Email</label>
+                  <label htmlFor="loginEmail">{t("auth.fieldEmail")}</label>
                   <input
                     className="ctrl"
                     id="loginEmail"
@@ -151,26 +153,26 @@ export default function LoginPage() {
                 </div>
                 <PasswordField
                   id="loginPw"
-                  label="Password"
+                  label={t("auth.fieldPassword")}
                   value={password}
                   onChange={setPassword}
-                  placeholder="Your password"
+                  placeholder={t("auth.passwordPlaceholder")}
                   autoComplete="current-password"
                   error={passwordError}
                 />
                 <div className="row" style={{ justifyContent: "flex-end" }}>
-                  <button className="lnk" type="button" onClick={() => showToast("Password reset link sent to your email")}>
-                    Forgot password?
+                  <button className="lnk" type="button" onClick={() => showToast(t("auth.resetSent"))}>
+                    {t("auth.forgotPassword")}
                   </button>
                 </div>
                 <button className="btn block lg outline" type="submit" disabled={busy}>
-                  {busy ? "Signing you in…" : "Sign in with email"}
+                  {busy ? t("auth.signingIn") : t("auth.signInEmail")}
                 </button>
               </form>
             ) : (
               <div className="stack">
                 <div className="field">
-                  <label htmlFor="loginPhone">Mobile Number</label>
+                  <label htmlFor="loginPhone">{t("auth.fieldMobile")}</label>
                   <input
                     className="ctrl"
                     id="loginPhone"
@@ -186,19 +188,19 @@ export default function LoginPage() {
 
                 {!otpSent ? (
                   <button className="btn block lg" type="button" onClick={sendOtp} disabled={busy}>
-                    {busy ? "Sending code…" : "Get 6-digit OTP"}
+                    {busy ? t("auth.sendingCode") : t("auth.getOtp")}
                   </button>
                 ) : (
                   <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
-                    <p className="tiny muted">Enter the 6-digit verification code sent to {phone}:</p>
+                    <p className="tiny muted">{t("auth.otpPrompt", { phone })}</p>
                     <div className="pad">
                       <OtpField value={otp} onChange={setOtp} onComplete={verifyOtp} />
                     </div>
                     <button className="btn block lg" type="button" onClick={verifyOtp} disabled={busy || otp.length < 6}>
-                      {busy ? "Verifying…" : "Verify and sign in"}
+                      {busy ? t("auth.verifying") : t("auth.verifyAndSignIn")}
                     </button>
                     <button className="lnk" type="button" onClick={sendOtp} disabled={busy}>
-                      Resend OTP
+                      {t("auth.resendOtp")}
                     </button>
                   </div>
                 )}
@@ -206,9 +208,9 @@ export default function LoginPage() {
             )}
           </div>
           <p className="tiny center mt-lg">
-            New to 9bhk?{" "}
+            {t("auth.newToApp")} {" "}
             <Link className="inline-link" href={`/signup${authSearch}`}>
-              Create account
+              {t("auth.createAccount")}
             </Link>
           </p>
         </div>

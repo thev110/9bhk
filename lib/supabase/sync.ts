@@ -25,7 +25,16 @@ export async function persistProfile(user: User): Promise<void> {
     rera_number: user.reraNumber ?? null,
     verified_broker: Boolean(user.verifiedBroker),
     commission_rate: user.commissionRate ?? 2.0,
+    locale: user.locale ?? "en",
   });
+}
+
+/** Persist a language change without touching the rest of the profile row. */
+export async function persistLocale(locale: string): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id) return;
+  await supabase.from("bhk_profiles").update({ locale }).eq("id", id);
 }
 
 export async function persistBooking(booking: Booking): Promise<void> {
