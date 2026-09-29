@@ -15,7 +15,7 @@ import type { Property } from "@/lib/properties";
 import { capacityBand, hasPool, inr, isBeachfront, joinList, listingCount, priceBand } from "@/lib/seo/copy";
 import { locationFor, type LocationEntry, type LocationSummary } from "@/lib/seo/locations";
 import { categoryFor, type StayCategory } from "@/lib/seo/taxonomy";
-import { absoluteUrl, resolveCanonical, SITE, siteVerification } from "@/lib/seo/site";
+import { absoluteUrl, resolveCanonical, SITE, SITE_URL, siteVerification } from "@/lib/seo/site";
 import type { Guide } from "@/lib/content/guides";
 
 /** Clamp a title to a SERF-safe length without cutting mid-word when avoidable. */
@@ -58,6 +58,38 @@ export type BuildOptions = {
 };
 
 /**
+ * Intrinsic dimensions of the Open Graph images this site ships.
+ *
+ * `og:image:width` and `og:image:height` used to be hard-coded to 1200x630,
+ * which is the conventional landscape social card. The actual catalog images
+ * are not that shape: `prop-palm-grove.jpg` is 800x1000 portrait and
+ * `prop-blue-horizon.jpg` is 640x640 square, so every page on the site was
+ * asserting dimensions that contradicted the file it pointed at. Scrapers that
+ * trust the declared size rather than reading the image render the card wrong.
+ *
+ * The real sizes are listed here so the declaration is true. An image that is
+ * not in the table gets **no** width/height at all rather than a guess — an
+ * absent dimension is ignored by every consumer, a wrong one is acted upon.
+ */
+const OG_IMAGE_DIMENSIONS: Record<string, { width: number; height: number }> = {
+  "/assets/prop-palm-grove.jpg": { width: 800, height: 1000 },
+  "/assets/prop-blue-horizon.jpg": { width: 640, height: 640 },
+  "/logo-wordmark.png": { width: 1200, height: 630 },
+};
+
+function ogImage(url: string, alt: string) {
+  const path = url.replace(SITE_URL, "");
+  const dimensions = OG_IMAGE_DIMENSIONS[path];
+  const type = path.endsWith(".png") ? "image/png" : "image/jpeg";
+  return {
+    url,
+    alt,
+    type,
+    ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {}),
+  };
+}
+
+/**
  * Single metadata factory. Every indexable page goes through here so canonical
  * handling, Open Graph, Twitter cards and robots directives stay consistent.
  */
@@ -93,7 +125,7 @@ export function buildMetadata(options: BuildOptions): Metadata {
       title,
       description,
       locale: SITE.locale,
-      images: [{ url: image, width: 1200, height: 630, alt: imageAlt, type: "image/jpeg" }],
+      images: [ogImage(image, imageAlt)],
       ...(options.publishedTime ? { publishedTime: options.publishedTime } : {}),
       ...(options.modifiedTime ? { modifiedTime: options.modifiedTime } : {}),
     },
