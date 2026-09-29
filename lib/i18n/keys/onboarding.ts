@@ -10,30 +10,30 @@
  */
 export const onboardingKeys = {
   // ── Step 1 — role picker ────────────────────────────────────────────────
-  "onboarding.marketplacePill": "Direct Beachfront & Automotive Marketplace",
-  "onboarding.heroTitle": "How will you experience the coast?",
+  "onboarding.marketplacePill": "Whole Villas, Bungalows & Pool Houses",
+  "onboarding.heroTitle": "How will you use 9bhk?",
   "onboarding.heroBody":
     "Select your mandate to personalize your listings, client management, and architectural tools.",
   "onboarding.exploreAsGuest": "Explore as Guest",
 
   // ── Role cards ──────────────────────────────────────────────────────────
-  "onboarding.roleBuyer": "Buyer or Coastal Guest",
-  "onboarding.roleBuyerBody": "Acquire or reserve verified direct oceanfront beach houses & collector vaults.",
+  "onboarding.roleBuyer": "Group Booker or Buyer",
+  "onboarding.roleBuyerBody": "Reserve whole villas and bungalows with pools, or buy one outright.",
   "onboarding.roleRealtor": "Licensed Realtor / Broker",
   "onboarding.roleRealtorBody": "Unbranded presentation mode, private client roster, and 1.5%–2% co-broking lock.",
-  "onboarding.roleSeller": "Estate Owner or Seller",
-  "onboarding.roleSellerBody": "List genuine oceanfront land & villas for crore-denominated sale or curated stays.",
+  "onboarding.roleSeller": "Property Owner or Seller",
+  "onboarding.roleSellerBody": "List your villa, bungalow or pool house for sale or for curated group stays.",
 
   // ── Role short names (continue button) ──────────────────────────────────
-  "onboarding.roleBuyerShort": "Buyer",
+  "onboarding.roleBuyerShort": "Booker",
   "onboarding.roleRealtorShort": "Realtor",
-  "onboarding.roleSellerShort": "Estate Owner",
+  "onboarding.roleSellerShort": "Owner",
   "onboarding.continueAs": "Continue as {role}",
 
   // ── Step 2 — credentials ────────────────────────────────────────────────
   "onboarding.credentialsPill": "Profile & Mandate Credentials",
   "onboarding.titleRealtor": "Agent & Agency Registration",
-  "onboarding.titleSeller": "Estate Verification Details",
+  "onboarding.titleSeller": "Property Verification Details",
   "onboarding.titleBuyer": "Personalize Your Search",
 
   // ── Common fields ───────────────────────────────────────────────────────
@@ -48,19 +48,19 @@ export const onboardingKeys = {
   "onboarding.fieldRera": "RERA License ID / Certificate",
   "onboarding.reraHelp": "Enables co-broking attribution and verified agent checkmark.",
   "onboarding.fieldAcquisitionRange": "Typical Client Acquisition Range",
-  "onboarding.budgetBoutique": "₹5 Cr – ₹15 Cr (Boutique Dune Stretches)",
-  "onboarding.budgetSupercar": "₹15 Cr – ₹35 Cr (Supercar Vault Estates)",
-  "onboarding.budgetSignature": "₹35 Cr – ₹100+ Cr (Signature Bay Frontages)",
+  "onboarding.budgetBoutique": "₹5 Cr – ₹15 Cr (Boutique hill & city homes)",
+  "onboarding.budgetSupercar": "₹15 Cr – ₹35 Cr (Large villas with collector garages)",
+  "onboarding.budgetSignature": "₹35 Cr – ₹100+ Cr (Signature coastal estates)",
 
   // ── Buyer fields ────────────────────────────────────────────────────────
-  "onboarding.fieldCoastalInterest": "Primary Coastal Interest",
+  "onboarding.fieldCoastalInterest": "Primary Setting",
   "onboarding.intentBoth": "Both Buying & Private Stays",
   "onboarding.intentBuy": "Direct Property Acquisition (For Sale)",
-  "onboarding.intentRent": "Private Beachfront Stays Only",
-  "onboarding.fieldAutomotive": "Automotive Accommodations",
+  "onboarding.intentRent": "Private Group Stays Only",
+  "onboarding.fieldAutomotive": "Parking & Garage",
 
   // ── Seller fields ───────────────────────────────────────────────────────
-  "onboarding.fieldFrontage": "Ocean Frontage Linear Feet",
+  "onboarding.fieldFrontage": "Seaside Frontage Linear Feet (if applicable)",
   "onboarding.frontagePlaceholder": "e.g. 150 ft uninterrupted beach",
 
   // ── Form actions ────────────────────────────────────────────────────────
@@ -68,15 +68,15 @@ export const onboardingKeys = {
   "onboarding.activating": "Activating Profile…",
   "onboarding.complete": "Complete Onboarding",
 
-  // ── Toasts ──────────────────────────────────────────────────────────────
+  // ── Garage-type options (carried a qualifier the short labels drop) ─────
   "onboarding.optionCollectorVault": "Subterranean Collector's Vault (<7° ramp)",
   "onboarding.optionMarinePort": "Beach & Marine Port (Boat Trailer Slipway)",
   "onboarding.optionEvPavilion": "High-Output EV Pavilion (22kW+ DC)",
-  "onboarding.optionTeakPortico": "Coastal Teak Open Portico",
+  "onboarding.optionTeakPortico": "Open Timber Portico",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "onboarding.toastNeedName": "Please enter your name",
   "onboarding.toastRealtorActivated": "Realtor Workspace activated. RERA credentials recorded.",
-  "onboarding.toastSellerWelcome": "Welcome owner. Proceeding to estate listing.",
-  "onboarding.toastBuyerWelcome": "Welcome to 9bhk Coastal.",
+  "onboarding.toastSellerWelcome": "Welcome owner. Proceeding to property listing.",
+  "onboarding.toastBuyerWelcome": "Welcome to 9bhk.",
 } as const;

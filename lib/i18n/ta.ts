@@ -1,6 +1,7 @@
 import { en, type Dict } from "./en";
 import { taAdmin } from "./ta/admin";
 import { taCore } from "./ta/core";
+import { taGroup } from "./ta/group";
 import { taHost } from "./ta/host";
 import { taLegal } from "./ta/legal";
 import { taOnboarding } from "./ta/onboarding";
@@ -24,6 +25,7 @@ export const ta: Dict = {
   ...taOnboarding,
   ...taRealtor,
   ...taHost,
+  ...taGroup,
   ...taAdmin,
   ...taLegal,
 };

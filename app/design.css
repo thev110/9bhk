@@ -149,6 +149,8 @@ p{ text-wrap:pretty; }
   transition:border-color .15s ease, background .15s ease;
 }
 .icon-btn:hover{ border-color:var(--primary); background:color-mix(in oklch, var(--primary) 5%, var(--surface)); }
+.icon-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.icon-btn:disabled:hover{ border-color:var(--border-strong); background:var(--surface); }
 .icon-btn .ico{ width:19px; height:19px; }
 .loc-btn{
   display:inline-flex; align-items:center; gap:6px;
@@ -210,7 +212,11 @@ p{ text-wrap:pretty; }
 
 /* ── media, favourites, badges ─────────────────────────────────────── */
 .media{ position:relative; border-radius:var(--r-lg); overflow:hidden; background:var(--surface-2); }
-.media img{ width:100%; height:100%; object-fit:cover; }
+/* Cards now render through next/image. The existing rules already size and
+   crop the <img>, and next/image emits exactly one <img> per card, so the
+   selectors keep working unchanged. `display:block` removes the inline
+   baseline gap that would otherwise add a few pixels of height per card. */
+.media img{ width:100%; height:100%; object-fit:cover; display:block; }
 .fav{
   position:absolute; top:10px; right:10px; z-index:2;
   width:38px; height:38px; border-radius:var(--r-pill);
@@ -242,7 +248,9 @@ p{ text-wrap:pretty; }
 }
 .badge-guest .ico{ width:13px; height:13px; }
 
-.badge-coastal{
+/* Setting badge: seaside / hill station / city / countryside. Replaces the
+   old beachfront-only badge — every listing gets one, none is privileged. */
+.badge-setting{
   position:absolute; bottom:10px; left:10px; z-index:2;
   display:inline-flex; align-items:center; gap:5px;
   padding:4px 9px 4px 7px; border-radius:var(--r-pill);
@@ -252,7 +260,7 @@ p{ text-wrap:pretty; }
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   box-shadow:0 2px 6px rgba(0,0,0,.18);
 }
-.badge-coastal .ico{ width:12px; height:12px; color:var(--sand); }
+.badge-setting .ico{ width:12px; height:12px; color:var(--sand); }
 
 .badge-sale{
   position:absolute; top:10px; left:10px; z-index:2;
@@ -326,7 +334,7 @@ p{ text-wrap:pretty; }
 }
 .n-card:hover{ border-color:var(--moss); box-shadow:var(--sh-sm); }
 .n-thumb{ position:relative; width:96px; height:96px; flex:none; border-radius:var(--r-md); overflow:hidden; background:var(--surface-2); }
-.n-thumb img{ width:100%; height:100%; object-fit:cover; }
+.n-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
 .n-body{ min-width:0; display:flex; flex-direction:column; gap:2px; }
 .n-body .p-title{ font-size:14.5px; }
 .n-body .p-price{ margin-top:7px; font-size:14px; }
@@ -354,7 +362,7 @@ button, input, select, textarea{ font:inherit; }
 }
 .rowcard:hover{ border-color:var(--moss); box-shadow:var(--sh-sm); }
 .rowcard .thumb{ width:96px; height:96px; flex:none; border-radius:var(--r-md); overflow:hidden; background:var(--surface-2); position:relative; }
-.rowcard .thumb img{ width:100%; height:100%; object-fit:cover; }
+.rowcard .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
 .list-stack{ display:flex; flex-direction:column; gap:14px; padding:0 var(--gutter); }
 .cards-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 var(--gutter); }
 .cards-2 .media{ aspect-ratio:1/1; }
@@ -527,6 +535,9 @@ select.ctrl{ appearance:none; background-image:linear-gradient(45deg,transparent
   font-size:13.5px; font-weight:700; color:var(--fg); transition:background .15s ease, color .15s ease;
 }
 .cal-d small{ font-size:9px; font-weight:800; opacity:.85; }
+/* Unselectable days — other months, booked and blocked — must not read as
+   clickable. Past days are not rendered as buttons at all. */
+.cal-d:disabled{ cursor:not-allowed; }
 .cal-d.is-muted{ color:color-mix(in oklch, var(--muted) 45%, transparent); }
 .cal-d.is-off{ color:color-mix(in oklch, var(--muted) 45%, transparent); }
 .cal-d.is-booked{ background:var(--surface-2); color:var(--muted); text-decoration:line-through; }
@@ -550,7 +561,11 @@ select.ctrl{ appearance:none; background-image:linear-gradient(45deg,transparent
 /* ── gallery ───────────────────────────────────────────────────────── */
 .gal{ display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 var(--gutter); }
 .gal > *{ border-radius:var(--r-lg); overflow:hidden; background:var(--surface-2); position:relative; }
-.gal img{ width:100%; height:100%; object-fit:cover; }
+.gal img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* The property gallery image is `fill`, so it needs a positioned, sized parent
+   to resolve against. The aspect ratio is what reserves the space and keeps the
+   page free of cumulative layout shift while the photograph decodes. */
+.gal .gal-hero{ position:relative; display:block; width:100%; aspect-ratio:4/3; overflow:hidden; border-radius:var(--r-lg); box-shadow:var(--sh-sm); }
 .gal .g-main{ grid-column:1/-1; aspect-ratio:4/3; }
 .gal .g-item{ aspect-ratio:1/1; }
 .gal .more{ position:absolute; inset:0; display:grid; place-items:center; background:color-mix(in oklch, var(--ink) 42%, transparent); color:var(--warm-white); font-weight:800; font-size:14px; border:0; }

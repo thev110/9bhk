@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
@@ -10,6 +10,16 @@ import { useCatalog } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
 import type { DictKey } from "@/lib/i18n/en";
 import { browserSupabase, hasSupabase } from "@/lib/supabase/browser";
+import { formatBytes } from "@/lib/format";
+import {
+  downloadDocument,
+  openDocument,
+  reviewDocument,
+  type DocumentKind,
+  type DocumentStatus,
+  type PropertyDocument,
+} from "@/lib/supabase/documents";
+import { decideListing, loadReviewQueue, waitingDays, type ReviewListing } from "@/lib/supabase/review";
 
 const TABS = ["Overview", "Properties", "Reviews", "Users", "Bookings", "Verification"] as const;
 
@@ -29,20 +39,35 @@ const PROP_FILTER_KEY: Record<"all" | "published" | "draft", DictKey> = {
   draft: "admin.filterDraft",
 };
 
-type ReviewItem = {
-  id: string;
-  name: string;
-  meta: string;
-  host: string;
-  price: string;
-  amenities: string;
-  when: string;
-  images: string[];
-  docs: [string, "Verified" | "Pending" | "Missing"][];
-  status: "pending" | "approved" | "changes" | "rejected";
+/**
+ * A submission in the review queue.
+ *
+ * This used to be a hardcoded batch, which is why "Submitted documents" could
+ * only ever be decoration. A card now exists because a host really submitted a
+ * listing, and its documents are the files that host really uploaded.
+ */
+type QueueRow = ReviewListing;
+
+/** Document slot -> catalog key. Shared with the host wizard, so a document
+ *  carries one name from upload through approval. */
+const DOC_KIND_KEY: Record<DocumentKind, DictKey> = {
+  ownership_proof: "admin.docOwnershipProof",
+  tax_receipt: "admin.docTaxReceipt",
+  host_id: "admin.docHostId",
 };
 
-/** Document checklist label -> catalog key. */
+/** Document review state -> pill class. */
+const DOC_PILL: Record<DocumentStatus, string> = {
+  pending: "warn",
+  verified: "ok",
+  rejected: "danger",
+};
+
+/**
+ * Verification-checklist label -> catalog key, keyed by the literal English
+ * label. Only the Verification tab still uses this: the review queue is keyed
+ * by document kind instead.
+ */
 const DOC_KEY: Record<string, DictKey> = {
   "Ownership proof": "admin.docOwnershipProof",
   "Property tax receipt": "admin.docTaxReceipt",
@@ -50,6 +75,13 @@ const DOC_KEY: Record<string, DictKey> = {
   "Government ID": "admin.docGovernmentId",
   "Phone + email": "admin.docPhoneEmail",
   "Payout account": "admin.docPayoutAccount",
+};
+
+/** Document review state -> catalog key. */
+const DOC_STATE_KEY: Record<DocumentStatus, DictKey> = {
+  pending: "admin.statePending",
+  verified: "admin.stateVerified",
+  rejected: "admin.stateRejected",
 };
 
 /** Document / verification state -> catalog key. */
@@ -60,70 +92,6 @@ const STATE_KEY: Record<string, DictKey> = {
   "Docs in review": "admin.stateDocsInReview",
   "Missing documents": "admin.stateMissingDocs",
 };
-
-const INITIAL_QUEUE: ReviewItem[] = [
-  {
-    id: "LH-2048",
-    name: "The Guava House",
-    meta: "Chennai · 4 guests · 2 bedrooms · 2 beds · 2 bathrooms",
-    host: "Arjun K · host since 2024",
-    price: "₹5,950",
-    amenities: "Wi-Fi · AC · Pool · Parking",
-    when: "Submitted 2 days ago",
-    images: [
-      "/assets/prop-guava-house.jpg",
-      "/assets/prop-coconut-grove.jpg",
-      "/assets/prop-terracotta-courtyard.jpg",
-      "/assets/prop-mango-orchard.jpg",
-    ],
-    docs: [
-      ["Ownership proof", "Verified"],
-      ["Property tax receipt", "Pending"],
-      ["Host ID", "Verified"],
-    ],
-    status: "pending",
-  },
-  {
-    id: "LH-2061",
-    name: "Lakeview Courtyard Stay",
-    meta: "Pondicherry · 6 guests · 3 bedrooms · 3 beds · 2 bathrooms",
-    host: "Meera N · host since 2025",
-    price: "₹7,400",
-    amenities: "Wi-Fi · AC · BBQ · Bonfire",
-    when: "Submitted 1 day ago",
-    images: [
-      "/assets/prop-lakeview-courtyard.jpg",
-      "/assets/prop-blue-horizon.jpg",
-      "/assets/prop-verde-meadow.jpg",
-      "/assets/prop-sunset-fields.jpg",
-    ],
-    docs: [
-      ["Ownership proof", "Verified"],
-      ["Host ID", "Verified"],
-    ],
-    status: "pending",
-  },
-  {
-    id: "LH-2054",
-    name: "Coconut Grove Farmhouse",
-    meta: "Mahabalipuram · 3 guests · 1 bedroom · 2 beds · 1 bathroom",
-    host: "Dev P · first listing",
-    price: "₹4,900",
-    amenities: "Wi-Fi · Parking · Kitchenette",
-    when: "Submitted 1 day ago",
-    images: [
-      "/assets/prop-coconut-grove.jpg",
-      "/assets/prop-guava-house.jpg",
-      "/assets/prop-mango-orchard.jpg",
-      "/assets/prop-terracotta-courtyard.jpg",
-    ],
-    docs: [
-      ["Ownership proof", "Missing"],
-      ["Host ID", "Pending"],
-    ],
-    status: "pending",
-  },
-];
 
 type AdminUser = {
   initials: string;
@@ -200,7 +168,10 @@ export default function AdminPage() {
   const { properties: catalogProps, reload: reloadCatalog } = useCatalog();
   const t = useT();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
-  const [queue, setQueue] = useState<ReviewItem[]>(INITIAL_QUEUE);
+  const [queue, setQueue] = useState<QueueRow[]>([]);
+  const [queueLoading, setQueueLoading] = useState(true);
+  // Reviewer notes, keyed by document id, so a refusal can say why.
+  const [docNotes, setDocNotes] = useState<Record<string, string>>({});
   const [users, setUsers] = useState<AdminUser[]>(INITIAL_USERS);
   const [verifySeg, setVerifySeg] = useState<"host" | "property">("host");
   const [activity, setActivity] = useState<string[]>([
@@ -247,23 +218,35 @@ export default function AdminPage() {
           image: (row.image_urls && row.image_urls[0]) || "/assets/prop-palm-grove.jpg",
           alt: row.alt || row.name,
           blurb: row.blurb || row.description || "",
-          type: row.type || "Oceanfront Estate",
+          type: row.type || "Villa",
           guestFavourite: row.guest_favourite,
           group: row.group_name || "popular",
           status: row.status || "published",
-          beachFrontage: row.beach_frontage || "120 ft direct beachfront",
-          coastalZone: row.coastal_zone || "Direct Oceanfront",
-          privateBeachAccess: row.private_beach_access ?? true,
-          tideDistanceMeters: row.tide_distance_meters ?? 40,
-          garage: {
-            type: row.garage_type || "collector_vault",
-            name: row.garage_type === "marine_port" ? "Beach & Marine Port" : row.garage_type === "ev_pavilion" ? "Executive EV Pavilion" : row.garage_type === "teak_portico" ? "Coastal Teak Portico" : "Subterranean Collector's Vault",
-            capacity: row.garage_capacity ?? 2,
-            supercarFriendly: row.supercar_friendly ?? true,
-            evChargingKw: row.ev_charging_kw ?? 22,
-            washdownStation: row.washdown_station ?? true,
-            description: "Protected coastal vehicle bay.",
-          },
+          setting: row.setting || "seaside",
+          settingName: row.setting_name || row.location || row.city || "",
+          settingDetail: row.setting_detail || row.highlights || "",
+          // Coastal and garage fields are optional — only carry them across
+          // when the row actually has them, so the admin table never invents
+          // a shoreline or a garage for a hill or city listing.
+          ...(row.setting === "seaside"
+            ? {
+                beachFrontage: row.beach_frontage || undefined,
+                coastalZone: row.coastal_zone || undefined,
+                privateBeachAccess: row.private_beach_access ?? true,
+                tideDistanceMeters: row.tide_distance_meters ?? 40,
+              }
+            : {}),
+          garage: row.garage_type
+            ? {
+                type: row.garage_type,
+                name: row.garage_type === "marine_port" ? "Beach & Marine Port" : row.garage_type === "ev_pavilion" ? "Executive EV Pavilion" : row.garage_type === "teak_portico" ? "Teak Portico" : "Subterranean Collector's Vault",
+                capacity: row.garage_capacity ?? 2,
+                supercarFriendly: row.supercar_friendly ?? false,
+                evChargingKw: row.ev_charging_kw ?? 0,
+                washdownStation: row.washdown_station ?? false,
+                description: "Protected covered vehicle bay.",
+              }
+            : undefined,
           isForSale: Boolean(row.is_for_sale),
           salePrice: row.sale_price,
           landArea: row.land_area,
@@ -326,7 +309,9 @@ export default function AdminPage() {
     },
   ]);
 
-  const pendingReviews = useMemo(() => queue.filter((item) => item.status === "pending"), [queue]);
+  // Every row in the queue is awaiting a decision by construction — it is a
+  // query for `status = 'pending'` — so there is nothing left to filter on.
+  const pendingReviews = queue;
 
   function logActivity(text: string) {
     setActivity((prev) => [`${text} · ${t("note.justNow")}`, ...prev.slice(0, 8)]);
@@ -412,16 +397,50 @@ export default function AdminPage() {
     }
   }
 
-  function actReview(id: string, action: "approve" | "changes" | "reject") {
+  /**
+   * How long a submission has been waiting, as a sentence.
+   *
+   * A listing submitted before the review columns existed has no timestamp, so
+   * it says so rather than claiming to be brand new.
+   */
+  function submittedLabel(submittedAt: string | null): string {
+    const days = waitingDays(submittedAt);
+    if (days === null) return t("admin.submittedUnknown");
+    if (days === 0) return t("admin.submittedToday");
+    return t("admin.submittedDaysAgo", { n: days });
+  }
+
+  /** Re-read the queue. A submission appears here the moment it is submitted. */
+  const reloadQueue = useCallback(async () => {
+    setQueueLoading(true);
+    setQueue(await loadReviewQueue());
+    setQueueLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void reloadQueue();
+  }, [reloadQueue]);
+
+  /**
+   * Decide a whole listing.
+   *
+   * The row leaves the queue either way: a rejection and a request for changes
+   * both stop it from being "waiting", and only 'approve' publishes it.
+   */
+  async function actReview(id: string, action: "approve" | "changes" | "reject") {
+    const target = queue.find((item) => item.id === id);
+    const saved = await decideListing({ id, decision: action });
+    if (!saved) {
+      showToast(t("admin.toastReviewFailed"));
+      return;
+    }
+
     const labels = {
       approve: t("admin.reviewApprovedPublished"),
       changes: t("admin.reviewChangesRequested"),
       reject: t("admin.reviewRejected"),
     };
-    const target = queue.find((q) => q.id === id);
-    setQueue((items) =>
-      items.map((item) => (item.id === id ? { ...item, status: action === "approve" ? "approved" : action === "changes" ? "changes" : "rejected" } : item))
-    );
+    setQueue((items) => items.filter((item) => item.id !== id));
     showToast(labels[action]);
     logActivity(
       `${target?.name || id} ${
@@ -432,6 +451,40 @@ export default function AdminPage() {
             : t("admin.logRejected")
       }`
     );
+  }
+
+  /** Record a verdict on a single document, with an optional reviewer note. */
+  async function actOnDocument(doc: PropertyDocument, status: "verified" | "rejected") {
+    const note = docNotes[doc.id] ?? "";
+    const saved = await reviewDocument({ id: doc.id, status, note });
+    if (!saved) {
+      showToast(t("admin.toastDocReviewFailed"));
+      return;
+    }
+    setQueue((items) =>
+      items.map((item) => ({
+        ...item,
+        documents: item.documents.map((entry) =>
+          entry.id === doc.id ? { ...entry, status, note: note.trim() || undefined } : entry,
+        ),
+      })),
+    );
+    showToast(status === "verified" ? t("admin.toastDocVerified") : t("admin.toastDocRejected"));
+  }
+
+  /**
+   * Open a document for reading.
+   *
+   * The bucket is private, so this mints a short-lived signed URL rather than
+   * linking straight at a path — which is also why it can fail, and why that
+   * failure is reported instead of silently doing nothing.
+   */
+  async function openDoc(doc: PropertyDocument) {
+    if (!(await openDocument(doc.path))) showToast(t("admin.errDocLink"));
+  }
+
+  async function downloadDoc(doc: PropertyDocument) {
+    if (!(await downloadDocument(doc))) showToast(t("admin.errDocLink"));
   }
 
   function toggleSuspendUser(email: string) {
@@ -667,12 +720,12 @@ export default function AdminPage() {
                 className="btn sm outline"
                 type="button"
                 onClick={() => {
-                  setQueue(INITIAL_QUEUE);
-                  showToast(t("admin.toastQueuesRestored"));
-                  logActivity(t("admin.logQueuesReset"));
+                  void reloadQueue();
+                  showToast(t("admin.toastQueueRefreshed"));
+                  logActivity(t("admin.logQueueRefreshed"));
                 }}
               >
-                {t("admin.resetDemoQueues")}
+                {t("admin.refreshQueue")}
               </button>
             </div>
           </div>
@@ -818,14 +871,20 @@ export default function AdminPage() {
             <span className="pill warn sm">{t("admin.inThisBatch", { n: pendingReviews.length })}</span>
           </div>
 
-          {pendingReviews.length === 0 ? (
+          <button className="btn outline sm" type="button" onClick={reloadQueue} disabled={queueLoading}>
+            <Icon name="refresh" /> {t("admin.refreshQueue")}
+          </button>
+
+          {queueLoading ? (
+            <div className="empty">
+              <Icon name="refresh" />
+              <h3>{t("admin.queueLoading")}</h3>
+            </div>
+          ) : pendingReviews.length === 0 ? (
             <div className="empty">
               <Icon name="check" />
               <h3>{t("admin.queueClear")}</h3>
               <p>{t("admin.queueClearBody")}</p>
-              <button className="btn sm" type="button" onClick={() => setQueue(INITIAL_QUEUE)}>
-                {t("admin.reloadSampleQueue")}
-              </button>
             </div>
           ) : (
             pendingReviews.map((item) => (
@@ -834,13 +893,18 @@ export default function AdminPage() {
                   <span className="g-lead">
                     <img src={item.images[0]} alt={item.name} />
                   </span>
-                  <span><img src={item.images[1]} alt="" /></span>
-                  <span><img src={item.images[2]} alt="" /></span>
-                  <span><img src={item.images[3]} alt="" /></span>
+                  {/* A real submission may carry fewer than four photos. */}
+                  {[1, 2, 3].map((slot) =>
+                    item.images[slot] ? (
+                      <span key={slot}>
+                        <img src={item.images[slot]} alt="" />
+                      </span>
+                    ) : null,
+                  )}
                 </div>
 
                 <div className="between" style={{ marginTop: 12 }}>
-                  <span className="pill info sm">{item.when}</span>
+                  <span className="pill info sm">{submittedLabel(item.submittedAt)}</span>
                   <span className="tiny muted">{t("admin.listingRef", { id: item.id })}</span>
                 </div>
 
@@ -854,16 +918,47 @@ export default function AdminPage() {
                 </div>
 
                 <p className="sec-title" style={{ fontSize: 13, marginTop: 14 }}>{t("admin.submittedDocuments")}</p>
-                <div className="card tight" style={{ marginTop: 6 }}>
-                  {item.docs.map(([doc, state]) => (
-                    <div className="doc-row" key={doc}>
-                      <span className="nm"><Icon name="shield" />{DOC_KEY[doc] ? t(DOC_KEY[doc]) : doc}</span>
-                      <span className={`pill sm ${state === "Verified" ? "ok" : state === "Pending" ? "warn" : "danger"}`}>
-                        {STATE_KEY[state] ? t(STATE_KEY[state]) : state}
-                      </span>
+                {item.documents.length === 0 ? (
+                  <div className="card tight" style={{ marginTop: 6 }}>
+                    <p className="tiny muted">{t("admin.noDocuments")}</p>
+                  </div>
+                ) : (
+                  item.documents.map((doc) => (
+                    <div className="card tight" key={doc.id} style={{ marginTop: 6 }}>
+                      <div className="between">
+                        <span className="nm"><Icon name="shield" />{t(DOC_KIND_KEY[doc.kind])}</span>
+                        <span className={`pill sm ${DOC_PILL[doc.status]}`}>{t(DOC_STATE_KEY[doc.status])}</span>
+                      </div>
+                      <p className="tiny muted" style={{ marginTop: 2 }}>
+                        {doc.fileName} · {formatBytes(doc.sizeBytes)}
+                      </p>
+                      <div className="row wrap" style={{ gap: 6, marginTop: 8 }}>
+                        <button className="btn outline sm" type="button" onClick={() => openDoc(doc)}>
+                          {t("admin.docView")}
+                        </button>
+                        <button className="btn outline sm" type="button" onClick={() => downloadDoc(doc)}>
+                          <Icon name="download" /> {t("admin.docDownload")}
+                        </button>
+                        <button className="btn sm" type="button" onClick={() => actOnDocument(doc, "verified")}>
+                          {t("admin.docVerify")}
+                        </button>
+                        <button className="btn danger sm" type="button" onClick={() => actOnDocument(doc, "rejected")}>
+                          {t("admin.reject")}
+                        </button>
+                      </div>
+                      <input
+                        className="ctrl"
+                        style={{ marginTop: 8 }}
+                        placeholder={t("admin.docNotePlaceholder")}
+                        aria-label={t("admin.docNotePlaceholder")}
+                        value={docNotes[doc.id] ?? doc.note ?? ""}
+                        onChange={(event) =>
+                          setDocNotes((curr) => ({ ...curr, [doc.id]: event.target.value }))
+                        }
+                      />
                     </div>
-                  ))}
-                </div>
+                  ))
+                )}
 
                 <div className="row wrap mt" style={{ gap: 8 }}>
                   <button className="btn sm grow" type="button" onClick={() => actReview(item.id, "approve")}>

@@ -4,22 +4,36 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
-import { CITIES, inr } from "@/lib/format";
-import { PROPERTIES, formatInrCrores } from "@/lib/properties";
+import { CITIES, formatBytes, inr } from "@/lib/format";
+import { MIN_BEDROOMS, PROPERTIES, SETTINGS, formatInrCrores, type Setting } from "@/lib/properties";
 import { emptyDraft, useStore, type ListingDraft } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
 import { saveProperty, uploadPropertyPhotos } from "@/lib/supabase/properties";
+import {
+  DOCUMENT_ACCEPT_ATTR,
+  DOCUMENT_KINDS,
+  uploadPropertyDocument,
+  validateDocument,
+  type DocumentKind,
+} from "@/lib/supabase/documents";
 import { useT } from "@/lib/i18n";
 import { garageLabel } from "@/lib/i18n/garage";
+import { settingLabel } from "@/lib/i18n/vibes";
+import { settingIcon } from "@/components/icon";
 import type { DictKey } from "@/lib/i18n/en";
 
 // Amenity and property-type values are persisted to the listing record and
 // matched against the search index, so they stay as stored data — not copy.
 const AMENITIES = ["Pool", "BBQ", "Bonfire", "Wi-Fi", "AC", "Parking", "Kitchen", "Pet friendly", "Indoor games", "Outdoor games", "Projector & music", "Caretaker", "Power backup"];
 const TYPES = [
+  "Villa",
+  "Bungalow",
+  "Pool House",
+  "Farmhouse",
+  "Countryside Estate",
+  "Hill Station Villa",
+  "City Villa",
   "Oceanfront Estate",
-  "Marine Beachfront Villa",
-  "Dune Edge Sanctuary",
   "Cove Beachfront Villa",
 ];
 const GARAGE_OPTIONS = [
@@ -30,10 +44,21 @@ const GARAGE_OPTIONS = [
 ] as const satisfies readonly { id: string; qualifier: DictKey }[];
 const PHOTOS = PROPERTIES.slice(0, 6);
 
+/**
+ * Document slot -> label. Deliberately the same keys the admin console uses, so
+ * the paper a host attaches and the paper a reviewer approves carry one name.
+ */
+const DOC_KIND_KEY: Record<DocumentKind, DictKey> = {
+  ownership_proof: "admin.docOwnershipProof",
+  tax_receipt: "admin.docTaxReceipt",
+  host_id: "admin.docHostId",
+};
+
 const SECTIONS = [
   "host.sectionBasics",
   "host.sectionLocation",
   "host.sectionSpace",
+  "celebration.wizardTitle",
   "host.sectionAmenities",
   "host.sectionPhotos",
   "host.sectionPrice",
@@ -44,8 +69,9 @@ const SECTIONS = [
 
 const TITLES = [
   "host.titleBasics",
-  "host.titleShoreline",
+  "host.titleSetting",
   "host.titleSpace",
+  "celebration.wizardTitle",
   "host.titleGarage",
   "host.titlePhotos",
   "host.titlePricing",
@@ -63,6 +89,9 @@ export default function ListingWizard() {
   const [form, setForm] = useState<ListingDraft>(draft ?? emptyDraft());
   const [done, setDone] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Documents are staged as plain Files and uploaded after the listing row
+  // exists, because both the storage path and the index row are keyed by its id.
+  const [docFiles, setDocFiles] = useState<Partial<Record<DocumentKind, File>>>({});
 
   function patch(partial: Partial<ListingDraft>) {
     setForm((f) => ({ ...f, ...partial }));
@@ -73,12 +102,26 @@ export default function ListingWizard() {
       showToast(t("host.errNameShort"));
       return;
     }
-    if (step === 8) {
+    // 9bhk is a group-stay marketplace: below the floor the listing is not
+    // bookable, so block the step rather than accepting a 1-bed room.
+    if (step === 2 && form.bedrooms < MIN_BEDROOMS) {
+      showToast(t("host.errMinBedrooms", { n: MIN_BEDROOMS }));
+      return;
+    }
+    if (step === 9) {
+      if (form.bedrooms < MIN_BEDROOMS) {
+        showToast(t("host.errMinBedrooms", { n: MIN_BEDROOMS }));
+        return;
+      }
       try {
-        await saveProperty(form);
+        const propertyId = await saveProperty(form);
+        // Attach the paperwork to the listing that now exists. A failed upload
+        // must not undo a saved listing, so it is reported rather than thrown.
+        const failed = await uploadStagedDocuments(propertyId);
         setDraft(null);
         reload();
         setDone(true);
+        if (failed) showToast(t("host.errDocsNotUploaded", { n: failed }));
       } catch (error) {
         showToast(error instanceof Error ? error.message : t("host.errSaveFailed"));
       }
@@ -86,6 +129,41 @@ export default function ListingWizard() {
     }
     setDraft(form);
     setStep((s) => s + 1);
+  }
+
+  /** Upload every staged document. Returns how many could not be sent. */
+  async function uploadStagedDocuments(propertyId: string): Promise<number> {
+    const staged = Object.entries(docFiles) as [DocumentKind, File][];
+    let failed = 0;
+    for (const [kind, file] of staged) {
+      try {
+        await uploadPropertyDocument({ propertyId, kind, file });
+      } catch {
+        failed += 1;
+      }
+    }
+    return failed;
+  }
+
+  /**
+   * Hold a chosen file until submit.
+   *
+   * The file is checked here as well as in the client library so the host gets
+   * the reason immediately, instead of at the end of the wizard.
+   */
+  function stageDocument(kind: DocumentKind, list: FileList | null) {
+    const file = list?.[0];
+    if (!file) return;
+    const problem = validateDocument(file);
+    if (problem === "too_large") {
+      showToast(t("host.errDocTooLarge"));
+      return;
+    }
+    if (problem === "bad_type") {
+      showToast(t("host.errDocType"));
+      return;
+    }
+    setDocFiles((curr) => ({ ...curr, [kind]: file }));
   }
 
   async function addPhotos(list: FileList | null) {
@@ -124,10 +202,10 @@ export default function ListingWizard() {
       <PageBar title={t("host.newListing")} backHref="/host" />
       <div className="pad mt">
         <p className="muted">
-          {t("host.sectionOf", { n: step + 1, total: 9, section: t(SECTIONS[step]) })}
+          {t("host.sectionOf", { n: step + 1, total: 10, section: t(SECTIONS[step]) })}
         </p>
         <div className="pbar mt">
-          <i style={{ width: `${((step + 1) / 9) * 100}%` }} />
+          <i style={{ width: `${((step + 1) / 10) * 100}%` }} />
         </div>
         <h1 className="mt" style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32 }}>
           {t(TITLES[step])}
@@ -188,6 +266,30 @@ export default function ListingWizard() {
         {step === 1 ? (
           <>
             <p className="muted">{t("host.stepLocation")}</p>
+            <p style={{ fontWeight: 800 }}>{t("host.fieldSetting")}</p>
+            <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
+              {SETTINGS.map((setting) => (
+                <button
+                  key={setting}
+                  type="button"
+                  className={`chip${form.setting === setting ? " is-active" : ""}`}
+                  onClick={() => patch({ setting })}
+                >
+                  <Icon name={settingIcon(setting)} />
+                  {settingLabel(t, setting)}
+                </button>
+              ))}
+            </div>
+            <span className="help">{t("host.helpSetting")}</span>
+            <label className="field">
+              {t("host.fieldSettingDetail")}
+              <input
+                className="ctrl"
+                placeholder={t("host.settingDetailPlaceholder", { setting: settingLabel(t, form.setting) })}
+                value={form.settingDetail}
+                onChange={(e) => patch({ settingDetail: e.target.value })}
+              />
+            </label>
             <label className="field">
               {t("host.fieldCityOrRegion")}
               <select className="ctrl" value={form.city} onChange={(e) => patch({ city: e.target.value })}>
@@ -214,38 +316,162 @@ export default function ListingWizard() {
         {step === 2 ? (
           <>
             <p className="muted">{t("host.stepSpace")}</p>
-            <Counter label={t("host.fieldBedrooms")} value={form.bedrooms} onChange={(bedrooms) => patch({ bedrooms })} />
-            <Counter label={t("host.fieldBeds")} value={form.beds} onChange={(beds) => patch({ beds })} />
+            <div
+              className="between"
+              style={{ padding: "10px 12px", borderRadius: "var(--r-md)", background: "var(--surface-2)" }}
+            >
+              <strong style={{ fontSize: 14 }}>{t("host.minBedroomsNote", { n: MIN_BEDROOMS })}</strong>
+              <Icon name="shield" style={{ width: 16, height: 16, color: "var(--moss)" }} />
+            </div>
+            <Counter
+              label={t("host.fieldBedrooms")}
+              value={form.bedrooms}
+              min={MIN_BEDROOMS}
+              onChange={(bedrooms) => patch({ bedrooms })}
+            />
+            <Counter label={t("host.fieldBeds")} value={form.beds} min={MIN_BEDROOMS} onChange={(beds) => patch({ beds })} />
             <Counter label={t("host.fieldBathrooms")} value={form.bathrooms} onChange={(bathrooms) => patch({ bathrooms })} />
           </>
         ) : null}
 
         {step === 3 ? (
           <>
-            <p className="muted">{t("host.stepGarage")}</p>
-            <label className="field">
-              <span>{t("host.fieldBeachFrontage")}</span>
-              <input
-                className="ctrl"
-                placeholder={t("host.beachFrontagePlaceholder")}
-                value={form.beachFrontage || ""}
-                onChange={(e) => patch({ beachFrontage: e.target.value })}
+            <p className="muted">{t("celebration.wizardBody")}</p>
+            <div
+              className="between"
+              style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}
+            >
+              <div>
+                <strong>{t("celebration.toggle")}</strong>
+                <p className="muted" style={{ fontSize: 12 }}>
+                  {t("celebration.toggleHelp")}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="sw"
+                aria-checked={Boolean(form.hostsCelebrations)}
+                onClick={() => patch({ hostsCelebrations: !form.hostsCelebrations })}
               />
-            </label>
+            </div>
+            {form.hostsCelebrations ? (
+              <>
+                <label className="field">
+                  {t("celebration.fieldCapacity")}
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    value={form.maxEventGuests ?? ""}
+                    onChange={(e) => patch({ maxEventGuests: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="field">
+                  {t("celebration.fieldPower")}
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    value={form.powerLoadKw ?? ""}
+                    onChange={(e) => patch({ powerLoadKw: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="field">
+                  {t("celebration.fieldCurfew")}
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    value={form.soundCurfewHour ?? ""}
+                    onChange={(e) =>
+                      patch({ soundCurfewHour: Math.min(23, Math.max(0, Number(e.target.value) || 0)) })
+                    }
+                  />
+                </label>
+                <label className="field">
+                  {t("celebration.fieldParking")}
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    value={form.parkingCars ?? ""}
+                    onChange={(e) => patch({ parkingCars: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <label className="field">
+                  {t("celebration.fieldGenerator")}
+                  <input
+                    className="ctrl"
+                    inputMode="numeric"
+                    value={form.generatorKw ?? ""}
+                    onChange={(e) => patch({ generatorKw: Number(e.target.value) || 0 })}
+                  />
+                </label>
+                <div
+                  className="between"
+                  style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}
+                >
+                  <strong>{t("celebration.catererYes")}</strong>
+                  <button
+                    type="button"
+                    className="sw"
+                    aria-checked={Boolean(form.catererKitchen)}
+                    onClick={() => patch({ catererKitchen: !form.catererKitchen })}
+                  />
+                </div>
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        {step === 4 ? (
+          <>
+            <p className="muted">{t("host.stepGarage")}</p>
+            {form.setting === "seaside" ? (
+              <label className="field">
+                <span>{t("host.fieldBeachFrontage")}</span>
+                <input
+                  className="ctrl"
+                  placeholder={t("host.beachFrontagePlaceholder")}
+                  value={form.beachFrontage || ""}
+                  onChange={(e) => patch({ beachFrontage: e.target.value })}
+                />
+              </label>
+            ) : null}
             <p style={{ fontWeight: 800, marginTop: 12 }}>{t("host.garageArchitecture")}</p>
             <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
-              {GARAGE_OPTIONS.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  className={`chip${(form.garageType || "collector_vault") === g.id ? " is-active" : ""}`}
-                  onClick={() => patch({ garageType: g.id })}
-                >
-                  <Icon name="car" />
-                  {garageLabel(t, g.id)} {t(g.qualifier)}
-                </button>
-              ))}
+              <button
+                type="button"
+                className={`chip${!form.garageType ? " is-active" : ""}`}
+                onClick={() => patch({ garageType: undefined, garageCapacity: undefined })}
+              >
+                <Icon name="close" />
+                {t("host.noGarage")}
+              </button>
+              {GARAGE_OPTIONS
+                .filter((g) => g.id !== "marine_port" || form.setting === "seaside")
+                .map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    className={`chip${form.garageType === g.id ? " is-active" : ""}`}
+                    onClick={() => patch({ garageType: g.id, garageCapacity: form.garageCapacity || 2 })}
+                  >
+                    <Icon name="car" />
+                    {garageLabel(t, g.id)} {t(g.qualifier)}
+                  </button>
+                ))}
             </div>
+            {form.garageType ? (
+              <div className="between" style={{ marginTop: 12 }}>
+                <strong>{t("host.fieldGarageCapacity")}</strong>
+                <div className="stepper">
+                  <button type="button" onClick={() => patch({ garageCapacity: Math.max(1, (form.garageCapacity || 2) - 1) })}>
+                    <Icon name="minus" />
+                  </button>
+                  <span className="val num">{form.garageCapacity || 2}</span>
+                  <button type="button" onClick={() => patch({ garageCapacity: (form.garageCapacity || 2) + 1 })}>
+                    <Icon name="plus" />
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <p style={{ fontWeight: 800, marginTop: 16 }}>{t("host.curatedAmenities")}</p>
             <div className="chips" style={{ paddingInline: 0, flexWrap: "wrap" }}>
               {AMENITIES.map((item) => {
@@ -265,7 +491,7 @@ export default function ListingWizard() {
           </>
         ) : null}
 
-        {step === 4 ? (
+        {step === 5 ? (
           <>
             <p className="muted">{t("host.stepPhotos")}</p>
             <label className="btn block">
@@ -285,7 +511,7 @@ export default function ListingWizard() {
             {form.photos.length ? (
               <div className="gal" style={{ padding: 0 }}>
                 {form.photos.map((photo) => (
-                  <img key={photo} src={photo} alt="" style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
+                  <img key={photo} src={photo} alt="" loading="lazy" decoding="async" width={200} height={200} style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
                 ))}
               </div>
             ) : null}
@@ -294,7 +520,7 @@ export default function ListingWizard() {
                 const on = form.photos.includes(photo.image);
                 return (
                   <button key={photo.id} type="button" onClick={() => patch({ photos: on ? form.photos.filter((p) => p !== photo.image) : [...form.photos, photo.image] })} style={{ border: on ? "2px solid var(--primary)" : "2px solid transparent", padding: 0, background: "none" }}>
-                    <img src={photo.image} alt={photo.alt} style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
+                    <img src={photo.image} alt={photo.alt} loading="lazy" decoding="async" width={200} height={200} style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
                   </button>
                 );
               })}
@@ -306,7 +532,7 @@ export default function ListingWizard() {
           </>
         ) : null}
 
-        {step === 5 ? (
+        {step === 6 ? (
           <>
             <p className="muted">{t("host.stepPricing")}</p>
             {form.isForSale ? (
@@ -367,7 +593,7 @@ export default function ListingWizard() {
           </>
         ) : null}
 
-        {step === 6 ? (
+        {step === 7 ? (
           <>
             <p className="muted">{t("host.blockDatesBody")}</p>
             <div className="legend">
@@ -387,9 +613,16 @@ export default function ListingWizard() {
           </>
         ) : null}
 
-        {step === 7 ? (
+        {step === 8 ? (
           <article className="card">
             {form.photos[0] ? <img src={form.photos[0]} alt="" style={{ borderRadius: 16, marginBottom: 12 }} /> : null}
+            <div className="row wrap" style={{ gap: 6, marginBottom: 8 }}>
+              <span className="pill forest" style={{ fontSize: 11 }}>
+                <Icon name={settingIcon(form.setting)} style={{ width: 12, height: 12 }} />
+                {settingLabel(t, form.setting as Setting)}
+              </span>
+              {form.settingDetail ? <span className="pill muted" style={{ fontSize: 11 }}>{form.settingDetail}</span> : null}
+            </div>
             <h3>{form.name || t("host.untitledFarmhouse")}</h3>
             <p className="muted">
               {form.city}
@@ -405,8 +638,41 @@ export default function ListingWizard() {
           </article>
         ) : null}
 
-        {step === 8 ? (
-          <p>{t("host.stepPublish")}</p>
+        {step === 9 ? (
+          <div className="stack">
+            <p>{t("host.stepPublish")}</p>
+            <p className="sec-title" style={{ fontSize: 13 }}>{t("host.documentsTitle")}</p>
+            <p className="muted">{t("host.documentsBody")}</p>
+            {DOCUMENT_KINDS.map((kind) => {
+              const file = docFiles[kind];
+              return (
+                <div className="between" key={kind} style={{ gap: 10 }}>
+                  <span className="nm" style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                    <Icon name="shield" />
+                    <span style={{ minWidth: 0 }}>
+                      <strong style={{ display: "block", fontSize: 13.5 }}>{t(DOC_KIND_KEY[kind])}</strong>
+                      <span className="tiny muted">
+                        {file ? `${file.name} · ${formatBytes(file.size)}` : t("host.docNone")}
+                      </span>
+                    </span>
+                  </span>
+                  <label className="btn outline sm" style={{ flex: "none" }}>
+                    {file ? t("host.docReplace") : t("host.docUpload")}
+                    <input
+                      type="file"
+                      className="sr"
+                      accept={DOCUMENT_ACCEPT_ATTR}
+                      onChange={(event) => {
+                        stageDocument(kind, event.target.files);
+                        // Reset so re-picking the same file fires change again.
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         ) : null}
 
         <div className="row">
@@ -415,8 +681,8 @@ export default function ListingWizard() {
               {t("action.back")}
             </button>
           ) : null}
-          <button className="btn grow" type="button" onClick={next}>
-            {step === 8 ? t("host.submitForReview") : t("action.continue")}
+          <button className="btn grow" type="button" onClick={next} disabled={uploading}>
+            {step === 9 ? t("host.submitForReview") : t("action.continue")}
           </button>
         </div>
       </div>
@@ -424,12 +690,22 @@ export default function ListingWizard() {
   );
 }
 
-function Counter({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
+function Counter({
+  label,
+  value,
+  min = 0,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min?: number;
+  onChange: (n: number) => void;
+}) {
   return (
     <div className="between">
       <strong>{label}</strong>
       <div className="stepper">
-        <button type="button" onClick={() => onChange(Math.max(0, value - 1))}>
+        <button type="button" onClick={() => onChange(Math.max(min, value - 1))}>
           <Icon name="minus" />
         </button>
         <span className="val num">{value}</span>

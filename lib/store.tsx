@@ -4,15 +4,21 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { toast as sonnerToast } from "sonner";
 import {
   deleteClientFromDb,
+  loadAvailability,
   loadRealtorClients,
   persistBooking,
   persistClient,
   persistConfirmation,
   persistLocale,
   persistProfile,
+  persistSplitShares,
   persistViewingRequest,
+  type AvailabilityRange,
 } from "@/lib/supabase/sync";
 import { signOutSupabase } from "@/lib/supabase/browser";
+import type { Setting } from "@/lib/properties";
+import type { Occupancy } from "@/lib/availability";
+import { markPaid as markSharePaid, type SplitShare } from "@/lib/split";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n/types";
 import { dictionaries } from "@/lib/i18n/dictionaries";
 import { translate } from "@/lib/i18n/t";
@@ -36,6 +42,8 @@ export type Booking = {
   guestPhone: string;
   upiId?: string;
   paymentRef?: string;
+  /** Set once the organiser splits the bill across the group. */
+  split?: SplitShare[];
 };
 
 export type UserRole = "buyer" | "realtor" | "seller" | "guest" | "admin";
@@ -71,6 +79,9 @@ export type ListingDraft = {
   city: string;
   area: string;
   address: string;
+  /** Seaside, hill station, city or countryside. Drives the whole listing. */
+  setting: Setting;
+  settingDetail: string;
   bedrooms: number;
   beds: number;
   bathrooms: number;
@@ -83,10 +94,21 @@ export type ListingDraft = {
   status: "draft" | "pending" | "published";
   isForSale?: boolean;
   salePrice?: number;
+  /** Seaside listings only. */
   beachFrontage?: string;
+  /** Optional — a listing with no garage leaves this undefined. */
   garageType?: string;
   garageCapacity?: number;
   landArea?: string;
+  // ── Celebration capacity. Optional and all-or-nothing: a house that cannot
+  // host a function leaves every field undefined rather than half-filled.
+  hostsCelebrations?: boolean;
+  maxEventGuests?: number;
+  powerLoadKw?: number;
+  soundCurfewHour?: number;
+  parkingCars?: number;
+  generatorKw?: number;
+  catererKitchen?: boolean;
 };
 
 export type RealtorClient = {
@@ -130,14 +152,16 @@ export const defaultUser: User = {
 const emptyDraft = (): ListingDraft => ({
   name: "",
   description: "",
-  type: "Private farmhouse",
+  type: "Villa",
   guests: 8,
-  city: "ECR",
+  city: "Chennai",
   area: "",
   address: "",
+  setting: "countryside",
+  settingDetail: "",
   bedrooms: 3,
   beds: 4,
-  bathrooms: 2,
+  bathrooms: 3,
   amenities: [],
   photos: [],
   price: 8500,
@@ -150,6 +174,16 @@ const emptyDraft = (): ListingDraft => ({
 type Store = Persisted & {
   ready: boolean;
   sessionChecked: boolean;
+  /** Live stays read back from the database, independent of this device. */
+  availability: AvailabilityRange[];
+  availabilityReady: boolean;
+  reloadAvailability: () => void;
+  /**
+   * Database availability and local bookings merged, which is the only thing a
+   * calendar should render. DB rows come first so a stay booked on another
+   * device still holds its nights even if it is absent from local storage.
+   */
+  occupancies: Occupancy[];
   toast: string;
   presentationMode: boolean;
   setPresentationMode: (active: boolean) => void;
@@ -168,13 +202,15 @@ type Store = Persisted & {
   addClient: (client: RealtorClient) => void;
   removeClient: (id: string) => void;
   setLocale: (locale: Locale) => void;
+  setSplit: (bookingId: string, shares: SplitShare[]) => void;
+  markSplitPaid: (bookingId: string, shareId: string) => void;
   addViewingRequest: (req: {
     propertyId: string;
     propertyName: string;
     buyerName: string;
     buyerPhone: string;
     buyerEmail?: string;
-    automotiveMandate?: string;
+    notes?: string;
   }) => Promise<void>;
 };
 
@@ -211,6 +247,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [toast, setToast] = useState("");
+  const [availability, setAvailability] = useState<AvailabilityRange[]>([]);
+  const [availabilityReady, setAvailabilityReady] = useState(false);
+  const [availabilityTick, setAvailabilityTick] = useState(0);
 
   useEffect(() => {
     try {
@@ -246,6 +285,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state, ready]);
 
+  // The calendar has to reflect real bookings, not just the ones this device
+  // made. Local storage alone cannot know a weekend someone else took, so read
+  // live occupancy from the database once local state is up, and re-read it
+  // when the session settles — a host sees different rows signed in than out.
+  useEffect(() => {
+    if (!ready) return;
+    let cancelled = false;
+    void loadAvailability().then((rows) => {
+      if (cancelled) return;
+      setAvailability(rows);
+      setAvailabilityReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, sessionChecked, state.signedIn, availabilityTick]);
+
   const showToast = useCallback((message: string) => {
     setToast(message);
     sonnerToast(message);
@@ -262,6 +318,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...state,
       ready,
       sessionChecked,
+      availability,
+      availabilityReady,
+      reloadAvailability: () => setAvailabilityTick((n) => n + 1),
+      occupancies: [
+        ...availability,
+        ...state.bookings.map((booking) => ({
+          propertyId: booking.propertyId,
+          checkIn: booking.checkIn,
+          checkOut: booking.checkOut,
+          status: booking.status,
+        })),
+      ],
       markSessionChecked: () => setSessionChecked(true),
       toast,
       showToast,
@@ -325,6 +393,30 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           ],
         }));
       },
+      setSplit: (bookingId, shares) => {
+        // Persist before the local update so each share exists as a real row an
+        // invited guest's payment can settle against.
+        const booking = state.bookings.find((item) => item.id === bookingId);
+        if (booking) void persistSplitShares(booking.code, shares);
+        setState((s) => ({
+          ...s,
+          bookings: s.bookings.map((item) =>
+            item.id === bookingId ? { ...item, split: shares } : item,
+          ),
+        }));
+      },
+      markSplitPaid: (bookingId, shareId) => {
+        const booking = state.bookings.find((item) => item.id === bookingId);
+        if (!booking?.split) return;
+        const next = markSharePaid(booking.split, shareId, new Date().toISOString().slice(0, 10));
+        void persistSplitShares(booking.code, next);
+        setState((s) => ({
+          ...s,
+          bookings: s.bookings.map((item) =>
+            item.id === bookingId ? { ...item, split: next } : item,
+          ),
+        }));
+      },
       setDraft: (draft) => setState((s) => ({ ...s, draft })),
       markIntro: () => setState((s) => ({ ...s, seenIntro: true })),
       confirmBooking: (id) =>
@@ -369,7 +461,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await persistViewingRequest(req);
       },
     };
-  }, [state, ready, sessionChecked, toast, showToast]);
+  }, [state, ready, sessionChecked, toast, showToast, availability, availabilityReady]);
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }

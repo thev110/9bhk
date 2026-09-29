@@ -9,6 +9,7 @@ import { useStore, type RealtorClient } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { BaseSheet } from "@/components/base-sheet";
 import { useCatalog } from "@/lib/catalog";
+import { CITIES } from "@/lib/format";
 import { formatInrCrores } from "@/lib/properties";
 
 export default function RealtorPortalPage() {
@@ -18,7 +19,7 @@ export default function RealtorPortalPage() {
   const { properties } = useCatalog();
 
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [agencyName, setAgencyName] = useState("Coromandel Coastal Advisory");
+  const [agencyName, setAgencyName] = useState("Coromandel Property Advisory");
   const [reraNumber, setReraNumber] = useState("TN/AGT/2026/0894");
 
   // New Client Form State
@@ -27,7 +28,7 @@ export default function RealtorPortalPage() {
   const [clientEmail, setClientEmail] = useState("");
   const [budgetMin, setBudgetMin] = useState(15);
   const [budgetMax, setBudgetMax] = useState(35);
-  const [preferredStretch, setPreferredStretch] = useState("ECR · Mahabalipuram Coastal Strip");
+  const [preferredStretch, setPreferredStretch] = useState("Chennai");
   const [garageNeed, setGarageNeed] = useState("Subterranean Collector Vault (<7° Supercar Ramp)");
   const [confidential, setConfidential] = useState(true);
   const [notes, setNotes] = useState("");
@@ -325,10 +326,11 @@ export default function RealtorPortalPage() {
               value={preferredStretch}
               onChange={(e) => setPreferredStretch(e.target.value)}
             >
-              <option value="ECR · Mahabalipuram Coastal Strip">ECR · Mahabalipuram Coastal Strip</option>
-              <option value="Neelankarai & Palavakkam Beach Front">Neelankarai & Palavakkam Beach Front</option>
-              <option value="Kovalam & Muttukadu Dune Edge">Kovalam & Muttukadu Dune Edge</option>
-              <option value="Pondicherry & Auroville Oceanfront">Pondicherry & Auroville Oceanfront</option>
+              {CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </label>
 

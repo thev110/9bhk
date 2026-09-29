@@ -7,7 +7,9 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
-    "i18n:translate": "node scripts/translate-catalog.mjs"
+    "i18n:translate": "node scripts/translate-catalog.mjs",
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "validate": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

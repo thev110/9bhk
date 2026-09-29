@@ -4,13 +4,22 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandBar, Shell } from "@/components/shell";
-import { Icon } from "@/components/icon";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import { JsonLd } from "@/components/seo/json-ld";
+import {
+  createBreadcrumbSchema,
+  createItemListSchema,
+  graph,
+} from "@/lib/seo/schema";
+import { inr } from "@/lib/seo/copy";
+import { Icon, settingIcon } from "@/components/icon";
 import { FeatureCard, Rating } from "@/components/cards";
-import { formatInrCrores, type GarageType, type Property } from "@/lib/properties";
+import { formatInrCrores, hasGarage, type Property, type Setting } from "@/lib/properties";
 import { useCatalog } from "@/lib/catalog";
 import { BaseSheet } from "@/components/base-sheet";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
+import { settingLabel } from "@/lib/i18n/vibes";
 
 export default function BuyPage() {
   const router = useRouter();
@@ -18,8 +27,8 @@ export default function BuyPage() {
   const { properties } = useCatalog();
   const t = useT();
 
+  const [selectedSetting, setSelectedSetting] = useState<Setting | "all">("all");
   const [selectedGarage, setSelectedGarage] = useState<string>("all");
-  const [minFrontage, setMinFrontage] = useState<boolean>(false);
   const [supercarOnly, setSupercarOnly] = useState<boolean>(false);
   const [inquiryProperty, setInquiryProperty] = useState<Property | null>(null);
   const [buyerName, setBuyerName] = useState("");
@@ -28,20 +37,17 @@ export default function BuyPage() {
   const [isRealtor, setIsRealtor] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Filter for properties listed for sale (or fallback to top beachfront estates if not yet flagged)
   const salesProperties = useMemo(() => {
     return properties.filter((p) => {
-      const isForSale = p.isForSale || p.salePrice;
-      if (!isForSale) return false;
-      if (selectedGarage !== "all" && p.garage.type !== selectedGarage) return false;
-      if (supercarOnly && !p.garage.supercarFriendly) return false;
-      if (minFrontage) {
-        const ft = parseInt(p.beachFrontage) || 0;
-        if (ft < 150) return false;
+      if (!p.isForSale && !p.salePrice) return false;
+      if (selectedSetting !== "all" && p.setting !== selectedSetting) return false;
+      if (selectedGarage !== "all") {
+        if (!hasGarage(p) || p.garage.type !== selectedGarage) return false;
       }
+      if (supercarOnly && !(hasGarage(p) && p.garage.supercarFriendly)) return false;
       return true;
     });
-  }, [properties, selectedGarage, supercarOnly, minFrontage]);
+  }, [properties, selectedSetting, selectedGarage, supercarOnly]);
 
   async function handleInquiry(e: React.FormEvent) {
     e.preventDefault();
@@ -54,9 +60,7 @@ export default function BuyPage() {
           propertyName: inquiryProperty.name,
           buyerName: buyerName.trim(),
           buyerPhone: buyerPhone.trim(),
-          automotiveMandate: isRealtor
-            ? t("buy.brokerMandate", { agency: buyerAgency.trim() })
-            : undefined,
+          notes: isRealtor ? t("buy.brokerMandate", { agency: buyerAgency.trim() }) : undefined,
         });
       } catch {
         /* ignore if offline */
@@ -72,9 +76,19 @@ export default function BuyPage() {
     }, 2200);
   }
 
+  const forSale = properties.filter((p) => p.isForSale && p.salePrice);
+
   return (
     <Shell nav="buy">
       <BrandBar onLocation={() => {}} />
+
+      <div className="pad" style={{ marginTop: 10 }}>
+        {/* The page graph below already carries this BreadcrumbList. */}
+        <Breadcrumbs
+          crumbs={[{ name: "Home", href: "/" }, { name: "Estates for sale", href: "/buy" }]}
+          schema={false}
+        />
+      </div>
 
       {/* Header / Mode Switcher */}
       <section className="greet">
@@ -104,18 +118,60 @@ export default function BuyPage() {
         </p>
       </section>
 
-      {/* Tactical Garage & Shoreline Filters */}
+      {/* AEO: one direct, factual answer to the question this page exists for.
+          Counted from the live catalog so the number cannot go stale. */}
+      <div className="pad">
+        <BuyAnswerBlock listings={forSale} />
+      </div>
+      <JsonLd
+        data={graph(
+          createBreadcrumbSchema([
+            { name: "Home", href: "/" },
+            { name: "Estates for sale", href: "/buy" },
+          ]),
+          createItemListSchema(
+            forSale.map((property) => ({
+              name: property.name,
+              href: `/property/${property.id}`,
+              image: property.image,
+            })),
+            { name: "Estates for sale on 9bhk", path: "/buy" },
+          ),
+        )}
+      />
+
+      {/* Setting & Garage Filters */}
       <section className="pad mt">
         <p className="eyebrow" style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--moss)", marginBottom: 8 }}>
           {t("buy.filterEyebrow")}
         </p>
         <div className="chips" role="list">
           <button
+            className={`chip${selectedSetting === "all" ? " is-active" : ""}`}
+            type="button"
+            onClick={() => setSelectedSetting("all")}
+          >
+            {t("buy.filterAll")}
+          </button>
+          {(["seaside", "hill_station", "city", "countryside"] as Setting[]).map((s) => (
+            <button
+              key={s}
+              className={`chip${selectedSetting === s ? " is-active" : ""}`}
+              type="button"
+              onClick={() => setSelectedSetting(selectedSetting === s ? "all" : s)}
+            >
+              <Icon name={settingIcon(s)} />
+              {settingLabel(t, s)}
+            </button>
+          ))}
+        </div>
+        <div className="chips mt" role="list">
+          <button
             className={`chip${selectedGarage === "all" ? " is-active" : ""}`}
             type="button"
             onClick={() => setSelectedGarage("all")}
           >
-            {t("buy.filterAll")}
+            {t("buy.filterAnyGarage")}
           </button>
           <button
             className={`chip${selectedGarage === "collector_vault" ? " is-active" : ""}`}
@@ -149,14 +205,6 @@ export default function BuyPage() {
             <Icon name="car" />
             {t("buy.filterSupercar")}
           </button>
-          <button
-            className={`chip${minFrontage ? " is-active" : ""}`}
-            type="button"
-            onClick={() => setMinFrontage(!minFrontage)}
-          >
-            <Icon name="waves" />
-            {t("buy.filterFrontage")}
-          </button>
         </div>
       </section>
 
@@ -171,21 +219,21 @@ export default function BuyPage() {
             <article key={p.id} className="card" style={{ padding: 14 }}>
               <div className="media" style={{ aspectRatio: "16/10" }}>
                 <Link href={`/property/${p.id}`}>
-                  <img src={p.image} alt={p.alt} />
+                  <img src={p.image} alt={p.alt} loading="lazy" decoding="async" width={400} height={300} />
                 </Link>
                 <span className="badge-sale">
-                  {p.landArea || t("property.coastalEstate")}
+                  {p.landArea || t("property.estate")}
                 </span>
-                <span className="badge-coastal">
-                  <Icon name="waves" />
-                  {p.beachFrontage}
+                <span className="badge-setting">
+                  <Icon name={settingIcon(p.setting)} />
+                  {settingLabel(t, p.setting)}
                 </span>
               </div>
               <div style={{ marginTop: 12 }}>
                 <div className="between">
                   <div>
                     <h3 style={{ fontSize: 18, fontWeight: 800 }}>{p.name}</h3>
-                    <p className="p-loc">{p.location}</p>
+                    <p className="p-loc">{p.settingName}</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <p style={{ fontSize: 18, fontWeight: 800, color: "var(--forest)", margin: 0 }}>
@@ -195,19 +243,23 @@ export default function BuyPage() {
                   </div>
                 </div>
 
-                {/* Garage Spec Breakdown */}
                 <div className="row wrap mt" style={{ gap: 6, marginTop: 10 }}>
-                  <div className="p-garage-pill" style={{ margin: 0 }}>
-                    <Icon name="car" />
-                    <span>{t("buy.garageCars", { garage: p.garage.name, n: p.garage.capacity })}</span>
-                  </div>
-                  {p.garage.supercarFriendly ? (
+                  <span className="pill muted" style={{ fontSize: 11 }}>
+                    {t("property.bedroomsShort", { n: p.bedrooms })}
+                  </span>
+                  {hasGarage(p) ? (
+                    <div className="p-garage-pill" style={{ margin: 0 }}>
+                      <Icon name="car" />
+                      <span>{t("buy.garageCars", { garage: p.garage.name, n: p.garage.capacity })}</span>
+                    </div>
+                  ) : null}
+                  {hasGarage(p) && p.garage.supercarFriendly ? (
                     <span className="pill ok" style={{ fontSize: 11 }}>{t("buy.supercarReady")}</span>
                   ) : null}
-                  {p.garage.evChargingKw >= 22 ? (
+                  {hasGarage(p) && p.garage.evChargingKw >= 22 ? (
                     <span className="pill forest" style={{ fontSize: 11 }}>{t("property.evKw", { kw: p.garage.evChargingKw })}</span>
                   ) : null}
-                  <span className="pill muted" style={{ fontSize: 11 }}>{t("buy.tideLine", { m: p.tideDistanceMeters })}</span>
+                  <span className="pill muted" style={{ fontSize: 11 }}>{p.settingDetail}</span>
                 </div>
 
                 <p className="mt" style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.4 }}>
@@ -335,5 +387,32 @@ export default function BuyPage() {
         )}
       </BaseSheet>
     </Shell>
+  );
+}
+
+
+/**
+ * The direct answer for "/buy": how many estates are on the market, where
+ * they are and what they are asking. Every value comes from the catalog the
+ * page is already rendering, so the sentence cannot disagree with the cards
+ * below it.
+ */
+function BuyAnswerBlock({ listings }: { listings: Property[] }) {
+  const count = listings.length;
+  if (!count) return null;
+  const places = [...new Set(listings.map((property) => property.city || property.location).filter(Boolean))];
+  const lowest = listings.reduce((best, property) => (property.salePrice! < best.salePrice! ? property : best));
+  return (
+    <div className="seo-answer" style={{ margin: "18px 0 0" }}>
+      <h2 className="seo-answer-q" style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--moss)", margin: "0 0 8px" }}>
+        What is for sale on 9bhk?
+      </h2>
+      <p style={{ fontFamily: "var(--font-display)", fontSize: 20, lineHeight: 1.42, color: "var(--forest-deep)", margin: 0 }}>
+        {count} {count === 1 ? "estate is" : "estates are"} currently offered for
+        purchase{places.length ? ` in ${places.slice(0, 3).join(", ")}` : ""}, from{" "}
+        {inr(lowest.salePrice!)} at the lowest asking price. Each one can also be booked by the
+        night.
+      </p>
+    </div>
   );
 }

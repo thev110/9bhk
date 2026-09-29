@@ -17,7 +17,7 @@ translation is still missing.
 | `lib/i18n/use-t.ts` | The `useT()` hook. |
 | `lib/i18n/t.ts` | Key resolution and `{placeholder}` interpolation. |
 | `lib/i18n/garage.ts` | Shared garage-type vocabulary. |
-| `lib/i18n/vibes.ts` | Display labels for the search tokens in `VIBES`/`FILTERS`. |
+| `lib/i18n/vibes.ts` | Display labels for the search tokens in `VIBES`/`FILTERS`, plus `settingLabel` for a `Setting`. |
 | `scripts/translate-catalog.mjs` | Bulk machine-translation via IndicTrans2. |
 
 There is no `[locale]` route segment and no middleware. The locale lives on the

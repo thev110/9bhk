@@ -61,13 +61,13 @@ export const teHost = {
   // ── Listing wizard — step titles ───────────────────────────────────────
   "host.titlePublish": "ప్రచురించడానికి సిద్ధమా?",
   "host.titlePhotos": "అధిక రిజల్యూషన్ ఫోటోలను జోడించండి",
-  "host.titlePreview": "మీ తీర జాబితాను ప్రివ్యూ చేయండి",
+  "host.titlePreview": "మీ జాబితాను ప్రివ్యూ చేయండి",
   "host.titlePricing": "ధర మరియు కొనుగోలు నిబంధనలను సెట్ చేయండి",
-  "host.titleGarage": "గారేజ్ & ఆటోమోటివ్ వివరాలు",
-  "host.titleBasics": "మీ తీర భూమి గురించి చెప్పండి",
+  "host.titleGarage": "పార్కింగ్, గారేజ్ & సౌకర్యాలు",
+  "host.titleBasics": "మీ స్థలం గురించి చెప్పండి",
   "host.titleSpace": "ఎంత స్థలం?",
   "host.titleAvailability": "అందుబాటు & ప్రైవేట్ యాక్సెస్",
-  "host.titleShoreline": "తీర సరిహద్దు ఎక్కడ ఉంది?",
+  "host.titleSetting": "ఇది ఎక్కడ, ఏ రకమైనది?",
 
   // ── Listing wizard — basics ────────────────────────────────────────────
   "host.fieldPropertyName": "ఆస్తి పేరు",
@@ -86,23 +86,31 @@ export const teHost = {
   "host.fieldStreetAddress": "వీధి చిరునామా",
   "host.helpAddress": "బుకింగ్ నిర్ధారించే వరకు ఇది గోప్యంగా ఉంచబడుతుంది.",
   "host.stepLocation": "బుకింగ్ తర్వాతే అతిథులకు ఖచ్చితమైన పిన్ కనిపిస్తుంది.",
+  "host.fieldSetting": "స్థల రకం",
+  "host.helpSetting": "9bhk ఇంట్లు పూర్తి వీలువల్ల ఇంట్లు, బంగళాలు, పూల ఇంట్లు. మీ ఇల్లు నిజంగా ఎక్కడ ఉంది — సముద్రం, పర్వతాలు, నగరం, గ్రామీణం — దానినే ఎంచుకోండి.",
+  "host.fieldSettingDetail": "స్థలం గురించి ఒక వాక్యం",
+  "host.settingDetailPlaceholder": "ఉదా. {setting} — ఎత్తుకు, ముందుభాగం లేదా భూమి విస్తీర్ణం చేర్చండి",
 
   // ── Listing wizard — space ─────────────────────────────────────────────
   "host.fieldBathrooms": "స్నానగదులు",
   "host.fieldBedrooms": "పడగదులు",
   "host.fieldBeds": "పైలలు",
   "host.stepSpace": "పడగదులు, పైలలు, స్నానగదులు సమూహాన్ని ప్రణాళిక చేయడంలో అతిథులకు సహాయపడతాయి.",
+  "host.minBedroomsNote": "కనీసం {n} పడగదులు — ఇది సమూహ ఇల్లు, హోటల్ గది కాదు",
+  "host.errMinBedrooms": "9bhk జాబితాలకు కనీసం {n} పడగదులు అవసరం.",
 
   // ── Listing wizard — garage & amenities ────────────────────────────────
   "host.beachFrontagePlaceholder": "ఉదా. 180 అడుగుల నేరుగా సముద్రతీరం",
   "host.curatedAmenities": "ఎంపిక చేసిన భూమి సౌకర్యాలు",
   "host.fieldBeachFrontage": "నేరుగా సముద్రతీర ముందుభాగం",
-  "host.garageArchitecture": "ఆటోమోటివ్ గారేజ్ ఆర్కిటెక్చర్",
+  "host.garageArchitecture": "గారేజ్ & పార్కింగ్ (ఐచ్ఛికం)",
+  "host.noGarage": "గారేజ్ లేదు",
+  "host.fieldGarageCapacity": "వాహన సామర్థ్యం",
   "host.qualifierDcFastCharge": "(డీసీ ఫాస్ట్ చార్జ్)",
   "host.qualifierJetSkiSlip": "(జెట్ స్కీ స్లిప్)",
   "host.qualifierLowRamp": "(<7° సూపర్ కార్ రాంప్)",
-  "host.qualifierPergola": "(పెర్గోలా)",
-  "host.stepGarage": "తీర సరిహద్దును మరియు వాహన సౌకర్యాలను నిర్దిష్టంగా తెలియజేయండి.",
+  "host.qualifierPergola": "(పోర్టికో)",
+  "host.stepGarage": "తీర ఇంట్లు తమ ముందుభాగాన్ని జాబితా చేయవచ్చు. గారేజ్ పూర్తిగా ఐచ్ఛికం — చాలా మంచి ఇంట్లలో ఉండదు.",
 
   // ── Listing wizard — photos ────────────────────────────────────────────
   "host.coverFirstShot": "మొదటి ఫోటో కవర్‌గా సెట్ అయ్యింది.",
@@ -202,4 +210,12 @@ export const teHost = {
   "host.errNameShort": "అతిథులు గుర్తించే ఆస్తి పేరును జోడించండి.",
   "host.errPhotoUpload": "ఫోటో అప్‌లోడ్ విఫలమైంది",
   "host.errSaveFailed": "జాబితాను సేవ్ చేయలేకపోయాము",
+  "host.errDocsNotUploaded": "{n} పత్రాలు అప్‌లోడ్ కాలేదు",
+  "host.errDocTooLarge": "ఆ ఫైల్ చాలా పెద్దది",
+  "host.errDocType": "ఆ ఫైల్ రకం మద్దతు లేదు",
+  "host.documentsTitle": "పత్రాలు",
+  "host.documentsBody": "ఈ జాబితాను రివ్యూ చేయడానికి అవసరమైన పత్రాలను అప్‌లోడ్ చేయండి.",
+  "host.docNone": "ఫైల్ ఎంచుకోలేదు",
+  "host.docReplace": "ఫైల్ మార్చు",
+  "host.docUpload": "ఫైల్ ఎంచుకోండి",
 } as const satisfies Partial<Dict>;

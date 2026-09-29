@@ -25,8 +25,8 @@ export const realtorKeys = {
   "realtor.statLeadLock": "Lead lock guaranteed",
   "realtor.statActiveMandates": "Active Mandates",
   "realtor.statTotalBuyingPower": "Total buying power",
-  "realtor.statCoastalHoldings": "Coastal Holdings",
-  "realtor.statBeachfrontEstates": "Direct beachfront estates",
+  "realtor.statCoastalHoldings": "Estates",
+  "realtor.statBeachfrontEstates": "Villas & bungalows, all settings",
   "realtor.statCoBrokingFee": "Co-Broking Fee",
   "realtor.statLockedSplit": "Standard locked split",
 
@@ -35,43 +35,43 @@ export const realtorKeys = {
   "realtor.rosterBody": "Clients onboarded here are cryptographically bound to your agency profile.",
   "realtor.onboardClient": "+ Onboard Client",
   "realtor.ndaProtected": "NDA Protected",
-  "realtor.labelCorridor": "Corridor:",
-  "realtor.labelAutomotiveNeed": "Automotive Need:",
+  "realtor.labelCorridor": "Preferred area:",
+  "realtor.labelAutomotiveNeed": "Parking / garage need:",
   "realtor.addedOn": "Added on {date}",
   "realtor.presentHoldings": "Present Holdings",
   "realtor.removeClient": "Remove",
 
   // ── Seller cross-sell ───────────────────────────────────────────────────
-  "realtor.sellerPrompt": "Representing a coastal estate seller?",
+  "realtor.sellerPrompt": "Representing a villa or bungalow seller?",
   "realtor.sellerBody":
-    "List your client's beachfront property with verified title documentation, garage specs, and exclusive co-broking visibility.",
+    "List your client's property with verified title documentation, garage specs, and exclusive co-broking visibility.",
   "realtor.listForSale": "List Property for Sale",
   "realtor.viewAllHoldings": "View All Holdings",
 
   // ── Onboard client sheet ────────────────────────────────────────────────
   "realtor.sheetOnboardTitle": "Onboard Private Client",
   "realtor.sheetBody":
-    "Onboarding binds this buyer mandate to your agency ID, safeguarding your co-broking commission across all 9bhk coastal estates.",
+    "Onboarding binds this buyer mandate to your agency ID, safeguarding your co-broking commission across all 9bhk listings.",
   "realtor.fieldClientName": "Client Full Name / Entity Alias",
   "realtor.clientNamePlaceholder": "e.g. Vikramaditya K or Sovereign Family Trust",
   "realtor.fieldPhone": "Direct Phone / WhatsApp",
   "realtor.fieldEmailOptional": "Direct Email (Optional)",
   "realtor.fieldMinBudget": "Min Budget (₹ Cr)",
   "realtor.fieldMaxBudget": "Max Budget (₹ Cr)",
-  "realtor.fieldCoastalStretch": "Preferred Coastal Stretch",
-  "realtor.fieldGarageNeed": "Automotive & Garage Requirement",
+  "realtor.fieldCoastalStretch": "Preferred Area",
+  "realtor.fieldGarageNeed": "Parking & Garage Requirement",
 
   // ── Garage requirement options ──────────────────────────────────────────
   "realtor.optionCollectorVault": "Subterranean Collector Vault (<7° Supercar Ramp)",
   "realtor.optionMarinePort": "Beach & Marine Port (Jet Ski / Boat Trailer Slip)",
   "realtor.optionEvPavilion": "Executive EV Pavilion (High Output 22-50kW Chargers)",
-  "realtor.optionTeakPortico": "Coastal Teak Portico (Shaded Pergola for Cruisers)",
+  "realtor.optionTeakPortico": "Teak Portico (Shaded Pergola for Cruisers)",
 
   // ── Mandate footer ──────────────────────────────────────────────────────
   "realtor.enforceNda": "Enforce Buyer NDA & Confidentiality",
-  "realtor.fieldMandateNotes": "Mandate Notes & Vehicle Types",
+  "realtor.fieldMandateNotes": "Mandate Notes & Requirements",
   "realtor.mandateNotesPlaceholder":
-    "e.g. Collector of vintage Italian sports cars; requires zero salt mist intrusion...",
+    "e.g. Group of ten for a long weekend; needs a pool, bonfire lawn and covered parking for four cars...",
   "realtor.leadLockActive": "Lead Lock Active",
   "realtor.completeOnboarding": "Complete Onboarding",
 

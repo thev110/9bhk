@@ -1,3 +1,14 @@
+/**
+ * A file size a person can read. Decimal units, because that is what a file
+ * picker and a storage bucket both report.
+ */
+export function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 KB";
+  if (bytes < 1000) return `${Math.round(bytes)} B`;
+  if (bytes < 1000 * 1000) return `${Math.round(bytes / 1000)} KB`;
+  return `${(bytes / (1000 * 1000)).toFixed(1)} MB`;
+}
+
 export function inr(amount: number): string {
   const sign = amount < 0 ? "−" : "";
   const value = Math.abs(Math.round(amount));
@@ -36,13 +47,22 @@ export function isoDate(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Searchable localities, not just cities. The catalog spans the coast, the
+ * Nilgiri and Palani hills, in-city villas and inland countryside, so ECR and
+ * Ooty sit alongside Chennai rather than being collapsed into it.
+ */
 export const CITIES = [
   "Chennai",
   "ECR",
   "Mahabalipuram",
-  "Chengalpattu",
-  "Kanchipuram",
   "Pondicherry",
+  "Ooty",
+  "Kodaikanal",
+  "Courtallam",
+  "Coimbatore",
+  "Kanchipuram",
+  "Hosur",
 ] as const;
 
 export type City = (typeof CITIES)[number];

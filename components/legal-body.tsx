@@ -4,6 +4,8 @@ import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { PageBar, Shell } from "@/components/shell";
 import { useT } from "@/lib/i18n";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import type { Crumb } from "@/lib/seo/schema";
 
 /**
  * Chrome shared by every page under /legal.
@@ -12,6 +14,13 @@ import { useT } from "@/lib/i18n";
  * so they cannot call `useT()` directly. They pass their document body in as
  * `children` — which stays in English, because it is lawyer-reviewed prose —
  * and this client child renders only the translated UI chrome around it.
+ *
+ * SEO notes:
+ *   • the bar title is a `<p>`, not a heading, so the document `<h1>` below it
+ *     is the only `h1` on the page;
+ *   • a real breadcrumb trail is rendered (and `BreadcrumbList` JSON-LD emitted)
+ *     rather than a bare back link, so the legal pages are reachable and
+ *     describable in the site graph like every other public page.
  */
 const LEGAL_DOCS = [
   { id: "privacy", href: "/legal/privacy", barKey: "legal.privacy", titleKey: "legal.privacyTitle" },
@@ -25,10 +34,13 @@ export type LegalDocId = (typeof LEGAL_DOCS)[number]["id"];
 export function LegalBody({
   doc,
   backHref,
+  crumbs,
   children,
 }: {
   doc: LegalDocId;
   backHref: string;
+  /** Server-supplied trail; the BreadcrumbList JSON-LD is emitted from it. */
+  crumbs: Crumb[];
   children: ReactNode;
 }) {
   const t = useT();
@@ -38,7 +50,10 @@ export function LegalBody({
 
   return (
     <Shell dock="none">
-      <PageBar title={t(current.barKey)} backHref={backHref} />
+      <PageBar title={t(current.barKey)} backHref={backHref} titleAs="p" />
+      <div className="pad" style={{ marginTop: 10 }}>
+        <Breadcrumbs crumbs={crumbs} />
+      </div>
       <article className="pad mt stack">
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36 }}>
           {t(current.titleKey)}

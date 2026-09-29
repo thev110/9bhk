@@ -24,6 +24,18 @@ export async function signInWithGoogle(nextPath = "/"): Promise<boolean> {
   return !error;
 }
 
+/**
+ * The current session's access token, for calling our own route handlers as the
+ * signed-in user. Returning it to the same origin that already holds the
+ * session adds no exposure; it must never be logged or sent anywhere else.
+ */
+export async function accessToken(): Promise<string | null> {
+  const supabase = browserSupabase();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
 export async function signOutSupabase(): Promise<void> {
   const supabase = browserSupabase();
   if (!supabase) return;

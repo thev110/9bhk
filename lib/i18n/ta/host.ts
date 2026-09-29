@@ -61,13 +61,13 @@ export const taHost = {
   // ── Listing wizard — step titles ───────────────────────────────────────
   "host.titlePublish": "வெளியிடத் தயாரா?",
   "host.titlePhotos": "அதிக தெளிவுடைய படங்களைச் சேர்க்கவும்",
-  "host.titlePreview": "உங்கள் கடற்கரைப் பட்டியலை முன்னோட்டம் பார்க்கவும்",
+  "host.titlePreview": "உங்கள் பட்டியலை முன்னோட்டம் பார்க்கவும்",
   "host.titlePricing": "விலை மற்றும் கொள்முதல் விதிமுறைகளை அமைக்கவும்",
-  "host.titleGarage": "கார் குடிவை & வாகன விவரங்கள்",
-  "host.titleBasics": "உங்கள் கடற்கரை நிலத்தைப் பற்றிச் சொல்லுங்கள்",
+  "host.titleGarage": "கார் குடிவை & வசதிகள்",
+  "host.titleBasics": "உங்கள் இடத்தைப் பற்றிச் சொல்லுங்கள்",
   "host.titleSpace": "எவ்வளவு இடம்?",
   "host.titleAvailability": "கிடைக்கும் நிலை & தனியான அணுகல்",
-  "host.titleShoreline": "கடற்கரை எல்லை எங்கே உள்ளது?",
+  "host.titleSetting": "எது, என்ன வகையான இடம்?",
 
   // ── Listing wizard — basics ────────────────────────────────────────────
   "host.fieldPropertyName": "சொத்தின் பெயர்",
@@ -86,23 +86,31 @@ export const taHost = {
   "host.fieldStreetAddress": "தெரு முகவரி",
   "host.helpAddress": "முன்பதிவு உறுதியாகும் வரை தனிப்பட்டதாக வைக்கப்படும்.",
   "host.stepLocation": "முன்பதிவுக்குப் பின்னரே விருந்தினர்கள் சரியான பின்னைப் பார்க்கவார்கள்.",
+  "host.fieldSetting": "இட வகை",
+  "host.helpSetting": "9bhk இலுள்ள இடங்கள் முழு வீடுகள், பங்கலாகுகள், நீர்நிலை வீடுகள். உங்களது உண்மையில் எங்கு இருக்கிறது — கடல், மலை, நகர், ஊரகம் — அதையே தேர்ந்தெடுங்கள்.",
+  "host.fieldSettingDetail": "இடத்தைப் பற்றிய ஒரு வரி",
+  "host.settingDetailPlaceholder": "எ.கா. {setting} — உயரம், முனைப்பரப்பு அல்லது நில அளவைச் சேர்",
 
   // ── Listing wizard — space ─────────────────────────────────────────────
   "host.fieldBathrooms": "குளியரைகள்",
   "host.fieldBedrooms": "படுக்கையறைகள்",
   "host.fieldBeds": "படுக்கைகள்",
   "host.stepSpace": "படுக்கையறைகள், படுக்கைகள், குளியரைகள் குழுவின் திட்டத்தை விருந்தினர்களுக்கு உதவும்.",
+  "host.minBedroomsNote": "குறைந்தது {n} படுக்கையறைகள் — இது குழு வீடு, ஹோட்டல் அறை அல்ல",
+  "host.errMinBedrooms": "9bhk பட்டியலுக்குக் குறைந்தது {n} படுக்கையறைகள் தேவை.",
 
   // ── Listing wizard — garage & amenities ────────────────────────────────
   "host.beachFrontagePlaceholder": "எ.கா. 180 அடி நேரடி கடற்கரை",
   "host.curatedAmenities": "தேர்ந்தெடுக்கப்பட்ட நில வசதிகள்",
   "host.fieldBeachFrontage": "நேரடி கடற்கரை முனைப்பரப்பு",
-  "host.garageArchitecture": "மோட்டார் கார் குடிவை அமைப்பு",
+  "host.garageArchitecture": "கார் குடிவை & நிறுத்தும் இடம் (விருப்பத்தேர்வு)",
+  "host.noGarage": "கார் குடிவை இல்லை",
+  "host.fieldGarageCapacity": "வாகன திறன்",
   "host.qualifierDcFastCharge": "(டிசி ஃபாஸ்ட் சார்ஜ்)",
   "host.qualifierJetSkiSlip": "(ஜெட் ஸ்கை ஸ்லிப்)",
   "host.qualifierLowRamp": "(<7° சூப்பர்கார் ராம்ப்)",
-  "host.qualifierPergola": "(பர்கோலா)",
-  "host.stepGarage": "கடற்கரை எல்லையையும் வாகன வசதிகளையும் குறிப்பிடவும்.",
+  "host.qualifierPergola": "(போர்க்கோ)",
+  "host.stepGarage": "கடற்கரை வீடுகள் தங்கள் முனைப்பரப்பைக் குறிப்பிடலாம். கார் குடிவை முற்றிலும் விருப்பத்தேர்வு — நல்ல வீடுகளில் பலவற்றில் இல்லை.",
 
   // ── Listing wizard — photos ────────────────────────────────────────────
   "host.coverFirstShot": "முதல் படமே மூடுபடமாக அமைக்கப்பட்டது.",
@@ -202,4 +210,12 @@ export const taHost = {
   "host.errNameShort": "விருந்தினர்கள் அறியக்கூடிய சொத்துப் பெயரைச் சேர்க்கவும்.",
   "host.errPhotoUpload": "படத்தைப் பதிவேற்ற முடியவில்லை",
   "host.errSaveFailed": "பட்டியலைச் சேமிக்க முடியவில்லை",
+  "host.errDocsNotUploaded": "{n} ஆவணங்கள் பதிவேற்றப்படவில்லை",
+  "host.errDocTooLarge": "அந்தக் கோப்பு மிகப் பெரியது",
+  "host.errDocType": "அந்தக் கோப்பு வகை ஆதரிக்கப்படவில்லை",
+  "host.documentsTitle": "ஆவணங்கள்",
+  "host.documentsBody": "இந்தப் பட்டியலைச் சரிபார்க்க ஒரு பரிசோதகர் தேவையான ஆவணங்களைப் பதிவேற்றுங்கள்.",
+  "host.docNone": "கோப்பு தேர்ந்தெடுக்கப்படவில்லை",
+  "host.docReplace": "கோப்பை மாற்று",
+  "host.docUpload": "கோப்பைத் தேர்ந்தெடு",
 } as const satisfies Partial<Dict>;

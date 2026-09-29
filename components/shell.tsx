@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
 import { useStore } from "@/lib/store";
@@ -80,7 +81,21 @@ export function BrandBar({ onLocation }: { onLocation: () => void }) {
       <div className="appbar-inner">
         <Link href="/" className="brand">
           <span className="brand-mark" style={{ overflow: "hidden", padding: 0 }}>
-            <img src="/logo-mark.png" width={36} height={36} alt="" style={{ width: 36, height: 36, display: "block" }} />
+            {/*
+            `next/image` rather than a raw `<img>`. The source PNG is 1.8 MB and
+            this renders at 36 px, so the optimiser turns a 1.8 MB header
+            download into a couple of kilobytes. `alt=""` is correct: the
+            adjacent wordmark already names the brand, so this is decorative.
+          */}
+          <Image
+            src="/logo-mark.png"
+            width={36}
+            height={36}
+            alt=""
+            sizes="36px"
+            priority
+            quality={80}
+          />
           </span>
           <span className="brand-name">9bhk.app</span>
         </Link>
@@ -94,14 +109,26 @@ export function BrandBar({ onLocation }: { onLocation: () => void }) {
   );
 }
 
+/**
+ * Sticky page bar.
+ *
+ * `titleAs` exists so a page can opt out of the bar title being a heading.
+ * `PageBar` renders its title as an `<h1>` by default, which is correct for the
+ * many app screens where the bar title *is* the page's subject. On pages that
+ * also carry their own document heading — the legal pages, for instance —
+ * passing `titleAs="p"` keeps exactly one `<h1>` on the page instead of two
+ * competing ones.
+ */
 export function PageBar({
   title,
   backHref,
   right,
+  titleAs: TitleTag = "h1",
 }: {
   title: string;
   backHref?: string;
   right?: React.ReactNode;
+  titleAs?: "h1" | "p";
 }) {
   const router = useRouter();
   const t = useT();
@@ -117,7 +144,7 @@ export function PageBar({
             <Icon name="back" />
           </button>
         )}
-        <h1 className="bar-title">{title}</h1>
+        <TitleTag className="bar-title">{title}</TitleTag>
         {right ?? <span className="bar-spacer" />}
       </div>
     </header>

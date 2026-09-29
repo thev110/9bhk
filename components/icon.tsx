@@ -274,16 +274,45 @@ export function Icon({
           <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
       );
+    case "mountain":
+      return (
+        <svg {...common}>
+          <path d="m2.5 20 6.6-11.2a1 1 0 0 1 1.7 0l6.6 11.2" />
+          <path d="m9.4 13.2 2.1-3.4a1 1 0 0 1 1.7 0l3.4 5.8" />
+        </svg>
+      );
+    case "building":
+      return (
+        <svg {...common}>
+          <path d="M4 21V5.5a1 1 0 0 1 1-1h5.5a1 1 0 0 1 1 1V21" />
+          <path d="M11.5 11.5h7.5a1 1 0 0 1 1 1V21" />
+          <path d="M2.5 21h19" />
+          <path d="M7 9h.01M7 13h.01M7 17h.01M15.5 15.5h.01M15.5 18.5h.01" />
+        </svg>
+      );
     default:
       return null;
   }
 }
 
+/** Icon for a `Setting` (lib/properties.ts). */
+export function settingIcon(setting: string): string {
+  if (setting === "seaside") return "waves";
+  if (setting === "hill_station") return "mountain";
+  if (setting === "city") return "building";
+  return "leaf";
+}
+
 export function vibeIcon(vibe: string): string {
   if (vibe === "Pool") return "home";
   if (vibe === "Bonfire") return "flame";
+  if (vibe === "Seaside") return "waves";
+  if (vibe === "Hill Station") return "mountain";
+  if (vibe === "In the City") return "building";
   if (vibe === "Countryside") return "leaf";
+  if (vibe === "Collector Garage") return "car";
+  if (vibe === "EV Ready") return "bolt";
   if (vibe === "Pet friendly") return "paw";
-  if (vibe === "Groups" || vibe === "Family") return "users";
+  if (vibe === "Large Groups" || vibe === "Groups" || vibe === "Family") return "users";
   return "heart";
 }

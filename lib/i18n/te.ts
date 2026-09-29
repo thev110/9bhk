@@ -1,6 +1,7 @@
 import { en, type Dict } from "./en";
 import { teAdmin } from "./te/admin";
 import { teCore } from "./te/core";
+import { teGroup } from "./te/group";
 import { teHost } from "./te/host";
 import { teLegal } from "./te/legal";
 import { teOnboarding } from "./te/onboarding";
@@ -24,6 +25,7 @@ export const te: Dict = {
   ...teOnboarding,
   ...teRealtor,
   ...teHost,
+  ...teGroup,
   ...teAdmin,
   ...teLegal,
 };

@@ -8,30 +8,18 @@ import { Icon } from "@/components/icon";
 import { useCatalog } from "@/lib/catalog";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { isPastDate, monthMatrix, occupiedNights } from "@/lib/availability";
+import { useCalendarStart } from "@/lib/use-calendar";
 import NumberFlow from "@number-flow/react";
-
-const BLOCKED = new Set(["2026-10-04", "2026-10-05", "2026-10-18"]);
-const BOOKED = new Set(["2026-10-11", "2026-10-12"]);
-
-function monthMatrix(cursor: Date) {
-  const year = cursor.getFullYear();
-  const month = cursor.getMonth();
-  const first = new Date(year, month, 1);
-  const start = new Date(first);
-  start.setDate(1 - ((first.getDay() + 6) % 7));
-  return Array.from({ length: 42 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return d;
-  });
-}
 
 export default function BookPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const { properties } = useCatalog();
   const property = properties.find((item) => item.id === params.slug);
-  const { user, addBooking, showToast, ready, sessionChecked } = useStore();
+  // `occupancies` is the database's live bookings merged with this device's, so
+  // the grid knows about stays booked elsewhere instead of showing them free.
+  const { user, addBooking, showToast, ready, sessionChecked, occupancies } = useStore();
   const upiId = user?.upiId || "9bhk@okhdfcbank";
 
   useEffect(() => {
@@ -39,7 +27,9 @@ export default function BookPage() {
     router.replace(`/login?next=${encodeURIComponent(`/book/${params.slug}`)}`);
   }, [ready, sessionChecked, user, router, params.slug]);
   const [step, setStep] = useState(0);
-  const [cursor, setCursor] = useState(new Date(2026, 9, 1));
+  // Opens on the current month, resolved after mount so the server pass and
+  // hydration agree. `today` drives the past-night guard below.
+  const { cursor, today, goToMonth, canGoBack } = useCalendarStart();
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [adults, setAdults] = useState(2);
@@ -62,7 +52,15 @@ export default function BookPage() {
 
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
   const totals = property && nights >= 2 ? quote(property.price, property.cleaning, nights) : null;
-  const days = useMemo(() => monthMatrix(cursor), [cursor]);
+  const days = useMemo(() => (cursor ? monthMatrix(cursor) : []), [cursor]);
+
+  // Live occupancy: the host's own blocked nights plus every booking that has
+  // not been cancelled. Cancelled stays release their dates again.
+  const hostBlocked = useMemo(() => new Set(property?.blockedDates ?? []), [property]);
+  const occupied = useMemo(
+    () => (property ? occupiedNights(property, occupancies) : new Set<string>()),
+    [property, occupancies],
+  );
 
   if (!property) {
     return (
@@ -90,7 +88,8 @@ export default function BookPage() {
   }
 
   function pick(date: string) {
-    if (BLOCKED.has(date) || BOOKED.has(date)) return;
+    if (occupied.has(date)) return;
+    if (today && isPastDate(date, today)) return;
     if (!checkIn || (checkIn && checkOut)) {
       setCheckIn(date);
       setCheckOut(null);
@@ -110,8 +109,8 @@ export default function BookPage() {
 
   function dayClass(date: string, inMonth: boolean) {
     if (!inMonth) return "cal-d is-muted";
-    if (BOOKED.has(date)) return "cal-d is-booked";
-    if (BLOCKED.has(date)) return "cal-d is-blocked";
+    if (hostBlocked.has(date)) return "cal-d is-blocked";
+    if (occupied.has(date)) return "cal-d is-booked";
     if (date === checkIn || date === checkOut) return "cal-d is-on";
     if (checkIn && checkOut && date > checkIn && date < checkOut) return "cal-d is-in";
     return "cal-d";
@@ -186,11 +185,19 @@ export default function BookPage() {
         <div className="pad mt stack">
           <p className="muted">Minimum stay is 2 nights. Blocked and booked dates can&apos;t be selected.</p>
           <div className="between">
-            <button className="icon-btn" type="button" aria-label="Previous month" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}>
+            <button
+              className="icon-btn"
+              type="button"
+              aria-label="Previous month"
+              disabled={!canGoBack}
+              onClick={() => goToMonth(-1)}
+            >
               <Icon name="back" />
             </button>
-            <strong>{cursor.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</strong>
-            <button className="icon-btn" type="button" aria-label="Next month" onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}>
+            <strong>
+              {cursor ? cursor.toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "\u00a0"}
+            </strong>
+            <button className="icon-btn" type="button" aria-label="Next month" onClick={() => goToMonth(1)}>
               <Icon name="arrow" />
             </button>
           </div>
@@ -202,10 +209,21 @@ export default function BookPage() {
             ))}
             {days.map((d) => {
               const iso = isoDate(d);
-              const inMonth = d.getMonth() === cursor.getMonth();
-              const disabled = !inMonth || BLOCKED.has(iso) || BOOKED.has(iso);
+              const inMonth = cursor !== null && d.getMonth() === cursor.getMonth();
+              // A night that has already gone can never be part of a stay, so it
+              // is left out of the grid entirely rather than shown as a date the
+              // guest can see but not pick. Today itself stays bookable.
+              if (today !== null && isPastDate(iso, today)) {
+                return <span className="cal-d is-off" key={iso + d.getMonth()} aria-hidden="true" />;
+              }
               return (
-                <button key={iso + d.getMonth()} className={dayClass(iso, inMonth)} type="button" disabled={disabled} onClick={() => pick(iso)}>
+                <button
+                  key={iso + d.getMonth()}
+                  className={dayClass(iso, inMonth)}
+                  type="button"
+                  disabled={!inMonth || occupied.has(iso)}
+                  onClick={() => pick(iso)}
+                >
                   {d.getDate()}
                 </button>
               );

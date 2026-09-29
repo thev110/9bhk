@@ -24,6 +24,23 @@ words. Do **not** translate the meaning.
 | Google | Google | Google |
 | RERA License ID | ஆர்இஆர் லைசென்ஸ் எண் | ఆర్‌ఇఈఆర్ లైసెన్స్ ఐడీ |
 
+## Rule 1a — settings are product taxonomy, not scenery
+
+`Setting` is the primary facet a guest filters on. It must read as a place
+category, and it must translate. Do not fold it into "coastal" vocabulary, and
+do not transliterate it.
+
+| English | தமிழ் | తెలుగు |
+|---|---|---|
+| Seaside | கடற்கரை | సముద్రతీరం |
+| Hill Station | மலை ஊரகம் | పర్వత స్టేషన్ |
+| In the City | நகரில் | నగరంలో |
+| Countryside | ஊரகம் | గ్రామీణం |
+| Villa | வீடு | వీలువల్ల ఇల్లు |
+| Bungalow | பங்கலாகு | బంగ్లం |
+| Pool House | நீர்நிலை வீடు | పూల ఇల్లు |
+| Group House | குழு வீடு | సమూహ ఇల్లు |
+
 ## Rule 2 — use established native vocabulary for everyday UI
 
 | English | தமிழ் | తెలుగు |

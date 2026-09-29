@@ -11,8 +11,9 @@ const GARAGE_TYPE_KEY: Record<string, DictKey> = {
 };
 
 /**
- * Translate a garage type slug. Falls back to the Teak Portico label, which
- * matches the existing `?:` chain behaviour in the card components.
+ * Translate a garage type slug. Falls back to the generic Portico label, since
+ * a garage spec is optional and its absence should never render as a coastal
+ * type on a hill or city listing.
  */
 export function garageLabel(t: TFn, type: string): string {
   return t(GARAGE_TYPE_KEY[type] ?? "garage.teakPortico");

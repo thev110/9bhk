@@ -6,6 +6,7 @@ import { Shell } from "@/components/shell";
 import { formatRange, inr } from "@/lib/format";
 import { useCatalog } from "@/lib/catalog";
 import { useStore, type Booking } from "@/lib/store";
+import { SplitPayPanel } from "@/components/split-pay";
 import { useT } from "@/lib/i18n";
 import { useLocale } from "@/lib/i18n/use-t";
 import type { DictKey } from "@/lib/i18n/en";
@@ -145,6 +146,7 @@ export default function TripsPage() {
 
 function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void }) {
   const { properties } = useCatalog();
+  const { setSplit, markSplitPaid, showToast } = useStore();
   const t = useT();
   const { tag } = useLocale();
   const property = properties.find((item) => item.id === booking.propertyId);
@@ -183,6 +185,21 @@ function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void
             <span className="num">{inr(booking.total)}</span>
           </div>
         </div>
+        {booking.status !== "cancelled" ? (
+          <SplitPayPanel
+            total={booking.total}
+            code={booking.code}
+            organiser={booking.guestName}
+            checkIn={booking.checkIn}
+            shares={booking.split}
+            onCreate={(shares) => setSplit(booking.id, shares)}
+            onMarkPaid={(share) => {
+              markSplitPaid(booking.id, share.id);
+              showToast(t("split.toastPaid", { name: share.name }));
+            }}
+            onError={() => showToast(t("split.inviteFailed"))}
+          />
+        ) : null}
         <p className="muted mt">{t("trips.cancellationNote")}</p>
         <div className="row mt">
           <button className="btn outline grow" type="button">

@@ -65,13 +65,13 @@ export const hostKeys = {
   // ── Listing wizard — step titles ───────────────────────────────────────
   "host.titlePublish": "Ready to publish?",
   "host.titlePhotos": "Add high-res photos",
-  "host.titlePreview": "Preview your coastal listing",
+  "host.titlePreview": "Preview your listing",
   "host.titlePricing": "Set pricing & acquisition terms",
-  "host.titleGarage": "Garage & automotive specifications",
-  "host.titleBasics": "Tell us about your coastal estate",
+  "host.titleGarage": "Parking, garage & amenities",
+  "host.titleBasics": "Tell us about your place",
   "host.titleSpace": "How much space?",
   "host.titleAvailability": "Availability & private access",
-  "host.titleShoreline": "Where is the shoreline boundary?",
+  "host.titleSetting": "Where is it, and what kind of place?",
 
   // ── Listing wizard — basics ────────────────────────────────────────────
   "host.fieldPropertyName": "Property name",
@@ -79,34 +79,44 @@ export const hostKeys = {
   "host.fieldShortDescription": "Short description",
   "host.helpShortDescription": "One or two lines. You can expand this later.",
   "host.listForSaleAcquisition": "List for Sale (Acquisition)",
-  "host.listForSaleHelp": "Make this estate purchasable in the Buy tab",
+  "host.listForSaleHelp": "Make this property purchasable in the Buy tab",
   "host.maximumGuests": "Maximum guests",
   "host.stepBasics": "The name and short description guests see first.",
 
-  // ── Listing wizard — location ──────────────────────────────────────────
+  // ── Listing wizard — location & setting ────────────────────────────────
   "host.dragPin": "Drag the pin to your gate",
   "host.fieldArea": "Area or landmark",
   "host.fieldCityOrRegion": "City or region",
   "host.fieldStreetAddress": "Street address",
   "host.helpAddress": "Kept private until a booking is confirmed.",
   "host.stepLocation": "Guests only see the exact pin after booking.",
+  "host.fieldSetting": "Setting",
+  "host.helpSetting":
+    "9bhk houses are whole villas, bungalows and pool houses. Pick wherever yours actually is — the coast, the hills, the city or the countryside.",
+  "host.fieldSettingDetail": "One line about the setting",
+  "host.settingDetailPlaceholder": "e.g. {setting} — add elevation, frontage or land size",
 
   // ── Listing wizard — space ─────────────────────────────────────────────
   "host.fieldBathrooms": "Bathrooms",
   "host.fieldBedrooms": "Bedrooms",
   "host.fieldBeds": "Beds",
   "host.stepSpace": "Bedrooms, beds and bathrooms help guests plan the group.",
+  "host.minBedroomsNote": "Minimum {n} bedrooms — this is a group house, not a hotel room",
+  "host.errMinBedrooms": "9bhk listings need at least {n} bedrooms.",
 
   // ── Listing wizard — garage & amenities ────────────────────────────────
   "host.beachFrontagePlaceholder": "e.g. 180 ft direct oceanfront",
   "host.curatedAmenities": "Curated Estate Amenities",
   "host.fieldBeachFrontage": "Direct Beach Frontage",
-  "host.garageArchitecture": "Automotive Garage Architecture",
+  "host.garageArchitecture": "Garage & Parking (optional)",
+  "host.noGarage": "No garage",
+  "host.fieldGarageCapacity": "Vehicle capacity",
   "host.qualifierDcFastCharge": "(DC Fast Charge)",
   "host.qualifierJetSkiSlip": "(Jet Ski Slip)",
   "host.qualifierLowRamp": "(<7° Supercar Ramp)",
-  "host.qualifierPergola": "(Pergola)",
-  "host.stepGarage": "Specify coastal shoreline boundary and vehicle accommodations.",
+  "host.qualifierPergola": "(Portico)",
+  "host.stepGarage":
+    "Beachfront houses can list their frontage. A garage is entirely optional — plenty of good houses have none.",
 
   // ── Listing wizard — photos ────────────────────────────────────────────
   "host.coverFirstShot": "cover set to the first shot.",
@@ -206,4 +216,12 @@ export const hostKeys = {
   "host.errNameShort": "Add a property name guests will recognise.",
   "host.errPhotoUpload": "Photo upload failed",
   "host.errSaveFailed": "Could not save the listing",
+  "host.errDocsNotUploaded": "{n} document(s) could not be uploaded",
+  "host.errDocTooLarge": "That file is too large to upload",
+  "host.errDocType": "That file type is not supported",
+  "host.documentsTitle": "Documents",
+  "host.documentsBody": "Upload the documents a reviewer needs to verify this listing.",
+  "host.docNone": "No file chosen",
+  "host.docReplace": "Replace file",
+  "host.docUpload": "Choose file",
 } as const;

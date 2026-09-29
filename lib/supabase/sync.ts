@@ -1,5 +1,30 @@
 import type { Booking, User } from "@/lib/store";
+import type { SplitShare } from "@/lib/split";
 import { browserSupabase } from "@/lib/supabase/browser";
+
+/** A live stay, as the calendar needs it: dates and status, nothing personal. */
+export type AvailabilityRange = {
+  propertyId: string;
+  checkIn: string;
+  checkOut: string;
+  status: string;
+};
+
+type AvailabilityRow = {
+  property_id: string;
+  check_in: string;
+  check_out: string;
+  status: string;
+};
+
+function toRange(row: AvailabilityRow): AvailabilityRange {
+  return {
+    propertyId: row.property_id,
+    checkIn: row.check_in,
+    checkOut: row.check_out,
+    status: row.status,
+  };
+}
 
 async function sessionUserId(): Promise<string | null> {
   const supabase = browserSupabase();
@@ -79,6 +104,44 @@ export async function persistConfirmation(booking: Booking): Promise<void> {
   });
 }
 
+/**
+ * Persist the group's split ledger so each share exists as a real row.
+ *
+ * Keyed by booking *code* because that is what the client holds; the table
+ * itself references the booking's uuid, which the browser never sees.
+ *
+ * Note this writes the locally-known paid flags. The authoritative settle
+ * happens in the payment webhook, which runs with the service role — a guest
+ * marking their own share paid here is a UI affordance, not a receipt.
+ */
+export async function persistSplitShares(
+  bookingCode: string,
+  shares: SplitShare[],
+): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id || shares.length === 0) return;
+
+  const { data: booking } = await supabase
+    .from("bhk_bookings")
+    .select("id")
+    .eq("code", bookingCode)
+    .maybeSingle();
+  if (!booking) return;
+
+  await supabase.from("bhk_split_shares").upsert(
+    shares.map((share, slot) => ({
+      booking_id: booking.id,
+      slot,
+      member_name: share.name,
+      amount: share.amount,
+      paid: share.paid,
+      paid_at: share.paidAt ?? null,
+    })),
+    { onConflict: "booking_id,slot" },
+  );
+}
+
 export async function persistClient(client: any): Promise<void> {
   const supabase = browserSupabase();
   const id = await sessionUserId();
@@ -103,6 +166,36 @@ export async function deleteClientFromDb(clientId: string): Promise<void> {
   const id = await sessionUserId();
   if (!supabase || !id) return;
   await supabase.from("bhk_realtor_clients").delete().eq("id", clientId).eq("realtor_id", id);
+}
+
+/**
+ * Every live stay in the marketplace, as bare date ranges.
+ *
+ * Booking state cannot come from `bhk_bookings` directly: its RLS policy only
+ * returns the viewer's own rows as guest or host, so a calendar reading that
+ * table would show every other guest's weekend as free. `bhk_availability()` is
+ * the public projection the migration adds, and it is what makes the picker
+ * agree with reality.
+ *
+ * If that function is missing — the migration has not been pushed yet — this
+ * degrades to the rows RLS will actually hand over, so a database that predates
+ * the change still shows *its own* bookings rather than nothing. A property with
+ * no bookings simply contributes no ranges, and every future night stays
+ * available.
+ */
+export async function loadAvailability(): Promise<AvailabilityRange[]> {
+  const supabase = browserSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("bhk_availability");
+  if (!error && Array.isArray(data)) {
+    return (data as unknown as AvailabilityRow[]).map(toRange);
+  }
+
+  const { data: own } = await supabase
+    .from("bhk_bookings")
+    .select("property_id, check_in, check_out, status");
+  return ((own as unknown as AvailabilityRow[] | null) ?? []).map(toRange);
 }
 
 export async function loadRealtorClients(): Promise<any[]> {

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -101,11 +102,14 @@ export function PwaMobileHandler() {
         </button>
 
         <div className="pwa-banner-main">
-          <img
+          {/* 1.8 MB source rendered at 44 px — same story as the header. */}
+          <Image
             src="/logo-mark.png"
             alt="9bhk.app"
             width={44}
             height={44}
+            sizes="44px"
+            quality={80}
             className="pwa-app-icon"
           />
           <div className="pwa-banner-text">

@@ -8,6 +8,7 @@ import { CITIES } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { isAdminEmail } from "@/lib/admin";
 
 export default function ProfilePage() {
   const { user, signOut, updateUser, bookings, saved, showToast } = useStore();
@@ -134,11 +135,16 @@ export default function ProfilePage() {
             <Icon name="award" />
             <span className="lb">{t("profile.privacyTerms")}</span>
           </Link>
-          <Link className="mi" href="/admin">
-            <Icon name="award" />
-            <span className="lb">{t("profile.adminWorkspace")}</span>
-            <span className="meta">{t("profile.staffOnly")}</span>
-          </Link>
+          {/* Only the allow-listed operator sees a door to the console. For
+              everyone else the row does not exist, rather than sitting there
+              and bouncing them. */}
+          {isAdminEmail(user.email) ? (
+            <Link className="mi" href="/admin">
+              <Icon name="award" />
+              <span className="lb">{t("profile.adminWorkspace")}</span>
+              <span className="meta">{t("profile.staffOnly")}</span>
+            </Link>
+          ) : null}
         </div>
 
         <button

@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
-import { Icon } from "./icon";
+import { Icon, settingIcon } from "./icon";
 import { useCatalog } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 import { CITIES } from "@/lib/format";
-import { VIBES } from "@/lib/properties";
+import { SETTINGS, SETTING_LABEL } from "@/lib/properties";
 import { useT } from "@/lib/i18n";
+import { settingLabel } from "@/lib/i18n/vibes";
 
 export function CommandMenu() {
   const [mounted, setMounted] = useState(false);
@@ -63,15 +64,15 @@ export function CommandMenu() {
               {properties.slice(0, 5).map((p) => (
                 <Command.Item
                   key={p.id}
-                  value={`${p.name} ${p.location} ${p.beachFrontage} ${p.garage.name}`}
+                  value={`${p.name} ${p.location} ${p.settingName} ${p.settingDetail} ${p.garage?.name ?? ""}`}
                   onSelect={() => run(() => router.push(`/property/${p.id}`))}
                   className="cmdk-item"
                 >
-                  <Icon name="home" />
+                  <Icon name={settingIcon(p.setting)} />
                   <div className="cmdk-item-main">
                     <strong>{p.name}</strong>
                     <span>
-                      {p.location} · {t("cmdk.ftBeach", { ft: p.beachFrontage.split(" ")[0] })}
+                      {p.settingName} · {p.settingDetail}
                       {p.isForSale && p.salePrice
                         ? ` · ${p.salePrice >= 10000000 ? `₹${(p.salePrice / 10000000).toFixed(1)}Cr` : ""}`
                         : ` · ₹${p.price.toLocaleString("en-IN")}/nt`}
@@ -90,7 +91,7 @@ export function CommandMenu() {
                 <Icon name="key" />
                 <span>{t("cmdk.realtorPortal")}</span>
               </Command.Item>
-              <Command.Item value="home explore beachfront stays" onSelect={() => run(() => router.push("/"))} className="cmdk-item">
+              <Command.Item value="home explore group stays villas" onSelect={() => run(() => router.push("/"))} className="cmdk-item">
                 <Icon name="compass" />
                 <span>{t("cmdk.exploreStays")}</span>
               </Command.Item>
@@ -152,10 +153,21 @@ export function CommandMenu() {
             </Command.Group>
 
             <Command.Group heading={t("cmdk.groupZone")}>
+              {SETTINGS.map((s) => (
+                <Command.Item
+                  key={s}
+                  value={`setting ${SETTING_LABEL[s]}`}
+                  onSelect={() => run(() => router.push(`/search?setting=${encodeURIComponent(SETTING_LABEL[s])}`))}
+                  className="cmdk-item"
+                >
+                  <Icon name={settingIcon(s)} />
+                  <span>{settingLabel(t, s)}</span>
+                </Command.Item>
+              ))}
               {CITIES.map((c) => (
                 <Command.Item
                   key={c}
-                  value={`coastal region ${c}`}
+                  value={`location region ${c}`}
                   onSelect={() =>
                     run(() => {
                       setCity(c);
