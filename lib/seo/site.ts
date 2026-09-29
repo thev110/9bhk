@@ -61,10 +61,18 @@ export const CURRENCY = "INR";
  * Absolute, canonical URL for a site-relative path.
  * Collapses duplicate slashes, drops the query string and forces a single
  * trailing-slash policy so the same page can never emit two canonical forms.
+ *
+ * The root path returns the **bare origin**, with no trailing slash, because
+ * that is the form Next.js emits for `alternates.canonical` on the homepage:
+ * it normalises a root URL to the origin, so a helper returning
+ * `https://www.9bhk.app/` made the sitemap advertise a homepage URL that no
+ * canonical tag in the site ever pointed at. The site runs
+ * `trailingSlash: false`, and `https://www.9bhk.app` is the form every other
+ * URL here builds from, so that is what the root resolves to.
  */
 export function absoluteUrl(path = "/"): string {
   const clean = path.trim();
-  if (!clean || clean === "/") return `${SITE_URL}/`;
+  if (!clean || clean === "/") return SITE_URL;
   const withSlash = clean.startsWith("/") ? clean : `/${clean}`;
   const collapsed = withSlash.replace(/\/{2,}/g, "/").replace(/\/+$/, "");
   return `${SITE_URL}${collapsed}`;

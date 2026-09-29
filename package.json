@@ -9,7 +9,11 @@
     "test": "node --test tests/*.test.mjs",
     "i18n:translate": "node scripts/translate-catalog.mjs",
     "seo:audit": "node scripts/seo-audit.mjs",
-    "validate": "npm run typecheck && npm test && npm run build"
+    "seo:render": "node scripts/render-check.mjs",
+    "seo:flows": "node scripts/flow-check.mjs",
+    "seo:perf": "node scripts/perf-check.mjs",
+    "seo:cycles": "node scripts/cycle-check.mjs",
+    "validate": "npm run typecheck && npm run seo:cycles && npm test && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

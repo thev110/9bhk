@@ -312,3 +312,63 @@ directory (`C:\Users\rathn`), which is why `next build` prints a
 "inferred your workspace root" warning. `outputFileTracingRoot` is pinned in
 `next.config.ts`; removing the parent lockfile silences the warning. It does
 not affect the build or the emitted site.
+
+---
+
+## 11. Dev-server false alarm: "Cannot read properties of undefined (reading 'call')"
+
+**Symptom.** Running `npm run dev`, `/` failed with:
+
+```
+TypeError: Cannot read properties of undefined (reading 'call')
+  at HomePage (app/page.tsx:78:9)
+```
+
+which reads as "the server component received `undefined` for a client
+component it imported".
+
+**It was not a code defect.** `components/home-experience.tsx` had its
+`"use client"` directive and its `export function HomeExperience` in place the
+whole time, and `npm run build` plus `next start` rendered the page correctly.
+
+**Actual cause.** The dev server was mid-restart. Every edit to
+`next.config.ts` — the `images` block, then `headers()`, then
+`images.qualities` — triggers `⚠ Found a change in next.config.ts. Restarting
+the server`, and the crawler was hitting `/` inside that window. During a
+restart Next rebuilds its client-reference manifest; a server component that
+renders a client reference whose manifest entry is not yet written receives
+`undefined`, and React fails calling the element type. The 400-odd errors the
+audit reported at the same moment were the same window.
+
+**How to tell the two apart**
+
+| | Restart race | Real missing export |
+|---|---|---|
+| `npm run build` | passes | fails |
+| `next start` | renders | 500s |
+| Dev log | shows `Restarting the server` | silent |
+| Second request | 200 | still broken |
+
+**Resolution.** Restart the dev server and re-request. To confirm the module
+graph is sound rather than assuming it, `npm run seo:cycles` now walks the
+import graph from every page entry point and fails on a real cycle. It
+currently reports:
+
+```
+No import cycles reachable from any page entry point. (150 modules scanned)
+```
+
+It counts value imports only. A `import type { X } from "./y"` is erased at
+compile time and creates no runtime edge, so counting it reported a phantom
+cycle on `lib/supabase/sync.ts` -> `lib/store.tsx` that does not exist in the
+emitted graph.
+
+**Also fixed while investigating.** Next 15.5 logs a warning for every image
+whose `quality` is not listed in `images.qualities`, and Next 16 refuses to
+run without it. `images.qualities` is now `[68, 70, 72, 74, 78, 80]` — the
+exact set the UI uses — which removed roughly two hundred log lines per crawl
+and closes the Next 16 upgrade path.
+
+**Rule of thumb for this repo:** do not edit `next.config.ts` while a
+`next dev` server is running and then crawl. Use `npm run build && npm start`
+for validation, or restart dev and wait for `✓ Ready` first.
