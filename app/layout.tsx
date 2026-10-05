@@ -70,6 +70,8 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.displayName,
+  creator: "Rathnavel Karthi",
+  authors: [{ name: "Rathnavel Karthi", url: "https://www.linkedin.com/in/rathnavel-karthi-114991135/" }],
   manifest: "/manifest.json",
   alternates: { canonical: absoluteUrl("/") },
   robots: {
@@ -93,8 +95,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: absoluteUrl("/logo-wordmark.png"),
-        width: 1200,
-        height: 630,
+        width: 2004,
+        height: 785,
         alt: "9bhk.app — private stays for groups",
       },
     ],

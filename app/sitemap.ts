@@ -50,6 +50,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   entries.push({ path: "/faq", changeFrequency: "monthly", priority: 0.5 });
   entries.push({ path: "/about", changeFrequency: "monthly", priority: 0.4 });
   entries.push({ path: "/contact", changeFrequency: "monthly", priority: 0.4 });
+  entries.push({ path: "/creators", changeFrequency: "weekly", priority: 0.6 });
+  entries.push({ path: "/developers", changeFrequency: "monthly", priority: 0.5 });
+  entries.push({ path: "/credits", changeFrequency: "monthly", priority: 0.5 });
   entries.push({ path: "/buy", changeFrequency: "weekly", priority: 0.7 });
 
   /* Legal. */

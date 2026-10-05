@@ -5,6 +5,8 @@ import { SITE } from "@/lib/seo/site";
 import { getServerCatalog } from "@/lib/server/catalog";
 import { publishableLocations } from "@/lib/seo/locations";
 
+import { CreatorAttribution } from "@/components/creator-attribution";
+
 /**
  * Footer information architecture.
  *
@@ -27,6 +29,7 @@ export async function SiteFooter() {
 
   const company = [
     { href: "/about", label: "About" },
+    { href: "/credits", label: "The Creator" },
     { href: "/contact", label: "Contact" },
     { href: "/legal/terms", label: "Terms" },
     { href: "/legal/privacy", label: "Privacy" },
@@ -110,11 +113,12 @@ export async function SiteFooter() {
         </nav>
       </div>
 
-      <p className="seo-footer-legal">
-        © {new Date().getFullYear()} {SITE.displayName}. Whole-home private stays.
-        {/* TODO(business-data): add the registered entity name and address once
-            the business details are confirmed. */}
-      </p>
+      <div className="seo-footer-legal-bar">
+        <p className="seo-footer-legal">
+          © {new Date().getFullYear()} {SITE.displayName}. All rights reserved.
+        </p>
+        <CreatorAttribution variant="footer" />
+      </div>
     </footer>
   );
 }

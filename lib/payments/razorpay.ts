@@ -61,7 +61,7 @@ export type OrderRequest = {
   amountRupees: number;
   /** Idempotency-friendly reference. Use the booking code. */
   receipt: string;
-  /** Defaults to the 8% platform fee the product already advertises. */
+  /** Defaults to the 10% platform fee the product advertises. */
   commissionRate?: number;
   /** Razorpay Route linked account for the host, if they are onboarded yet. */
   hostAccountId?: string;
@@ -83,7 +83,7 @@ export type OrderPayload = {
 export function buildOrderPayload(request: OrderRequest): OrderPayload {
   const { amountPaise, hostAmountPaise } = splitOrder(
     request.amountRupees,
-    request.commissionRate ?? 0.08,
+    request.commissionRate ?? 0.10,
   );
   const payload: OrderPayload = {
     amount: amountPaise,
@@ -94,7 +94,7 @@ export function buildOrderPayload(request: OrderRequest): OrderPayload {
 
   // Without a Route account the funds settle to the platform and the host is
   // paid out separately. That is the fallback, not the target: settling
-  // directly to the host is what makes the 8% structurally collectable.
+  // directly to the host is what makes the 10% structurally collectable.
   if (request.hostAccountId) {
     payload.transfers = [
       {

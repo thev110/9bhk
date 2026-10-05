@@ -200,7 +200,7 @@ export const taHost = {
   "host.payoutArrives": "5 ஜூலை 2026 அன்று வரும்",
   "host.payouts": "வருவாய்கள்",
   "host.pendingPayout": "நிலுவையிலுள்ள வருவாய்",
-  "host.platformFees": "தளக் கட்டணங்கள் (8%)",
+  "host.platformFees": "தளக் கட்டணங்கள் (10%)",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "host.toastStayConfirmed": "தங்குமை உறுதிப்படுத்தப்பட்டது. விருந்தினர் அறிவிப்புகளில் பார்க்கலாம்.",

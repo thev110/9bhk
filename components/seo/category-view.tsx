@@ -288,9 +288,23 @@ export function categoryMetadata(
   const capacity = capacityBand(properties);
   const band = priceBand(properties);
 
-  const title = location
+  let title = location
     ? `${category.plural} in ${where} — ${properties.length} ${properties.length === 1 ? "stay" : "stays"}`
     : `${category.plural} near Chennai & along the coast — ${properties.length} on 9bhk`;
+
+  if (category.slug === "beach-houses") {
+    title = location
+      ? `Beach Houses in ${where} with Private Pool — ${properties.length} ${properties.length === 1 ? "stay" : "stays"}`
+      : `Beach Houses in ECR & Chennai with Private Pool — ${properties.length} on 9bhk`;
+  } else if (category.slug === "farmhouses") {
+    title = location
+      ? `Farmhouses in ${where} with Swimming Pool — ${properties.length} ${properties.length === 1 ? "stay" : "stays"}`
+      : `Farmhouses in Chennai with Swimming Pool — ${properties.length} on 9bhk`;
+  } else if (category.slug === "villas") {
+    title = location
+      ? `Luxury Private Villas in ${where} — ${properties.length} ${properties.length === 1 ? "stay" : "stays"}`
+      : `Luxury Private Villas in ECR & Chennai — ${properties.length} on 9bhk`;
+  }
 
   const description = [
     `${properties.length} ${category.plural.toLowerCase()} on 9bhk${location ? ` in ${where}` : where ? ` across ${where}` : ""}.`,

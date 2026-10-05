@@ -96,8 +96,8 @@ Client roster, confidential mandates, buyer-privacy protection, Presentation Mod
 guest becomes a sale lead; a stay review becomes evidence for the sale. Most marketplaces buy supply twice.
 We buy it once.
 
-**Built and complete:** 25 routes · 16 passing tests · 844 translation keys × 3 languages (English, Tamil,
-Telugu) · Next.js 15, React 19, Supabase.
+**Built and complete:** 30+ routes · 47 passing tests · 928 translation keys × 3 languages (English, Tamil,
+Telugu) · Live Razorpay gateway & MCP · Next.js 15, React 19, Supabase.
 
 > **Speaker note:** Show the real product — it's your best asset. Switch to the live app if you can. The
 > trilingual point lands hardest here: *"Every global OTA is English-first with translation bolted on. Our
@@ -160,9 +160,12 @@ needs — not room-nights.
 
 | Capability | Why it matters |
 |---|---|
-| **Client roster & onboarding** | Their book of buyers lives in the product, not a spreadsheet |
+| **₹500/mo Workspace Subscription** | Replaces messy WhatsApp forwards with a clean, branded digital catalog |
+| **Shareable Client & Calendar Links** | One-click WhatsApp/web links for buyers to view specs and pick dates on calendar |
+| **Client roster & onboarding** | Their book of buyers lives in the product, not a chaotic spreadsheet |
 | **Confidential mandates** | Buyer contact details protected from owners and other agents |
 | **Presentation Mode** | Client-facing view with agency branding; owner contact hidden |
+| **3-BHK Platform Showcase Gate** | 3+ BHK properties showcased in public 9bhk app; <3 BHK properties kept as private client links |
 | **Locked commission splits** | Tagged at onboarding and held across every listing |
 | **Lead attribution** | Inquiries stay bound to the sponsoring agent |
 
@@ -170,7 +173,7 @@ needs — not room-nights.
 technical capability no listing portal has, and it's the reason a broker brings us their best clients
 instead of hiding them.
 
-`commission_rate` · `bhk_realtor_clients` · presentation mode · lead locking — all built.
+`commission_rate` · `bhk_realtor_clients` · presentation mode · lead locking · ₹500 broker subscription — all built.
 
 > **Speaker note:** This is the slide that makes the *Buy* tab credible. Without it, you're a listings
 > site. With it, you own the money flow of every transaction a broker introduces.
@@ -179,43 +182,52 @@ instead of hiding them.
 
 ## SLIDE 8 — Business model
 
-### Two fee streams. Both already encoded in the product.
+### Three fee streams. All encoded in the product.
 
-**Stay bookings**
+**1. Stay bookings**
 ```
-Platform fee 8% of stay value        (built: host.platformFees)
+Platform fee 10% of stay value       (built: host.platformFees)
 Avg nightly rate ₹21,000
 Avg group stay 2 nights  =  ₹42,000 GMV
-→ ₹3,360 gross commission per booking
+→ ₹4,200 gross commission per booking
 ```
 
-**Property sales (realtor)**
+**2. Property sales (realtor)**
 ```
 Co-broking commission 2.0% default rate   (built: commission_rate)
-Charged per closed transaction
+Charged per closed transaction on luxury estates
+```
+
+**3. Broker Workspace SaaS Subscription**
+```
+₹500 / month per active broker / distributor
+Unlocks branded catalog links, interactive client calendar booking flows,
+and private client mandate management.
+Rule: 3+ BHK properties showcase on public 9bhk app; <3 BHK remain private catalog links.
 ```
 
 **Collections — live with Razorpay**
 ```
-Guest pays by UPI
-  → Razorpay Checkout (8% retained by platform)
-  → Razorpay Route splits 92% to the host
-  → Payout released after check-in
+Guest pays by UPI / Cards / Netbanking
+  → 100% captured by 9bhk Razorpay merchant account
+  → 10% platform service fee retained by 9bhk
+  → 90% credited to host wallet with a 15-day dispute/hold period
+  → Host withdraws on-demand after 15 days via UPI / IMPS (no min/max limit)
 ```
 
-This is the critical slide. We don't invoice hosts and hope. **We collect.** Guests pay by UPI exactly as
-they do today; the only change is that settlement happens after check-in, so our fee is enforced by the
-rail rather than by goodwill.
+This is the critical slide. We don't invoice hosts and hope. **We collect.** Guests pay by UPI or cards exactly as
+they do today; 100% settles directly to 9bhk, the 10% fee is held automatically, and the host withdraws their 90%
+after a 15-day dispute cooling period.
 
-> **Speaker note:** Say this alignment explicitly: *"Our 8% is only collectable if the guest actually
+> **Speaker note:** Say this alignment explicitly: *"Our 10% is only collectable if the guest actually
 > arrives and the stay happens. Our incentive and the host's incentive are identical — fill the house.
-> We make nothing on a cancelled booking."*
+> We make nothing on a cancelled booking. And our ₹500 broker subscription gives us high-margin SaaS revenue from day one."*
 
 ---
 
 ## SLIDE 9 — Unit economics
 
-### Forty-one villas is ₹1 crore of ARR.
+### Thirty-three villas is ₹1 crore of ARR.
 
 **Per villa, per year** (at 40% occupancy)
 
@@ -224,16 +236,16 @@ rail rather than by goodwill.
 | Nights sold | 146 |
 | Avg nightly rate | ₹21,000 |
 | **GMV per villa/year** | **₹30.7 L** |
-| **Platform revenue at 8%** | **₹2.46 L** |
+| **Platform revenue at 10%** | **₹3.07 L** |
 
 **What that means at scale**
 
 | ARR | Bookings/yr | Bookings/day | **Villas needed** |
 |---|---|---|---|
-| ₹25 L | ~744 | ~2.0 | **~10** |
-| ₹50 L | ~1,488 | ~4.1 | **~20** |
-| **₹1 Cr** | **~2,976** | **~8.2** | **~41** |
-| ₹5 Cr | ~14,880 | ~40.8 | **~204** |
+| ₹25 L | ~595 | ~1.6 | **~8** |
+| ₹50 L | ~1,190 | ~3.3 | **~16** |
+| **₹1 Cr** | **~2,380** | **~6.5** | **~33** |
+| ₹5 Cr | ~11,900 | ~32.6 | **~163** |
 
 **Gross margin is software-grade.** Variable cost per booking is gateway fees, not inventory. We do not own
 or lease property.

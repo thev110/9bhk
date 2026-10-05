@@ -125,6 +125,34 @@ export type RealtorClient = {
   createdAt: string;
 };
 
+export type RealtorProperty = {
+  id: string;
+  name: string;
+  location: string;
+  city: string;
+  bedrooms: number;
+  bathrooms: number;
+  guests: number;
+  forRent: boolean;
+  forSale: boolean;
+  nightlyRate?: number;
+  salePriceCr?: number;
+  pool: boolean;
+  notes?: string;
+  createdAt: string;
+};
+
+/**
+ * 9bhk 3-BHK Platform Showcase Rule:
+ * Only properties with a minimum of 3 BHK can be publicly showcased in the 9bhk app
+ * for renting and sales. Properties with fewer than 3 BHK can still be managed in the
+ * broker's private catalog and shared via direct private link, but are never displayed
+ * in the public marketplace.
+ */
+export function isShowcaseEligible(property: { bedrooms: number }): boolean {
+  return property.bedrooms >= 3;
+}
+
 type Persisted = {
   city: string;
   saved: string[];
@@ -136,6 +164,8 @@ type Persisted = {
   notes: AppNote[];
   clients: RealtorClient[];
   presentationMode?: boolean;
+  brokerSubscribed?: boolean;
+  realtorProperties?: RealtorProperty[];
   locale: Locale;
 };
 
@@ -201,6 +231,11 @@ type Store = Persisted & {
   confirmBooking: (id: string) => void;
   addClient: (client: RealtorClient) => void;
   removeClient: (id: string) => void;
+  brokerSubscribed: boolean;
+  setBrokerSubscribed: (active: boolean) => void;
+  realtorProperties: RealtorProperty[];
+  addRealtorProperty: (prop: RealtorProperty) => void;
+  removeRealtorProperty: (id: string) => void;
   setLocale: (locale: Locale) => void;
   setSplit: (bookingId: string, shares: SplitShare[]) => void;
   markSplitPaid: (bookingId: string, shareId: string) => void;
@@ -242,6 +277,55 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
     ],
     presentationMode: false,
+    brokerSubscribed: true,
+    realtorProperties: [
+      {
+        id: "rp-1",
+        name: "Coromandel Coastal Pavilion",
+        location: "East Coast Road (ECR), Chennai",
+        city: "Chennai",
+        bedrooms: 4,
+        bathrooms: 4,
+        guests: 12,
+        forRent: true,
+        forSale: true,
+        nightlyRate: 35000,
+        salePriceCr: 14.5,
+        pool: true,
+        notes: "Direct high-tide frontage, 30 kW power load, verified generator.",
+        createdAt: "2026-09-28",
+      },
+      {
+        id: "rp-2",
+        name: "Mahabalipuram Sand Dune Villa",
+        location: "Mahabalipuram Coastal Strip",
+        city: "Mahabalipuram",
+        bedrooms: 3,
+        bathrooms: 3,
+        guests: 10,
+        forRent: true,
+        forSale: false,
+        nightlyRate: 28000,
+        pool: true,
+        notes: "Private pool, sound curfew 23:00, great for family reunions.",
+        createdAt: "2026-10-01",
+      },
+      {
+        id: "rp-3",
+        name: "Poes Garden Luxury Executive Suite",
+        location: "Central Chennai",
+        city: "Chennai",
+        bedrooms: 2,
+        bathrooms: 2,
+        guests: 4,
+        forRent: true,
+        forSale: false,
+        nightlyRate: 16000,
+        pool: false,
+        notes: "2 BHK executive city property. Private link only (not showcased on 9bhk app).",
+        createdAt: "2026-10-03",
+      },
+    ],
     locale: DEFAULT_LOCALE,
   });
   const [ready, setReady] = useState(false);
@@ -271,6 +355,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           notes: parsed.notes ?? [],
           clients: parsed.clients && parsed.clients.length ? parsed.clients : curr.clients,
           presentationMode: parsed.presentationMode ?? false,
+          brokerSubscribed: parsed.brokerSubscribed ?? curr.brokerSubscribed ?? true,
+          realtorProperties:
+            parsed.realtorProperties && parsed.realtorProperties.length
+              ? parsed.realtorProperties
+              : curr.realtorProperties,
           locale: LOCALES.includes(parsed.locale) ? (parsed.locale as Locale) : DEFAULT_LOCALE,
         }));
       }
@@ -443,6 +532,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }),
       presentationMode: Boolean(state.presentationMode),
       setPresentationMode: (active) => setState((s) => ({ ...s, presentationMode: active })),
+      brokerSubscribed: Boolean(state.brokerSubscribed),
+      setBrokerSubscribed: (active) => setState((s) => ({ ...s, brokerSubscribed: active })),
+      realtorProperties: state.realtorProperties || [],
+      addRealtorProperty: (prop) =>
+        setState((s) => ({
+          ...s,
+          realtorProperties: [prop, ...(s.realtorProperties || [])],
+        })),
+      removeRealtorProperty: (id) =>
+        setState((s) => ({
+          ...s,
+          realtorProperties: (s.realtorProperties || []).filter((p) => p.id !== id),
+        })),
       addClient: (client) => {
         void persistClient(client);
         setState((s) => ({

@@ -1,4 +1,5 @@
 import type { SeoProperty } from "@/lib/catalog-rows";
+import NextLink from "next/link";
 import { Link } from "@/components/seo/link-tile";
 import { FaqSection, QuickAnswer } from "@/components/seo/faq";
 import { GuideCard } from "@/components/seo/guide-blocks";
@@ -8,6 +9,7 @@ import { CATEGORIES, categoryFor, distinctTypes } from "@/lib/seo/taxonomy";
 import { locationSummaries, publishableLocations } from "@/lib/seo/locations";
 import { SITE } from "@/lib/seo/site";
 import { CONTENT } from "@/lib/content/guides";
+import { CreatorAttribution } from "@/components/creator-attribution";
 
 /**
  * Homepage editorial layer.
@@ -103,11 +105,54 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
           <ul className="home-seo-list">
             {popular.map((property) => (
               <li key={property.id}>
-                <Link
+                <NextLink
                   href={`/property/${property.id}`}
-                  label={property.name}
-                  note={`${property.type} · ${property.settingName} · sleeps ${property.guests}`}
-                />
+                  className="home-popular-item"
+                  aria-label={`${property.name}, ${property.type} in ${property.settingName}, sleeps ${property.guests}, ₹${property.price.toLocaleString("en-IN")} per night`}
+                >
+                  <div className="home-popular-thumb">
+                    <img
+                      src={property.image}
+                      alt={property.alt || property.name}
+                      width={160}
+                      height={120}
+                      className="home-popular-img"
+                      loading="lazy"
+                    />
+                    <span className="home-popular-tag">
+                      {property.settingName.split("·")[0]?.trim() || property.type}
+                    </span>
+                  </div>
+                  <div className="home-popular-info">
+                    <strong className="home-popular-title">{property.name}</strong>
+                    <p className="home-popular-spec">
+                      <span>{property.type}</span>
+                      <span className="home-popular-sep" aria-hidden="true">·</span>
+                      <span>{property.bedrooms} BHK</span>
+                      <span className="home-popular-sep" aria-hidden="true">·</span>
+                      <span>Sleeps {property.guests}</span>
+                    </p>
+                    <div className="home-popular-meta-row">
+                      <span className="home-popular-rate">
+                        <strong className="num">₹{property.price.toLocaleString("en-IN")}</strong>
+                        <small>/ night</small>
+                      </span>
+                      {property.rating ? (
+                        <span className="home-popular-score" aria-label={`Rating ${property.rating} of 5`}>
+                          <svg className="home-star" viewBox="0 0 20 20" fill="currentColor" width="12" height="12" aria-hidden="true">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          <span className="num">{property.rating.toFixed(2)}</span>
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="home-popular-affordance" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 4l6 6-6 6" />
+                    </svg>
+                  </div>
+                </NextLink>
               </li>
             ))}
           </ul>
@@ -121,32 +166,32 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
         </div>
         <div className="home-seo-cards">
           <div className="home-seo-card">
+            <div className="home-seo-card-badge">01 · Exclusive Gathering</div>
             <h3>The whole house, not a room</h3>
             <p>
-              Every 9bhk listing is a private home taken exclusively for your dates. Bedrooms start
-              at three because that is what a group travelling together actually needs.
+              Every 9bhk listing is a private home reserved exclusively for your group. Bedrooms start
+              at three because genuine gatherings need dedicated space, total privacy, and communal living.
             </p>
           </div>
           <div className="home-seo-card">
+            <div className="home-seo-card-badge">02 · Verified Direct Specs</div>
             <h3>The specification is the host&apos;s own</h3>
             <p>
-              Capacity, bedrooms, bathrooms, amenities, nightly rate, cleaning fee — and, where the
-              host has entered it, beach frontage, garage specification and event capacity. 9bhk
-              does not fill in fields that have not been declared.
+              Capacity, bedrooms, amenities, generator capacity, and beach frontage are declared directly by verified owners. 9bhk never inflates specs or creates synthetic amenities.
             </p>
           </div>
           <div className="home-seo-card">
-            <h3>A booking is a request, not a charge</h3>
+            <div className="home-seo-card-badge">03 · Escrow Protection</div>
+            <h3>Direct Razorpay escrow protection</h3>
             <p>
-              You send a request with your dates and the host confirms it. Payment goes to the
-              host&apos;s own UPI ID; 9bhk does not take or hold the money.
+              Your payment is safeguarded in escrow via Razorpay until check-in. Hosts receive transparent payouts following a 15-day clearance window, ensuring full dispute protection.
             </p>
           </div>
           <div className="home-seo-card">
-            <h3>One clear total</h3>
+            <div className="home-seo-card-badge">04 · Transparent Fee</div>
+            <h3>One clear total, zero checkout surprises</h3>
             <p>
-              The nightly rate, the cleaning fee and 12% tax make up the whole price. There is no
-              platform fee added at the end of checkout.
+              The nightly rate, cleaning fee, and standard 10% platform fee are itemized upfront. No hidden resort fees or inflated final screens when you confirm your reservation.
             </p>
           </div>
         </div>
@@ -172,8 +217,7 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
             until the host confirms it.
           </li>
           <li>
-            <strong>Pay the published UPI ID.</strong> Keep the confirmation — the refund window
-            runs from your check-in date.
+            <strong>Confirm with secure payment.</strong> Pay seamlessly with UPI or card via Razorpay escrow. Funds are held safely with clear cancellation protections until your arrival.
           </li>
         </ol>
       </section>
@@ -256,6 +300,15 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
           </p>
           <ul className="home-seo-links">
             <li>
+              <a href="/credits">The Creator</a>
+            </li>
+            <li>
+              <a href="/creators">Creators &amp; Shoots</a>
+            </li>
+            <li>
+              <a href="/developers">Developers &amp; API</a>
+            </li>
+            <li>
               <a href="/legal/terms">Terms of service</a>
             </li>
             <li>
@@ -268,6 +321,10 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
               <a href="/legal/cookies">Cookie policy</a>
             </li>
           </ul>
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid color-mix(in oklch, var(--fg) 10%, transparent)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, fontSize: 12.5 }}>
+            <span className="muted">© {new Date().getFullYear()} {SITE.displayName}. All rights reserved.</span>
+            <CreatorAttribution variant="footer" />
+          </div>
         </div>
       </section>
     </div>

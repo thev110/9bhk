@@ -45,11 +45,11 @@ export async function POST(request: Request) {
   const payment = event.payload?.payment?.entity;
   const notes = payment?.notes ?? {};
   const bookingCode = notes.bookingCode;
+  const hasSlot = notes.slot !== undefined && notes.slot !== null && notes.slot !== "";
   const slot = Number(notes.slot);
 
-  if (!bookingCode || !Number.isInteger(slot)) {
-    // A capture that is not part of a split — nothing of ours to settle.
-    return NextResponse.json({ ok: true, ignored: "not a split payment" });
+  if (!bookingCode) {
+    return NextResponse.json({ ok: true, ignored: "no bookingCode in payment notes" });
   }
 
   const supabase = serviceSupabase();
@@ -70,17 +70,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ignored: "booking not found" });
   }
 
-  // Idempotent by nature: re-marking a paid share paid is harmless, which
-  // matters because gateways retry webhooks.
+  if (hasSlot && Number.isInteger(slot)) {
+    // Settle split share
+    await supabase
+      .from("bhk_split_shares")
+      .update({
+        paid: true,
+        paid_at: new Date().toISOString(),
+        payment_ref: payment?.id ?? null,
+      })
+      .eq("booking_id", booking.id)
+      .eq("slot", slot);
+
+    return NextResponse.json({ ok: true, settled: { bookingCode, slot } });
+  }
+
+  // Settle full stay booking
   await supabase
-    .from("bhk_split_shares")
+    .from("bhk_bookings")
     .update({
-      paid: true,
-      paid_at: new Date().toISOString(),
+      status: "confirmed",
       payment_ref: payment?.id ?? null,
     })
-    .eq("booking_id", booking.id)
-    .eq("slot", slot);
+    .eq("id", booking.id);
 
-  return NextResponse.json({ ok: true, settled: { bookingCode, slot } });
+  return NextResponse.json({ ok: true, settled: { bookingCode, fullStay: true } });
 }

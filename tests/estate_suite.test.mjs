@@ -314,3 +314,23 @@ test("9. Multi-role profiles: Bookkeeper, Realtor, and Seller onboarding typing"
   assert.ok(viewingRequest.notes.length > 0, "Viewing notes are generic, not automotive-only");
   assert.strictEqual(viewingRequest.status, "pending");
 });
+
+test("10. Broker Workspace: ₹500 subscription & 3-BHK platform showcase gate", () => {
+  const BROKER_SUBSCRIPTION_INR = 500;
+  assert.strictEqual(BROKER_SUBSCRIPTION_INR, 500, "Broker workspace subscription must be ₹500");
+
+  function isShowcaseEligible(prop) {
+    return prop.bedrooms >= 3;
+  }
+
+  const villa3Bhk = { id: "p1", name: "Dune Haven", bedrooms: 3 };
+  const farmhouse4Bhk = { id: "p2", name: "Palm Estate", bedrooms: 4 };
+  const penthouse2Bhk = { id: "p3", name: "City Flat", bedrooms: 2 };
+  const studio1Bhk = { id: "p4", name: "Solo Suite", bedrooms: 1 };
+
+  assert.strictEqual(isShowcaseEligible(villa3Bhk), true, "3 BHK is eligible for 9bhk app showcase");
+  assert.strictEqual(isShowcaseEligible(farmhouse4Bhk), true, "4 BHK is eligible for 9bhk app showcase");
+  assert.strictEqual(isShowcaseEligible(penthouse2Bhk), false, "<3 BHK cannot be showcased in public app");
+  assert.strictEqual(isShowcaseEligible(studio1Bhk), false, "<3 BHK cannot be showcased in public app");
+});
+

@@ -508,6 +508,23 @@ export function createContactPageSchema(options: { name: string; description: st
   };
 }
 
+export function createPersonSchema(): JsonLd {
+  return {
+    "@type": "Person",
+    "@id": `${absoluteUrl("/credits")}#creator`,
+    name: "Rathnavel Karthi",
+    jobTitle: "Independent Product Builder & Developer",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Chennai",
+      addressRegion: "Tamil Nadu",
+      addressCountry: "India",
+    },
+    url: "https://www.linkedin.com/in/rathnavel-karthi-114991135/",
+    sameAs: ["https://www.linkedin.com/in/rathnavel-karthi-114991135/"],
+  };
+}
+
 /* ── Graph assembly ──────────────────────────────────────────────────── */
 
 /** Wraps nodes in a single `@graph`, de-duplicating by `@id`. */

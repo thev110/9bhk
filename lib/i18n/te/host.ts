@@ -200,7 +200,7 @@ export const teHost = {
   "host.payoutArrives": "5 జూలై 2026 నాడు వస్తుంది",
   "host.payouts": "చెల్లింపులు",
   "host.pendingPayout": "పెండింగ్ చెల్లింపు",
-  "host.platformFees": "ప్లాట్‌ఫారమ్ ఫీజులు (8%)",
+  "host.platformFees": "ప్లాట్‌ఫారమ్ ఫీజులు (10%)",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "host.toastStayConfirmed": "రాత్రి నిర్ధారించబడింది. అతిథి నోటిఫికేషన్లలో చూడగలరు.",

@@ -122,11 +122,16 @@ export function PropertyRowCard({ property }: { property: SeoProperty }) {
           {location ? location.name : property.city}
           {property.bedrooms > 0 ? ` · ${plural(property.bedrooms, "bedroom")}` : ""}
         </p>
-        <p className="seo-row-price">
-          {property.isForSale && property.salePrice
-            ? formatInrCrores(property.salePrice)
-            : `${inr(property.price)} / night`}
-        </p>
+        <div className="seo-row-price">
+          {property.price > 0 ? (
+            <span>{inr(property.price)} / night</span>
+          ) : null}
+          {property.isForSale && property.salePrice ? (
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--terracotta)", display: "block" }}>
+              {property.price > 0 ? `Also for Sale · ${formatInrCrores(property.salePrice)}` : `${formatInrCrores(property.salePrice)} asking`}
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );

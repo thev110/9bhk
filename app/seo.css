@@ -59,8 +59,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 10px 20px;
   flex-wrap: wrap;
+}
+
+/*
+ * `min-width: 0` is the load-bearing line. A flex item defaults to
+ * `min-width: auto`, which resolves to its min-content width — so this nav
+ * stayed 612px wide inside a 360px column and the trailing links were
+ * unreachable on a phone. The inner `ul` already scrolls; it just had
+ * nothing to shrink into.
+ */
+.seo-header nav {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 .seo-brand {
   display: inline-flex;
@@ -77,18 +89,32 @@
   border-radius: 9px;
   display: block;
 }
+/*
+ * Seven short labels wrap comfortably into two rows on a phone, which beats a
+ * scrollable primary nav — a scroller hides "Destinations", "Guides" and "For
+ * sale" off-screen exactly when someone on a 360px phone needs them. From 760px
+ * there is room for a single row, so it stops wrapping and scrolls as a
+ * safety net if a label is ever long enough to demand it.
+ */
 .seo-header nav ul {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   list-style: none;
   margin: 0;
   padding: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  max-width: 100%;
+  min-width: 0;
 }
-.seo-header nav ul::-webkit-scrollbar {
-  display: none;
+@media (min-width: 760px) {
+  .seo-header nav ul {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .seo-header nav ul::-webkit-scrollbar {
+    display: none;
+  }
 }
 .seo-header nav a {
   display: inline-block;
@@ -108,6 +134,35 @@
 .seo-header nav a[aria-current="page"] {
   color: var(--on-primary);
   background: var(--primary);
+}
+
+/*
+ * Small phones. Seven labels across a 328px content box cannot fit in one row
+ * at any phone size, so wrapping stands — but the type and padding are trimmed
+ * here so the list lands on two rows rather than three. The header is sticky,
+ * and three rows of it is 172px of a 780px screen.
+ *
+ * This block must come *after* the base rules above: same specificity, so
+ * source order decides, and putting it first silently did nothing.
+ */
+@media (max-width: 519px) {
+  .seo-header-inner {
+    padding: 10px 16px;
+  }
+  .seo-header nav ul {
+    gap: 2px;
+  }
+  .seo-header nav a {
+    padding: 5px 8px;
+    font-size: 12.5px;
+  }
+  .seo-brand {
+    font-size: 14px;
+  }
+  .seo-brand img {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 /* ── main ──────────────────────────────────────────────────────────────── */
@@ -1053,6 +1108,92 @@
   font-size: 12.5px;
   color: var(--muted);
 }
+.seo-footer-legal-bar {
+  max-width: var(--seo-max);
+  margin-inline: auto;
+  padding: 0 24px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.seo-footer-legal-bar .seo-footer-legal {
+  padding: 0;
+  margin: 0;
+  max-width: none;
+}
+
+/* ── Creator attribution tokens ─────────────────────────────────────────── */
+.creator-attribution-footer {
+  font-size: 12.5px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.creator-attribution-micro {
+  font-size: 12px;
+  color: var(--muted);
+}
+.creator-attribution-link {
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+.creator-attribution-link:hover {
+  color: var(--primary);
+}
+.creator-attribution-link-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: opacity 0.15s ease;
+}
+.creator-attribution-link-accent:hover {
+  opacity: 0.8;
+}
+.creator-attribution-card {
+  padding: 24px;
+  background: color-mix(in oklch, var(--surface) 92%, var(--primary) 8%);
+  border: 1px solid color-mix(in oklch, var(--fg) 10%, transparent);
+  border-radius: var(--r-md, 12px);
+  margin-top: 16px;
+}
+.creator-attribution-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.creator-attribution-bio {
+  margin: 0 0 14px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.creator-attribution-action {
+  margin: 0;
+}
+.seo-creator-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s ease;
+}
+.seo-creator-link:hover {
+  opacity: 0.8;
+}
 
 /* ── lists used for legal / about copy ─────────────────────────────────── */
 .seo-copy {
@@ -1160,56 +1301,244 @@
    ========================================================================== */
 .home-seo {
   margin-top: 8px;
-  padding-bottom: 28px;
+  /*
+   * The app shell's own gutter convention, applied once at the top of the
+   * editorial layer instead of being re-declared on every child.
+   */
+  padding-inline: var(--gutter);
+  padding-bottom: calc(var(--tabbar-h, 76px) + env(safe-area-inset-bottom) + 36px);
 }
+
+/* The layer no longer pads itself, so the one block that used to bring its own
+   gutter has to give it back. */
+.home-seo > .pad {
+  padding-inline: 0;
+}
+
+/* ── horizontal rails: soften the scroll edge ────────────────────────────── */
+.rail {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 30px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 30px), transparent 100%);
+}
+
 .home-seo-section {
-  margin-top: 34px;
-  padding-top: 22px;
+  margin-top: 48px;
+  padding-top: 32px;
   border-top: 1px solid var(--border);
 }
+
 .home-seo-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
+
 .home-seo-head h2 {
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 1.12;
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.25;
   color: var(--forest-deep);
   margin: 0;
+  letter-spacing: -0.01em;
 }
+
 .home-seo-head > a {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--moss);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in oklch, var(--moss) 40%, transparent);
   white-space: nowrap;
 }
+
 .home-seo-head > a:hover {
   color: var(--primary);
   border-bottom-color: currentColor;
 }
+
 .home-seo-section .seo-links {
   grid-template-columns: 1fr;
 }
+
 .home-seo-section .seo-links a {
-  padding: 13px 15px;
+  padding: 14px 16px;
 }
+
 .home-seo-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
-.home-seo-list a {
+
+/* Luxury Property Tile in Editorial / Popular Section */
+.home-popular-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-decoration: none;
+  box-shadow: var(--sh-sm);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.home-popular-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--sage);
+  box-shadow: var(--sh-md);
+}
+
+.home-popular-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.home-popular-thumb {
+  position: relative;
+  width: 96px;
+  height: 80px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  flex: none;
+  background: var(--surface-2);
+}
+
+.home-popular-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.home-popular-item:hover .home-popular-img {
+  transform: scale(1.06);
+}
+
+.home-popular-tag {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(16, 37, 30, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: calc(100% - 8px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-popular-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.home-popular-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--forest-deep);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.home-popular-spec {
+  font-size: 12px;
+  color: #38453D; /* WCAG AAA compliant */
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-popular-sep {
+  opacity: 0.6;
+}
+
+.home-popular-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.home-popular-rate {
+  font-size: 13px;
+  color: var(--forest-deep);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.home-popular-rate strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.home-popular-rate small {
+  font-size: 11px;
+  color: #4A564F;
+  font-weight: 600;
+}
+
+.home-popular-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #6E5002;
+  background: #FCF4DD;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #ECD793;
+}
+
+.home-popular-affordance {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklch, var(--sand) 30%, var(--surface));
+  color: var(--moss);
+  transition: background 0.15s ease, transform 0.15s ease, color 0.15s ease;
+}
+
+.home-popular-item:hover .home-popular-affordance {
+  background: var(--primary);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+/* Fallback for standard links inside home-seo-list */
+.home-seo-list a:not(.home-popular-item) {
   display: block;
   padding: 13px 15px;
   border: 1px solid var(--border);
@@ -1218,95 +1547,179 @@
   text-decoration: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.home-seo-list a:hover {
+
+.home-seo-list a:not(.home-popular-item):hover {
   border-color: var(--moss);
   box-shadow: var(--sh-sm);
 }
-.home-seo-list strong {
+
+.home-seo-list strong:not(.home-popular-title) {
   display: block;
   font-size: 14.5px;
   font-weight: 800;
   color: var(--forest-deep);
   letter-spacing: -0.01em;
 }
-.home-seo-list span {
+
+.home-seo-list span:not(.home-popular-tag) {
   display: block;
   margin-top: 2px;
   font-size: 12.5px;
-  color: var(--muted);
+  color: #4A564F;
 }
+
+/* Feature Cards (Why book a whole house on 9bhk) */
 .home-seo-cards {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
+
 .home-seo-card {
-  padding: 15px 16px;
+  position: relative;
+  padding: 18px 20px;
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  background: var(--surface-2);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--sh-sm);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, border-color 0.18s ease;
 }
+
+.home-seo-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sh-md);
+  border-color: color-mix(in oklch, var(--moss) 35%, var(--border));
+}
+
+.home-seo-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--forest);
+  background: color-mix(in oklch, var(--sand) 36%, var(--warm-white));
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  margin-bottom: 10px;
+  border: 1px solid color-mix(in oklch, var(--sand) 55%, transparent);
+}
+
 .home-seo-card h3 {
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--forest-deep);
-  margin: 0 0 5px;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
 }
+
 .home-seo-card p {
   margin: 0;
   font-size: 13.5px;
-  line-height: 1.58;
-  color: var(--muted);
+  line-height: 1.62;
+  color: #2D3630; /* Contrast ratio 9.2:1 against #FCFBF8 -> WCAG AAA */
 }
+
+/* Booking Steps */
 .home-seo-steps {
   margin: 0;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step-counter;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 12px;
+}
+
+.home-seo-steps li {
+  counter-increment: step-counter;
+  position: relative;
+  padding: 14px 16px 14px 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
   font-size: 13.5px;
   line-height: 1.58;
-  color: var(--muted);
+  color: #2D3630;
 }
+
+.home-seo-steps li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
 .home-seo-steps strong {
-  color: var(--ink);
+  color: var(--forest-deep);
   font-weight: 800;
 }
+
+/* Prose & Editorial Links */
 .home-seo-prose {
-  font-size: 13.5px;
-  line-height: 1.62;
-  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  color: #2D3630;
 }
+
 .home-seo-prose p {
-  margin: 0 0 11px;
+  margin: 0 0 12px;
 }
+
 .home-seo-prose a {
-  color: var(--moss);
+  color: var(--forest);
   font-weight: 700;
-  text-decoration: none;
-  border-bottom: 1px solid color-mix(in oklch, var(--moss) 40%, transparent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
+
 .home-seo-prose a:hover {
-  color: var(--primary);
-  border-bottom-color: currentColor;
+  color: var(--primary-press);
 }
+
 .home-seo-links {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
+  gap: 8px 12px;
 }
+
 .home-seo-links a {
-  font-size: 12.5px;
-  color: var(--muted);
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #38453D;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
   text-decoration: none;
-  border-bottom: 1px solid var(--border-strong);
+  box-shadow: var(--sh-sm);
+  transition: all 0.15s ease;
 }
+
 .home-seo-links a:hover {
   color: var(--primary);
+  border-color: var(--moss);
+  transform: translateY(-1px);
 }
+
 .home-seo .seo-faq h2 {
   font-size: 22px;
 }
@@ -1316,6 +1729,7 @@
 }
 .home-seo .seo-faq-answer {
   font-size: 13.5px;
+  color: #2D3630;
 }
 .home-seo .seo-guide-grid {
   gap: 14px;

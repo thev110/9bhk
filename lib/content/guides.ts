@@ -357,6 +357,77 @@ export const GUIDES: Guide[] = [
     imageAlt: "Warm terracotta courtyard of a private stay near Chennai",
     status: "published",
   },
+  {
+    slug: "building-9bhk-rathnavel-karthi",
+    title: "Building 9bhk: The Story Behind South India's Sovereign Estate Platform",
+    h1: "Building 9bhk: The Story Behind South India's Sovereign Estate Platform",
+    excerpt:
+      "Why independent builder Rathnavel Karthi engineered 9bhk from Chennai to solve unverified brokers, fake villa photos, and unprotected advance deposits.",
+    author: "Rathnavel Karthi",
+    publishedAt: "2026-10-06",
+    updatedAt: "2026-10-06",
+    locations: ["chennai", "ecr"],
+    categories: ["farmhouses", "beach-houses", "villas"],
+    relatedProperties: ["bay-breakers-vault", "kovalam-dune-residence"],
+    relatedGuides: ["ecr-weekend-stays", "private-stays-near-chennai"],
+    faq: [
+      {
+        question: "Who built 9bhk and why?",
+        answer:
+          "9bhk was designed, architected, and built by Rathnavel Karthi, an independent product builder from Chennai, India, to provide transparent, escrow-backed booking for whole private estates.",
+      },
+      {
+        question: "How does 9bhk protect payments?",
+        answer:
+          "Guest payments are captured directly through Razorpay escrow and held until check-in. Hosts receive settlements under a 15-day clearance window.",
+      },
+      {
+        question: "What is the three-bedroom floor?",
+        answer:
+          "Every listing on 9bhk requires a minimum of three bedrooms. The platform is built exclusively for group gatherings, family reunions, offsites, and commercial shoots rather than individual room rentals.",
+      },
+    ],
+    body: [
+      {
+        kind: "p",
+        text: "For years, booking a weekend farmhouse or seaside villa on the ECR was an exercise in pure trust and frequent frustration. Families and startup teams had to rely on fragmented WhatsApp forwards, blurry photos, and unprotected UPI advances sent to informal middlemen.",
+      },
+      { kind: "h2", text: "The problem with informal estate rentals" },
+      {
+        kind: "p",
+        text: "When groups arrived at properties, they frequently encountered unannounced caretakers, dirty pools, or electrical wiring that tripped the moment air conditioners and a sound setup ran simultaneously. Meanwhile, global OTAs slapped 20% fees on checkout while refusing to publish verified generator capacities or sound curfews.",
+      },
+      {
+        kind: "factbox",
+        title: "The 9bhk Foundation",
+        items: [
+          { label: "Creator", value: "Rathnavel Karthi (Chennai, India)" },
+          { label: "Core Floor", value: "Minimum 3 bedrooms; whole house only" },
+          { label: "Trust Mechanism", value: "Razorpay escrow with 15-day host settlement" },
+          { label: "Verified Specs", value: "Sanctioned kW, backup generator, high-tide meters" },
+          { label: "Economics", value: "Flat 10% platform fee, zero hidden checkout fees" },
+        ],
+      },
+      { kind: "h2", text: "Engineering for high-trust gatherings" },
+      {
+        kind: "p",
+        text: "I built 9bhk to institutionalize trust across South India's private estate economy. We verify real specifications directly with property owners, safeguard guest payments with Razorpay escrow until check-in, and provide hosts with transparent 15-day settlement clearance.",
+      },
+      {
+        kind: "p",
+        text: "Whether you are a multi-generational family gathering for an anniversary, a company running an executive offsite, or a creative team shooting a brand campaign, you deserve the privacy of a whole estate and the certainty of verified contracts.",
+      },
+      {
+        kind: "link",
+        href: "/credits",
+        label: "About Rathnavel Karthi",
+        note: "Independent Product Builder & Developer portfolio and background.",
+      },
+    ],
+    image: "/assets/prop-palm-grove.jpg",
+    imageAlt: "Verdant coconut grove surrounding a private estate",
+    status: "published",
+  },
 ];
 
 /** Published guides only — drafts must never reach metadata, links or sitemap. */

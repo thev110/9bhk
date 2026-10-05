@@ -1,6 +1,10 @@
 {
   "name": "9bhk",
   "private": true,
+  "author": {
+    "name": "Rathnavel Karthi",
+    "url": "https://www.linkedin.com/in/rathnavel-karthi-114991135/"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,6 +17,8 @@
     "seo:flows": "node scripts/flow-check.mjs",
     "seo:perf": "node scripts/perf-check.mjs",
     "seo:cycles": "node scripts/cycle-check.mjs",
+    "seo:layout": "node scripts/layout-probe.mjs",
+    "seo:layout:shots": "node scripts/layout-probe.mjs",
     "validate": "npm run typecheck && npm run seo:cycles && npm test && npm run build"
   },
   "dependencies": {
@@ -24,6 +30,7 @@
     "input-otp": "^1.5.0",
     "motion": "^13.4.4",
     "next": "^15.5.4",
+    "razorpay": "^2.9.8",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "sonner": "^2.0.8"

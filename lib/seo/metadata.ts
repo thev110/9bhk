@@ -74,7 +74,7 @@ export type BuildOptions = {
 const OG_IMAGE_DIMENSIONS: Record<string, { width: number; height: number }> = {
   "/assets/prop-palm-grove.jpg": { width: 800, height: 1000 },
   "/assets/prop-blue-horizon.jpg": { width: 640, height: 640 },
-  "/logo-wordmark.png": { width: 1200, height: 630 },
+  "/logo-wordmark.png": { width: 2004, height: 785 },
 };
 
 function ogImage(url: string, alt: string) {
@@ -151,26 +151,43 @@ export function noindexMetadata(title: string, description: string, path: string
 
 export function generateHomeMetadata(properties: Property[]): Metadata {
   const coastal = properties.filter((property) => property.setting === "seaside").length;
-  const destinations = [...new Set(properties.map((property) => property.city).filter(Boolean))];
   const capacity = capacityBand(properties);
   const band = priceBand(properties);
 
   const description = clampDescription(
-    `9bhk is a marketplace for private farmhouses, beach houses and villas across the Chennai coast, ECR, Pondicherry and the Tamil Nadu hills. ${
-      properties.length
-        ? `${properties.length} whole houses listed${
-            capacity ? `, sleeping ${capacity}` : ""
-          }${band ? `, from ${band}` : ""}.`
-        : ""
-    }${coastal ? ` ${coastal} sit on the coast.` : ""} Book the whole house.`,
+    `Book exclusive whole-house farmhouses, beach houses & luxury villas with private pools across ECR & Chennai. Transparent pricing, verified hosts & Razorpay escrow protection.`,
   );
 
   return buildMetadata({
-    title: "Private Farmhouses, Beach Houses & Villas in Chennai & ECR",
+    title: "9bhk — Luxury Farmhouses, Beach Houses & Private Villas in Chennai & ECR",
     description,
     path: "/",
     image: "/assets/prop-palm-grove.jpg",
-    imageAlt: "Private pool and lawn at a 9bhk farmhouse stay",
+    imageAlt: "Private pool and lawn at a 9bhk farmhouse stay in ECR",
+  });
+}
+
+export function generateCreatorsMetadata(): Metadata {
+  return buildMetadata({
+    title: "Creator & Partner Program — Film, Shoot & Stay on 9bhk",
+    description: clampDescription(
+      "Partner with 9bhk for brand campaigns, architectural photography, film shoots, and creator stays across private farmhouses and luxury estates in Chennai & ECR.",
+    ),
+    path: "/creators",
+    image: "/assets/prop-palm-grove.jpg",
+    imageAlt: "9bhk Creator Program",
+  });
+}
+
+export function generateDevelopersMetadata(): Metadata {
+  return buildMetadata({
+    title: "Developers & Architecture — Engineering 9bhk",
+    description: clampDescription(
+      "Explore the technology powering 9bhk: Next.js 15 App Router, Razorpay escrow webhook pipelines, AEO structured graphs, design tokens, and open integrations.",
+    ),
+    path: "/developers",
+    image: "/logo-wordmark.png",
+    imageAlt: "9bhk Developer Hub",
   });
 }
 
@@ -197,9 +214,23 @@ export function generateCategoryMetadata(
   location?: LocationEntry,
 ): Metadata {
   const where = location ? location.name : locations.map((summary) => summary.entry.name).slice(0, 3).join(", ");
-  const title = location
+  let title = location
     ? `${category.plural} in ${where} — ${listingCount(properties.length, "stay", "stays")}`
     : `${category.plural} near Chennai & along the coast — ${listingCount(properties.length, "stay", "stays")}`;
+
+  if (category.slug === "beach-houses") {
+    title = location
+      ? `Beach Houses in ${where} with Private Pool — ${listingCount(properties.length, "stay", "stays")}`
+      : `Beach Houses in ECR & Chennai with Private Pool — ${listingCount(properties.length, "stay", "stays")}`;
+  } else if (category.slug === "farmhouses") {
+    title = location
+      ? `Farmhouses in ${where} with Swimming Pool — ${listingCount(properties.length, "stay", "stays")}`
+      : `Farmhouses in Chennai with Swimming Pool — ${listingCount(properties.length, "stay", "stays")}`;
+  } else if (category.slug === "villas") {
+    title = location
+      ? `Luxury Private Villas in ${where} — ${listingCount(properties.length, "stay", "stays")}`
+      : `Luxury Private Villas in ECR & Chennai — ${listingCount(properties.length, "stay", "stays")}`;
+  }
   const path = location ? `${category.href}/${location.slug}` : category.href;
 
   const description = clampDescription(
@@ -388,6 +419,18 @@ export function generateContactMetadata(): Metadata {
     path: "/contact",
     image: "/logo-wordmark.png",
     imageAlt: `Contact ${SITE.name}`,
+  });
+}
+
+export function generateCreditsMetadata(): Metadata {
+  return buildMetadata({
+    title: `The Creator — Rathnavel Karthi · ${SITE.name}`,
+    description:
+      "Rathnavel Karthi is an independent product builder and developer from Chennai, India. Creator and architect of 9bhk.",
+    path: "/credits",
+    type: "profile",
+    image: "/logo-wordmark.png",
+    imageAlt: `Rathnavel Karthi — Creator of ${SITE.name}`,
   });
 }
 

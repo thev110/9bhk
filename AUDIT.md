@@ -263,7 +263,7 @@ Both are optional. The site builds and validates with neither set.
 
 ## 8. Regression suites
 
-Four runnable checks, all against a live server:
+Five runnable checks, all against a live server:
 
 | Script | What it protects |
 |---|---|
@@ -271,6 +271,7 @@ Four runnable checks, all against a live server:
 | `node scripts/render-check.mjs` | 51 assertions that the premium app shell, hero, search bar, card rails, tab bar and design tokens survived the server-render refactor |
 | `node scripts/flow-check.mjs` | Every route responds, every client bundle is served, booking / auth / host / search behaviour markers are present in the shipped JS, and the API routes do not crash |
 | `node scripts/perf-check.mjs` | Payload sizes and the image policy: no raw `<img>` on a listing surface, priority preload on the LCP element, modern formats, logo and photo byte comparison |
+| `npm run seo:layout` | Horizontal overflow at five viewports, plus three named layout contracts — see section 8a |
 
 The programmatic-SEO gate list in `seo-audit.mjs` is the important one. These
 all return **404**, and the audit fails if any of them ever starts returning
@@ -283,6 +284,98 @@ all return **404**, and the audit fails if any of them ever starts returning
 /beach-houses/kodaikanal         category x destination below threshold
 /farmhouses/weekend-getaway      occasion pages are not published
 /farmhouses/2-guests/pool/beach  no attribute permutations
+```
+
+---
+
+## 8a. Layout pass — edges and overflow
+
+A screenshot review of the homepage and the editorial pages turned up three
+distinct defects, only one of which was actual document overflow. Because CSS
+cannot be reasoned about from source reliably, `scripts/layout-probe.mjs` was
+written to **measure** it: it drives a headless Chrome over the DevTools
+Protocol (no dependencies — Node's built-in `WebSocket` speaks CDP directly) and
+reports `document.scrollWidth` against the viewport, plus every element whose
+box escapes the app column, with the ancestor chain that produced the width.
+
+### 8a.1 The primary nav could not shrink — real, and serious
+
+`.seo-header nav` is a flex item of `.seo-header-inner`. A flex item defaults to
+`min-width: auto`, which resolves to its **min-content** width, so the nav
+stayed **612px wide inside a 360px column** on all ten editorial pages. The
+`ul` inside it already had `overflow-x: auto`, but a scroller cannot help a box
+that refuses to shrink. The result: *Destinations*, *Guides* and *For sale* were
+pushed off-screen with no scrollbar and no way to reach them on a phone.
+
+Two changes, in `app/seo.css`:
+
+- `min-width: 0` on the nav so it can shrink at all.
+- The list **wraps** below 760px instead of scrolling. A scrollable primary nav
+  hides destinations behind a gesture; wrapping does not. Type size and padding
+  are trimmed at `max-width: 519px` specifically so seven labels land on **two**
+  rows rather than three — the header is sticky, and three rows of it is 172px
+  of a 780px screen.
+
+That `@media` block has to come *after* the base rules. Same specificity, so
+source order decides; the first attempt placed it above them and silently did
+nothing. The header-height assertion caught it immediately.
+
+### 8a.2 `.home-seo` had no gutters
+
+Every other app-shell section (`.greet`, `.section-head`, `.searchwrap`) uses
+`padding: … var(--gutter) …`. `.home-seo` set only `margin-top` and
+`padding-bottom`, so its cards, link lists and FAQ rows ran **flush against
+both edges** of the column. Nothing overflowed, and `scrollWidth` equalled the
+viewport, which is why no overflow detector would ever have flagged it — the
+text simply touched the column boundary with no breathing room and read as
+clipped. Fixed by applying the gutter once at `.home-seo` and zeroing the one
+child (`.pad`) that used to bring its own.
+
+### 8a.3 The rail's scroll edge
+
+A 280px card cannot fit twice in a 430px column, so the listing rail always
+ends on a fragment, and the fragment sliced a text line in half exactly at the
+column boundary — which reads as a rendering fault, not as "more this way". A
+30px gradient mask on the rail's right edge turns the same fragment into an
+explicit affordance. It is safe on a rail that does not overflow: with one card
+the card ends at x=300 and the fade begins at x=400, so a non-scrolling rail is
+never dimmed.
+
+### 8a.4 Two false positives worth recording
+
+The probe was wrong twice before it was right, and both are the kind of thing
+that makes people distrust a linter:
+
+- **Cards inside the rail were reported as overflowing.** Each card is wrapped
+  in an `<article>`, so checking only the *immediate* parent missed that `.rail`
+  is a horizontal scroller two levels up. The fix walks the whole ancestor chain.
+- **A bare `<section>` "escaping the app column" on every app-shell page.** That
+  is sonner's `<Toaster>` notification region — a body-level portal shell that
+  spans the viewport by design. The "escaped the column" rule does not apply to
+  nodes mounted on `<body>`; genuine document overflow on those is still caught
+  by the `scrollWidth` assertion.
+
+### 8a.5 What the probe asserts
+
+Beyond raw overflow it now enforces the three contracts above by name, so a
+regression identifies itself instead of requiring someone to compare
+screenshots:
+
+- no primary-nav link is off-screen, and `.seo-header` is under 150px tall;
+- `.home-seo` carries at least a 12px gutter;
+- `.rail` has its right-edge mask.
+
+Current state: **15 pages × 5 viewports (360 / 390 / 430 / 768 / 1440) = 75
+combinations, zero overflow**, on both the dev server and a production build.
+
+```bash
+npm run seo:layout                                    # 127.0.0.1:3000
+BASE_URL=https://www.9bhk.app npm run seo:layout      # a preview deployment
+
+# visual inspection, when an assertion is not enough
+PROBE_SHOTS=./shots PROBE_SHOT_AT=".home-seo" npm run seo:layout
+PROBE_SHOTS=./shots PROBE_SHOT_CLIP="0,0,360,560"     npm run seo:layout
+PROBE_DUMP_BODY=1 BASE_URL=… npm run seo:layout       # list <body> children
 ```
 
 ---

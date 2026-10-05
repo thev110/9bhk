@@ -126,15 +126,18 @@ export function RailCard({ property, priority = false }: { property: Property; p
             </span>
             <GaragePill property={property} variant="ready" />
           </div>
-          {property.isForSale && property.salePrice ? (
-            <p className="p-sale-tag">
-              <span>{t("property.acquisition", { price: formatInrCrores(property.salePrice) })}</span>
-            </p>
-          ) : (
-            <p className="p-price num">
-              <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
-            </p>
-          )}
+          <div style={{ marginTop: 6 }}>
+            {property.price > 0 ? (
+              <p className="p-price num" style={{ margin: 0 }}>
+                <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
+              </p>
+            ) : null}
+            {property.isForSale && property.salePrice ? (
+              <p className="p-sale-tag" style={{ margin: property.price > 0 ? "2px 0 0" : "0", fontSize: 12 }}>
+                <span>{property.price > 0 ? `Also for Sale · ${formatInrCrores(property.salePrice)}` : t("property.acquisition", { price: formatInrCrores(property.salePrice) })}</span>
+              </p>
+            ) : null}
+          </div>
         </div>
       </Link>
     </motion.article>
@@ -204,18 +207,18 @@ export function FeatureCard({ property, priority = false }: { property: Property
               </span>
             ) : null}
           </div>
-          <p className="p-price num" style={{ marginTop: 10 }}>
-            {property.isForSale && property.salePrice ? (
-              <>
-                <span>{formatInrCrores(property.salePrice)}</span>{" "}
-                <span className="per">{t("property.askingPrice")}</span>
-              </>
-            ) : (
-              <>
+          <div style={{ marginTop: 10 }}>
+            {property.price > 0 ? (
+              <p className="p-price num" style={{ margin: 0 }}>
                 <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
-              </>
-            )}
-          </p>
+              </p>
+            ) : null}
+            {property.isForSale && property.salePrice ? (
+              <p className="p-sale-tag" style={{ margin: property.price > 0 ? "3px 0 0" : "0", fontSize: 13 }}>
+                <span>{property.price > 0 ? `Also for Sale · ${formatInrCrores(property.salePrice)}` : `${formatInrCrores(property.salePrice)} ${t("property.askingPrice")}`}</span>
+              </p>
+            ) : null}
+          </div>
         </div>
       </Link>
     </motion.article>
@@ -236,11 +239,11 @@ export function NearbyCard({ property }: { property: Property }) {
           quality={68}
         />
         {property.isForSale ? (
-          <span className="badge-sale" style={{ fontSize: 9, padding: "2px 6px", top: 4, left: 4 }}>
+          <span className="badge-sale" style={{ fontSize: 9, padding: "2px 6px", top: 4, left: 4, zIndex: 3 }}>
             {t("property.sale")}
           </span>
         ) : null}
-        <span className="badge-setting" style={{ top: 4, left: 4, bottom: "auto", fontSize: 9, padding: "2px 6px" }}>
+        <span className="badge-setting" style={{ bottom: 4, left: 4, top: "auto", fontSize: 9, padding: "2px 6px" }}>
           <Icon name={settingIcon(property.setting)} />
           {settingLabel(t, property.setting)}
         </span>
@@ -263,15 +266,18 @@ export function NearbyCard({ property }: { property: Property }) {
             <span>{t("property.bedroomsShort", { n: property.bedrooms })}</span>
           </div>
         )}
-        <p className="p-price num" style={{ marginTop: 4 }}>
-          {property.isForSale && property.salePrice ? (
-            formatInrCrores(property.salePrice)
-          ) : (
-            <>
+        <div style={{ marginTop: 4 }}>
+          {property.price > 0 ? (
+            <p className="p-price num" style={{ margin: 0 }}>
               <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
-            </>
-          )}
-        </p>
+            </p>
+          ) : null}
+          {property.isForSale && property.salePrice ? (
+            <p style={{ margin: "2px 0 0", fontSize: 11, fontWeight: 700, color: "var(--terracotta)", letterSpacing: "-0.01em" }}>
+              {property.price > 0 ? `Also for Sale · ${formatInrCrores(property.salePrice)}` : `${formatInrCrores(property.salePrice)} ${t("property.askingPrice")}`}
+            </p>
+          ) : null}
+        </div>
       </div>
     </Link>
   );
@@ -290,6 +296,11 @@ export function ResultCard({ property }: { property: Property }) {
           sizes="96px"
           quality={68}
         />
+        {property.isForSale ? (
+          <span className="badge-sale" style={{ fontSize: 9, padding: "2px 6px", top: 4, left: 4, zIndex: 3 }}>
+            {t("property.sale")}
+          </span>
+        ) : null}
         <FavButton id={property.id} name={property.name} small />
       </div>
       <div className="grow">
@@ -301,7 +312,7 @@ export function ResultCard({ property }: { property: Property }) {
           </h3>
           {property.isForSale && property.salePrice ? (
             <span className="pill info" style={{ fontSize: 11, fontWeight: 800 }}>
-              {formatInrCrores(property.salePrice)}
+              Sale: {formatInrCrores(property.salePrice)}
             </span>
           ) : null}
         </div>
@@ -322,17 +333,20 @@ export function ResultCard({ property }: { property: Property }) {
             </div>
           ) : null}
         </div>
-        <div className="between" style={{ marginTop: 8 }}>
+        <div className="between" style={{ marginTop: 8, alignItems: "baseline" }}>
           <Rating rating={property.rating} reviews={property.reviews} />
-          <span className="p-price num" style={{ margin: 0 }}>
-            {property.isForSale && property.salePrice ? (
-              formatInrCrores(property.salePrice)
-            ) : (
-              <>
+          <div style={{ textAlign: "right" }}>
+            {property.price > 0 ? (
+              <span className="p-price num" style={{ margin: 0, display: "block" }}>
                 <NumberFlow value={property.price} prefix="₹" /> <span className="per">{t("property.perNight")}</span>
-              </>
-            )}
-          </span>
+              </span>
+            ) : null}
+            {property.isForSale && property.salePrice ? (
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--terracotta)", display: "block", marginTop: 2 }}>
+                {property.price > 0 ? `Also for Sale · ${formatInrCrores(property.salePrice)}` : `${formatInrCrores(property.salePrice)} ${t("property.askingPrice")}`}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>

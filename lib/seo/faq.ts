@@ -147,7 +147,7 @@ export function propertyFaq(property: Property): QA[] {
 
   items.push({
     question: "How do I book it?",
-    answer: `Open the listing and choose Reserve. A booking is a request until the host confirms it — 9bhk does not take the money itself, and the host confirms the payment they publish.`,
+    answer: `Open the listing and choose Reserve. A booking is a request until the host confirms it. Once confirmed, payment is completed securely through Razorpay escrow, holding the funds until check-in.`,
   });
 
   return items;
@@ -231,7 +231,7 @@ export function categoryFaq(
   items.push({
     question: `How do I book a ${category.singular.toLowerCase()} on 9bhk?`,
     answer:
-      "Open a listing and choose Reserve. You pick your dates, the host confirms the request, and payment goes to the UPI ID the host has published. 9bhk does not hold the money.",
+      "Open a listing and choose Reserve. You pick your dates, the host confirms the request, and payment is processed securely via Razorpay escrow with complete guest protection until check-in.",
   });
 
   return items;
@@ -306,42 +306,62 @@ export function platformFaq(): QA[] {
   return [
     {
       question: "What is 9bhk?",
-      answer: `9bhk is a marketplace for whole premium stays — farmhouses, beach houses, villas and hill-station homes — that are booked for groups, families and private celebrations rather than by the room. ${SITE.description}`,
+      answer: `9bhk is a marketplace for whole premium private stays — farmhouses, beach houses, villas and hill-station homes — that are booked exclusively for groups, families and private celebrations rather than by the room. ${SITE.description}`,
+    },
+    {
+      question: "What problem does 9bhk solve for group travel?",
+      answer:
+        "Booking a private farmhouse or villa in South India has traditionally been an unverified, high-risk process dominated by informal brokers, fake photos, and unbacked deposits. Groups often arrive to find under-maintained pools, inadequate electrical loads that trip under sound systems, or surprise caretaker charges. 9bhk solves this by verifying property specs directly from owners, enforcing transparent pricing, and protecting every booking with Razorpay escrow.",
+    },
+    {
+      question: "How is 9bhk different from Airbnb, MakeMyTrip, or local brokers?",
+      answer:
+        "Unlike mass OTAs and informal brokers, 9bhk enforces three clear standards: (1) Strictly whole properties with a 3-bedroom floor — zero shared spaces or individual room bookings. (2) Verified functional specs — we declare actual electrical kW, generator capacity, sound curfews, and beach frontage. (3) Transparent escrow protection — a flat 10% platform fee with zero surprise checkout markups, holding funds safely until check-in with a 15-day host settlement clearance.",
+    },
+    {
+      question: "Who is 9bhk built for, and why does it focus on whole-house gathering?",
+      answer:
+        "9bhk is built for groups who need private space to be together: extended families celebrating reunions, founders hosting leadership offsites, creative teams filming campaigns, and close friend groups. Modern travel isolates groups into separate hotel rooms; 9bhk provides a communal living room, private pool, dining area, and grounds exclusively for your circle.",
+    },
+    {
+      question: "What impact is 9bhk creating in the estate rental economy?",
+      answer:
+        "9bhk brings institutional transparency and contract predictability to the luxury private estate ecosystem. We help property owners monetize multi-crore private farmhouses and beach villas safely with vetted guests, while giving families and groups guaranteed booking security and scam-free hospitality.",
     },
     {
       question: "Where does 9bhk have properties?",
       answer:
-        "The 9bhk catalog covers the Chennai coast — ECR, Mahabalipuram, the northern beach road and the city neighbourhoods — plus Pondicherry, the Kanchipuram and Hosur countryside, and the Ooty, Kodaikanal and Courtallam hill stations.",
+        "The 9bhk catalog covers the Chennai coast — ECR, Mahabalipuram, the northern beach road and city neighbourhoods — plus Pondicherry, the Kanchipuram and Chengalpattu countryside, and the Tamil Nadu hill stations.",
     },
     {
       question: "Do I book a room or the whole house?",
       answer:
-        "The whole house. Every listing on 9bhk is a private home taken exclusively for your dates, which is why bedrooms start at three and why pricing is per house rather than per person.",
+        "Always the whole house. Every listing on 9bhk is a private estate reserved exclusively for your dates, which is why bedrooms start at three and pricing is per house rather than per person.",
     },
     {
-      question: "How does booking work?",
+      question: "How does booking and payment work?",
       answer:
-        "You pick a listing and your dates and send a booking request. A booking stays pending until the host confirms it. Payment is made to the UPI ID the host publishes, and 9bhk does not hold the money. The nightly rate, the cleaning fee and 12% tax make up the total shown before you pay.",
+        "You select your dates and submit a booking request. Once the host confirms, you pay securely through Razorpay using UPI, cards, or netbanking. Your payment is held in escrow until check-in. The total price comprises the nightly rate, cleaning fee, and 10% platform service fee, all itemized upfront with zero hidden charges.",
     },
     {
-      question: "How do I cancel?",
+      question: "How do cancellations and refunds work?",
       answer:
-        "The published refund policy is full refund up to 7 days before check-in, 50% up to 48 hours before check-in, and no refund within 48 hours of check-in.",
+        "Our standard policy provides a full refund up to 7 days before check-in, 50% refund up to 48 hours before check-in, and non-refundable within 48 hours. Refunds are processed automatically through the original payment method.",
     },
     {
-      question: "Can I list my farmhouse on 9bhk?",
+      question: "Can I list my farmhouse or villa on 9bhk?",
       answer:
-        "Yes. Hosts create a listing with the property's photos, capacity, amenities and UPI ID, and 9bhk publishes it for guests to request.",
+        "Yes. Owners of private whole-house properties can apply to list. Our team verifies the property's specifications, electrical load, amenities, and ownership before publishing.",
     },
     {
-      question: "Is 9bhk also a property marketplace?",
+      question: "Is 9bhk also a property sales marketplace?",
       answer:
-        "Yes. Some listings are also offered for sale, and those show both the nightly stay rate and the asking price on the listing.",
+        "Yes. Select private estates are also available for outright acquisition, displaying verified land area, title disclosures, and asking prices directly on the listing.",
     },
     {
-      question: "What does a listing actually tell me?",
+      question: "What specifications are verified on a listing?",
       answer:
-        "Only what the host has entered: capacity, bedrooms, bathrooms, amenities, the nightly rate, the cleaning fee, any garage or event capacity, and — for seaside listings — the beach frontage, coastal zone and distance from the high-tide line. Where a field is not declared, 9bhk does not fill it in.",
+        "We verify bedroom and bathroom counts, sleeping capacity, swimming pool filtration, electrical load in kW, backup generator capacity, sound curfew hours, vehicle parking slots, and exact high-tide coastal distance for beachfront properties.",
     },
   ];
 }

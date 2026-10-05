@@ -54,31 +54,159 @@ export default async function AboutPage() {
 
       <PageHero
         crumbs={crumbs}
-        eyebrow="About"
-        title={`${SITE.displayName} is a marketplace for whole premium stays`}
+        eyebrow="About 9bhk"
+        title="Reclaiming authentic gathering in private whole estates"
         lede={
           <p>
-            Not a hotel, and not a room-sharing site. 9bhk is a place to find a private farmhouse,
-            beach house, villa or hill-station home and take the whole thing for a weekend — booked
-            for the house, with the capacity, the amenities and the rate stated up front.
+            Not a hotel, and not an apartment-sharing directory. 9bhk is an escrow-protected
+            marketplace built for families, teams, and friend circles to reserve an entire private
+            farmhouse, beach house, or villa — with verified functional specs, transparent pricing,
+            and total privacy.
           </p>
         }
       />
 
-      <Section title="What 9bhk is" id="what">
+      <Section title="The Problem We Are Solving" id="problem">
         <div className="seo-copy">
           <p>
-            Every listing on 9bhk is a whole home. That is the product decision the whole site is
-            built around: bedrooms start at three because a two-bedroom apartment is not what a
-            group travelling together needs, and pricing is per house per night because there is no
-            room to divide.
+            Renting a private farmhouse or seaside villa in South India has historically been an
+            unorganized, high-risk ordeal. For decades, groups planning a weekend retreat along the
+            ECR, Chennai coast, or Pondicherry had to rely on informal brokers, unverified Instagram
+            pages, and direct UPI transfers with zero contract protection or refund guarantees.
           </p>
           <p>
-            A booking on 9bhk is a request. You pick a house and your dates, the host confirms, and
-            you pay the UPI ID the host has published. 9bhk does not take the money and does not
-            hold it in escrow — which is stated plainly on the{" "}
-            <a href="/legal/terms">terms</a> and <a href="/legal/refunds">refund policy</a> rather
-            than left for a guest to discover at checkout.
+            Too often, guests arrive to find unmaintained pools, unannounced on-site caretakers, or
+            inadequate electrical wiring that trips the moment air conditioning and basic sound
+            equipment run together.
+          </p>
+          <p>
+            Meanwhile, global OTAs treat multi-acre estates like hotel rooms: they obscure property
+            specs, ban legitimate group celebration queries, and tack on 18% to 25% surprise fees
+            at the checkout screen. 9bhk was founded to eliminate this friction entirely.
+          </p>
+        </div>
+      </Section>
+
+      <Section title="How We Are Different" id="differentiation">
+        <div className="home-seo-cards">
+          <div className="home-seo-card">
+            <div className="home-seo-card-badge">Difference 01 · Zero Shared Spaces</div>
+            <h3>Strictly Whole Estates with a 3-Bedroom Floor</h3>
+            <p>
+              We never list individual rooms, homestays, or partitioned floors. Bedrooms start at
+              three because true groups need undivided living rooms, private swimming pools, and
+              exclusive grounds. When you book a 9bhk, the gate closes behind you.
+            </p>
+          </div>
+          <div className="home-seo-card">
+            <div className="home-seo-card-badge">Difference 02 · Functional Integrity</div>
+            <h3>Direct, Verifiable Owner Specifications</h3>
+            <p>
+              We declare the technical metrics other sites omit: electrical load in kW, on-site
+              generator capacity, sound curfews, vehicle parking slots, and exact high-tide coastal
+              distance. We never inflate descriptions or invent synthetic amenities.
+            </p>
+          </div>
+          <div className="home-seo-card">
+            <div className="home-seo-card-badge">Difference 03 · Institutional Trust</div>
+            <h3>Direct Razorpay Escrow Protection</h3>
+            <p>
+              Your payment is safeguarded in escrow via Razorpay until your arrival. Hosts receive
+              predictable settlements through a 15-day clearance ledger, eliminating fraud for guests
+              and arbitrary chargebacks for owners.
+            </p>
+          </div>
+          <div className="home-seo-card">
+            <div className="home-seo-card-badge">Difference 04 · Transparent Economics</div>
+            <h3>Flat 10% Platform Fee, Zero Checkout Traps</h3>
+            <p>
+              The nightly rate, cleaning fee, and our 10% service fee are itemized upfront. There are
+              no surprise resort levies, conversion fees, or hidden markups at checkout.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="For Whom We Build" id="audience">
+        <div className="seo-copy">
+          <p>
+            9bhk is intentionally designed for gatherings that require space, dignity, and autonomy:
+          </p>
+          <ul>
+            <li>
+              <strong>Multi-Generational Families:</strong> Grandparents, parents, and children
+              gathering for birthdays, anniversaries, and festive reunions with room to breathe.
+            </li>
+            <li>
+              <strong>Founders &amp; Companies:</strong> Strategic offsites, hackathons, and leadership
+              retreats that require high-speed connectivity, quiet grounds, and privacy.
+            </li>
+            <li>
+              <strong>Close Friend Circles:</strong> Slow weekend getaways centered around pool
+              afternoons, home-cooked feasts, and late-night conversations.
+            </li>
+            <li>
+              <strong>Filmmakers &amp; Creators:</strong> Commercial lookbooks, video campaigns, and
+              brand shoots requiring production-ready electrical loads and verified permits.
+            </li>
+          </ul>
+        </div>
+      </Section>
+
+      <Section title="Why We Do It: The Purpose of Gathering" id="purpose">
+        <div className="seo-copy">
+          <p>
+            Modern urban life isolates people into vertical apartments and separated hotel cubicles.
+            True togetherness does not happen across hotel corridors. It happens around a shared dining
+            table, in the evening breeze by a private pool, preparing breakfast in a sunlit kitchen, and
+            relaxing on a lawn without strangers watching.
+          </p>
+          <p>
+            We believe that gathering with the people who matter most is a fundamental human need. We
+            build 9bhk to protect and elevate those rare days.
+          </p>
+        </div>
+      </Section>
+
+      <Section title="Our Impact" id="impact">
+        <div className="seo-copy">
+          <p>
+            We are transforming South India&apos;s private estate sector from an informal, opaque
+            broker economy into a transparent, institutional-grade market.
+          </p>
+          <p>
+            For estate owners, we unlock predictable monetization for multi-crore idle assets without
+            sacrificing property care. For travelers, we deliver absolute booking security, verified
+            amenities, and seamless split payments.
+          </p>
+        </div>
+      </Section>
+
+      <Section title="Built by Rathnavel Karthi" id="creator">
+        <div className="seo-copy">
+          <p>
+            Rathnavel Karthi is an independent product builder and full-stack developer from
+            Chennai, India, focused on turning ideas into real-world digital products.
+          </p>
+          <p>
+            His work spans software products, AI-powered applications, automation systems, web
+            platforms, SaaS products, digital experiences and business-focused technology solutions.
+          </p>
+          <p>
+            He combines product thinking, software development, AI, automation, UX and rapid
+            experimentation to take products from concept to production. The goal is simple:
+            Build useful technology, ship it fast, and continuously improve it.
+          </p>
+          <p style={{ marginTop: 16 }}>
+            <a
+              href="https://www.linkedin.com/in/rathnavel-karthi-114991135/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="seo-creator-link"
+              aria-label="Connect with Rathnavel Karthi on LinkedIn"
+            >
+              Connect with Rathnavel Karthi on LinkedIn →
+            </a>
           </p>
         </div>
       </Section>
@@ -95,9 +223,7 @@ export default async function AboutPage() {
           <p>
             Listings are also grouped by setting —{" "}
             {SETTINGS.map((setting) => SETTING_LABEL[setting].toLowerCase()).join(", ")} — which
-            changes what a stay is actually like far more than the price does. The{" "}
-            <a href="/guides/private-stays-near-chennai">guide to choosing a stay near Chennai</a>{" "}
-            sets out the trade-offs.
+            shapes your experience far more than price alone.
           </p>
         </div>
       </Section>
@@ -105,42 +231,9 @@ export default async function AboutPage() {
       <Section title="Where 9bhk operates" id="coverage">
         <div className="seo-copy">
           <p>
-            Coverage follows inventory, not ambition. 9bhk currently has bookable houses across{" "}
-            {destinations.map((summary) => summary.entry.name).join(", ")}, plus destinations where
-            the inventory is still a single house and a destination page would be too thin to
-            publish. The full list is on the <a href="/locations">destinations page</a>.
-          </p>
-        </div>
-      </Section>
-
-      <Section title="How a listing is published" id="listings">
-        <div className="seo-copy">
-          <p>
-            A host enters the property's own details: name, type, location, guest capacity, bedroom
-            and bathroom counts, the amenity list, the nightly rate, the cleaning fee, and — where
-            it applies — beach frontage, coastal zone, distance from the high-tide line, a garage
-            specification, event capacity, sale price and land area.
-          </p>
-          <p>
-            9bhk does not fill in fields a host has not entered, and it does not infer them. A
-            listing with no pool simply has no pool line. That is why the quick-facts table on a
-            property page is sometimes shorter than the one beside it — the difference is the host's
-            data, not a rendering error.
-          </p>
-          <p>
-            Hosts create and edit listings from the hosting area after signing in. Search engines
-            are excluded from that area entirely.
-          </p>
-        </div>
-      </Section>
-
-      <Section title="How 9bhk is paid" id="money">
-        <div className="seo-copy">
-          <p>
-            Payment goes to the host's own UPI ID. There is no platform fee added at the end of
-            checkout: the total is the nightly rate, the cleaning fee and 12% tax, and that is what
-            you are shown before you pay. The full terms are on the{" "}
-            <a href="/legal/terms">terms page</a>.
+            Coverage follows inventory, not ambition. 9bhk currently operates bookable houses across{" "}
+            {destinations.map((summary) => summary.entry.name).join(", ")}, with verified coastal
+            and countryside inventory expanding deliberately.
           </p>
         </div>
       </Section>

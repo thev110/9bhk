@@ -11,6 +11,7 @@ import { useStore } from "@/lib/store";
 import { isPastDate, monthMatrix, occupiedNights } from "@/lib/availability";
 import { useCalendarStart } from "@/lib/use-calendar";
 import NumberFlow from "@number-flow/react";
+import { RazorpayCheckout, RazorpayPaymentSuccess } from "@/components/RazorpayCheckout";
 
 export default function BookPage() {
   const params = useParams<{ slug: string }>();
@@ -40,7 +41,12 @@ export default function BookPage() {
   const [paymentRef, setPaymentRef] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [paying, setPaying] = useState(false);
-  const [done, setDone] = useState<{ code: string; total: number } | null>(null);
+  const [done, setDone] = useState<{
+    code: string;
+    total: number;
+    status?: "awaiting" | "confirmed";
+    paymentRef?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -159,9 +165,43 @@ export default function BookPage() {
         paymentRef: paymentRef.trim() || undefined,
       });
       setPaying(false);
-      setDone({ code, total: totals.total });
+      setDone({ code, total: totals.total, status: "awaiting", paymentRef: paymentRef.trim() || undefined });
       setStep(4);
     }, 600);
+  }
+
+  function handleRazorpaySuccess(result: RazorpayPaymentSuccess) {
+    if (!property || !totals || !checkIn || !checkOut) return;
+    const propertyId = property.id;
+    const propertyName = property.name;
+    const code = `9B-${Math.floor(40000 + Math.random() * 5000)}`;
+
+    addBooking({
+      id: code,
+      code,
+      propertyId,
+      propertyName,
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      total: totals.total,
+      status: "confirmed",
+      guestName: name.trim(),
+      guestEmail: email.trim(),
+      guestPhone: phone.trim(),
+      upiId,
+      paymentRef: result.paymentId,
+    });
+
+    showToast("Payment verified! Booking confirmed.");
+    setDone({
+      code,
+      total: totals.total,
+      status: "confirmed",
+      paymentRef: result.paymentId,
+    });
+    setStep(4);
   }
 
   const titles = ["Choose dates", "Who's staying?", "Your stay", "Guest details", "Booking confirmed"];
@@ -321,30 +361,70 @@ export default function BookPage() {
 
       {step === 3 && totals ? (
         <div className="pad mt stack">
-          <p className="muted">The host uses these to confirm your stay.</p>
+          <p className="muted">The host and gateway use these details to confirm and receipt your reservation.</p>
           <Field label="Full name" error={errors.name} value={name} onChange={setName} />
           <Field label="Email" error={errors.email} value={email} onChange={setEmail} type="email" />
           <Field label="Mobile number" error={errors.phone} value={phone} onChange={setPhone} />
-          <h3>Pay the host on UPI</h3>
-          <p className="muted">Send the total to the host&apos;s UPI ID, then add the reference so they can match the payment.</p>
-          <div className="card">
+
+          <div className="card mt">
             <div className="sumline">
-              <span className="k">UPI ID</span>
-              <strong>{upiId}</strong>
+              <span className="k">Total amount</span>
+              <span className="num" style={{ fontSize: "1.25rem", fontWeight: 700 }}>
+                {inr(totals.total)}
+              </span>
             </div>
-            <div className="sumline total">
-              <span className="k">Total due</span>
-              <span className="num">{inr(totals.total)}</span>
+            <div className="sumline">
+              <span className="k">Gateway</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#10b981" }} />
+                Razorpay Secure (UPI, Cards, Netbanking)
+              </span>
             </div>
           </div>
-          <Field label="UPI reference (optional)" value={paymentRef} onChange={setPaymentRef} placeholder="Last 4 digits or UTR" />
-          <p className="muted">The stay stays awaiting until the host confirms the payment. You&apos;ll get a notification when it is booked.</p>
-          <div className="row">
+
+          <RazorpayCheckout
+            amount={totals.total}
+            propertyName={property.name}
+            guestName={name}
+            guestEmail={email}
+            guestPhone={phone}
+            onBeforeCheckout={() => {
+              const valid = validateGuest();
+              if (!valid) {
+                showToast("Please provide your name, email, and 10-digit mobile number.");
+              }
+              return valid;
+            }}
+            onSuccess={handleRazorpaySuccess}
+            onError={(err) => showToast(err.message || "Payment could not be completed.")}
+            buttonText={`Pay ${inr(totals.total)} via Razorpay`}
+            className="btn accent block"
+          />
+
+          <details style={{ marginTop: 8, cursor: "pointer" }}>
+            <summary className="muted" style={{ fontSize: 13, userSelect: "none" }}>
+              Or pay host manually via UPI
+            </summary>
+            <div className="stack mt" style={{ paddingTop: 8 }}>
+              <div className="card">
+                <div className="sumline">
+                  <span className="k">UPI ID</span>
+                  <strong>{upiId}</strong>
+                </div>
+              </div>
+              <p className="muted" style={{ fontSize: 13 }}>
+                Send the total to the host&apos;s UPI ID, then add the reference below so they can match your payment.
+              </p>
+              <Field label="UPI reference" value={paymentRef} onChange={setPaymentRef} placeholder="Last 4 digits or UTR" />
+              <button className="btn outline block" type="button" onClick={pay} disabled={paying}>
+                {paying ? "Sending to the host…" : "I've paid directly"}
+              </button>
+            </div>
+          </details>
+
+          <div className="row mt">
             <button className="btn outline" type="button" onClick={() => setStep(2)} disabled={paying}>
               Back
-            </button>
-            <button className="btn grow" type="button" onClick={pay} disabled={paying}>
-              {paying ? "Sending to the host…" : "I've paid"}
             </button>
           </div>
         </div>
@@ -352,7 +432,11 @@ export default function BookPage() {
 
       {step === 4 && done && checkIn && checkOut ? (
         <div className="pad mt stack">
-          <p>Payment sent. The host will confirm your stay.</p>
+          <p>
+            {done.status === "confirmed"
+              ? "Payment verified! Your whole-house stay is secured and confirmed."
+              : "Payment sent. The host will confirm your stay."}
+          </p>
           <div className="card">
             <div className="sumline">
               <span className="k">Property</span>
@@ -370,8 +454,16 @@ export default function BookPage() {
             </div>
             <div className="sumline total">
               <span className="k">Status</span>
-              <span>Awaiting host</span>
+              <span style={{ color: done.status === "confirmed" ? "var(--ok, #18352b)" : "inherit", fontWeight: 600 }}>
+                {done.status === "confirmed" ? "Confirmed" : "Awaiting host"}
+              </span>
             </div>
+            {done.paymentRef ? (
+              <div className="sumline">
+                <span className="k">Payment Ref</span>
+                <span className="num muted" style={{ fontSize: 13 }}>{done.paymentRef}</span>
+              </div>
+            ) : null}
             <p className="muted">Booking #{done.code}</p>
           </div>
           <Link className="btn block" href="/trips">

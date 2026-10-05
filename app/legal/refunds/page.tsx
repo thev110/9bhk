@@ -24,13 +24,13 @@ export const metadata: Metadata = buildMetadata({
 export default function RefundsPage() {
   return (
     <LegalBody doc="refunds" backHref="/legal/privacy" crumbs={staticCrumbs("Refund policy", "/legal/refunds")}>
-      <p>Payment goes to the host’s UPI ID. 9bhk.app does not hold the money.</p>
+      <p>Payments are secured via Razorpay escrow and held until check-in. Payouts to hosts are processed under a 15-day clearance window.</p>
       <ul className="stack sm" style={{ paddingLeft: 18 }}>
-        <li>Free cancellation up to 7 days before check-in. The host returns the full amount.</li>
+        <li>Free cancellation up to 7 days before check-in. Full refund processed automatically to the original payment method.</li>
         <li>50% refund up to 48 hours before check-in.</li>
         <li>No refund within 48 hours of check-in.</li>
       </ul>
-      <p>If the host does not confirm the stay, ask them to return the UPI payment. Write to <a href="mailto:hello@9bhk.app">hello@9bhk.app</a> if that does not happen.</p>
+      <p>If a booking request expires or is declined by the host, the payment pre-authorization or charge is refunded automatically. For questions, write to <a href="mailto:hello@9bhk.app">hello@9bhk.app</a>.</p>
     </LegalBody>
   );
 }
