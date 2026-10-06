@@ -79,18 +79,37 @@ export function createOrganizationSchema(): JsonLd {
     "@type": "Organization",
     "@id": `${absoluteUrl("/")}#organization`,
     name: SITE.displayName,
-    alternateName: SITE.name,
+    alternateName: ["9bhk", "9BHK", "9bhk.app", "9 BHK App", "9BHK Chennai", "9BHK ECR Farmhouses", "9BHK Private Stays"],
     legalName: SITE.legalName,
     url: absoluteUrl("/"),
     description: SITE.description,
+    disambiguatingDescription:
+      "9bhk (9bhk.app) is an online marketplace for curated luxury farmhouses, beach houses, and grand gathering villas (3–9+ BHK) in Chennai and along East Coast Road (ECR), founded by Rathnavel Karthi.",
     email: SITE.email,
+    founder: {
+      "@type": "Person",
+      name: "Rathnavel Karthi",
+      jobTitle: "Founder & Product Builder",
+      url: "https://www.linkedin.com/in/rathnavel-karthi-114991135/",
+    },
+    knowsAbout: [
+      "Luxury Farmhouses in Chennai",
+      "ECR Beach Houses with Swimming Pool",
+      "Private Villas for Group Stays",
+      "9BHK and Whole House Vacation Rentals",
+      "Luxury Real Estate Acquisitions in Chennai",
+    ],
+    areaServed: ["Chennai", "East Coast Road (ECR)", "Mahabalipuram", "Pondicherry", "Tamil Nadu"],
     logo: {
       "@type": "ImageObject",
       url: absoluteUrl("/logo-wordmark.png"),
     },
     image: absoluteUrl("/logo-wordmark.png"),
+    sameAs: [
+      "https://www.linkedin.com/in/rathnavel-karthi-114991135/",
+      ...(TRUST.organizationSameAs && SITE.sameAs.length ? SITE.sameAs : []),
+    ],
   };
-  if (TRUST.organizationSameAs && SITE.sameAs.length) node.sameAs = SITE.sameAs;
   return node;
 }
 

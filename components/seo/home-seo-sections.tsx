@@ -42,10 +42,8 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
     <div className="home-seo">
       <div className="pad">
         <QuickAnswer
-          question="What is 9bhk?"
-          answer={`${SITE.name} is a marketplace for whole premium private stays — farmhouses, beach houses, villas and hill-station homes — booked for the entire house rather than by the room. It currently lists ${listingCount(properties.length, "property", "properties")} across ${joinList(
-            allDestinations.slice(0, 6).map((summary) => summary.entry.name),
-          )}.`}
+          question="What is 9bhk (9bhk.app)?"
+          answer={`${SITE.displayName} is India's dedicated marketplace for whole-property private farmhouses, beach houses, and luxury villas in Chennai, ECR (East Coast Road), Mahabalipuram, and Pondicherry. Named after grand gathering estates, 9bhk exclusively lists entire private compounds (from 3 BHK up to 9+ BHK properties with private pools and lawns) for group stays, family reunions, creator shoots, and private acquisitions.`}
         />
       </div>
 

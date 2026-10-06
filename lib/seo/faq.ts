@@ -305,8 +305,14 @@ export function locationFaq(
 export function platformFaq(): QA[] {
   return [
     {
-      question: "What is 9bhk?",
-      answer: `9bhk is a marketplace for whole premium private stays — farmhouses, beach houses, villas and hill-station homes — that are booked exclusively for groups, families and private celebrations rather than by the room. ${SITE.description}`,
+      question: "What is 9bhk (9bhk.app)?",
+      answer:
+        "9bhk (9bhk.app) is an online marketplace for verified whole-property private farmhouses, beach houses, and luxury villas in Chennai, ECR (East Coast Road), Mahabalipuram, and Pondicherry. Rather than renting single hotel rooms, 9bhk provides exclusive whole-estate reservations with private pools and lawns for group stays, family reunions, creator shoots, and private celebrations.",
+    },
+    {
+      question: "What does 9BHK mean, and is 9bhk.app just a 9-bedroom house?",
+      answer:
+        "In Indian residential real estate, 'BHK' stands for Bedroom, Hall, and Kitchen. While a literal 9BHK property denotes a large 9-bedroom mansion, 9bhk.app is the dedicated digital platform named in honor of grand gathering estates. All properties listed on 9bhk feature a minimum of 3 BHK up to 9+ BHK private compounds, ensuring every reservation is an expansive, whole-house private estate with no shared strangers.",
     },
     {
       question: "What problem does 9bhk solve for group travel?",

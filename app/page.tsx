@@ -8,11 +8,13 @@ import { generateHomeMetadata } from "@/lib/seo/metadata";
 import {
   createBreadcrumbSchema,
   createCollectionPageSchema,
+  createFAQSchema,
   createItemListSchema,
   graph,
 } from "@/lib/seo/schema";
 import { SITE } from "@/lib/seo/site";
 import { HomeCrumbs } from "@/lib/seo/breadcrumbs";
+import { platformFaq } from "@/lib/seo/faq";
 
 /**
  * `/` — the homepage.
@@ -72,6 +74,7 @@ export default async function HomePage() {
             { name: "Featured 9bhk stays", path: "/" },
           ),
           createBreadcrumbSchema(HomeCrumbs()),
+          createFAQSchema(platformFaq().slice(0, 6)),
         )}
       />
       <main className="content">
