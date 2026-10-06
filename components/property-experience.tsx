@@ -190,33 +190,21 @@ export function PropertyExperience({
         </div>
       ) : null}
 
-      <div className="gal" style={{ marginTop: 12, position: "relative" }}>
+      <div className="gal" style={{ marginTop: 12 }}>
         <div className="gal-hero">
-        {/*
-          The LCP element on the highest-value page on the site. It is
-          `priority` (never lazy), carries `sizes` so the browser picks the
-          right candidate instead of the 280 kB source, and reserves its box
-          through the aspect ratio so nothing shifts when it decodes.
-        */}
-        <Image
-          src={property.image}
-          alt={property.alt || property.name}
-          fill
-          priority
-          quality={78}
-          sizes="(max-width: 520px) 100vw, 430px"
-          style={{
-            gridColumn: "1 / -1",
-            aspectRatio: "4/3",
-            objectFit: "cover",
-            borderRadius: "var(--r-lg)",
-          }}
-        />
+          <Image
+            src={property.image}
+            alt={property.alt || property.name}
+            fill
+            priority
+            quality={78}
+            sizes="(max-width: 768px) 100vw, 860px"
+            style={{
+              objectFit: "cover",
+              borderRadius: "var(--r-lg)",
+            }}
+          />
         </div>
-        <span className="badge-setting" style={{ bottom: 16, left: 16 }}>
-          <Icon name={settingIcon(property.setting)} />
-          {settingLabel(t, property.setting)}
-        </span>
       </div>
       <p className="pad muted" style={{ marginTop: 8, fontSize: 13, fontWeight: 700 }}>
         {t("detail.morePhotos")}
