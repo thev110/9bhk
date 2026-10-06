@@ -104,6 +104,19 @@ export async function persistConfirmation(booking: Booking): Promise<void> {
   });
 }
 
+export async function persistCancellation(booking: Booking): Promise<void> {
+  const supabase = browserSupabase();
+  const id = await sessionUserId();
+  if (!supabase || !id) return;
+  await supabase.from("bhk_bookings").update({ status: "cancelled" }).eq("code", booking.code);
+  await supabase.from("bhk_notifications").insert({
+    user_id: id,
+    title: "Stay cancelled",
+    body: `${booking.propertyName || "Your farmhouse"} reservation has been cancelled and dates released.`,
+    href: "/trips",
+  });
+}
+
 /**
  * Persist the group's split ledger so each share exists as a real row.
  *

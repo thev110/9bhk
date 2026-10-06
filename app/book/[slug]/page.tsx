@@ -20,8 +20,12 @@ export default function BookPage() {
   const property = properties.find((item) => item.id === params.slug);
   // `occupancies` is the database's live bookings merged with this device's, so
   // the grid knows about stays booked elsewhere instead of showing them free.
-  const { user, addBooking, showToast, ready, sessionChecked, occupancies } = useStore();
+  const { user, addBooking, showToast, ready, sessionChecked, occupancies, reloadAvailability } = useStore();
   const upiId = user?.upiId || "9bhk@okhdfcbank";
+
+  useEffect(() => {
+    reloadAvailability();
+  }, [reloadAvailability]);
 
   useEffect(() => {
     if (!ready || !sessionChecked || user) return;
@@ -56,8 +60,9 @@ export default function BookPage() {
     }
   }, [user]);
 
+  const minStay = property?.minStay ?? 2;
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
-  const totals = property && nights >= 2 ? quote(property.price, property.cleaning, nights) : null;
+  const totals = property && nights >= minStay ? quote(property.price, property.cleaning, nights) : null;
   const days = useMemo(() => (cursor ? monthMatrix(cursor) : []), [cursor]);
 
   // Live occupancy: the host's own blocked nights plus every booking that has
@@ -106,8 +111,8 @@ export default function BookPage() {
       return;
     }
     const span = nightsBetween(checkIn, date);
-    if (span < 2) {
-      showToast("Minimum stay is 2 nights.");
+    if (span < minStay) {
+      showToast(minStay === 1 ? "Minimum stay is 1 night." : `Minimum stay is ${minStay} nights.`);
       return;
     }
     setCheckOut(date);
@@ -123,8 +128,8 @@ export default function BookPage() {
   }
 
   function continueGuests() {
-    if (!checkIn || !checkOut || nights < 2) {
-      showToast("Pick a check-in and check-out. Minimum stay is 2 nights.");
+    if (!checkIn || !checkOut || nights < minStay) {
+      showToast(`Pick a check-in and check-out. Minimum stay is ${minStay} night${minStay > 1 ? "s" : ""}.`);
       return;
     }
     setStep(1);
@@ -223,7 +228,7 @@ export default function BookPage() {
 
       {step === 0 ? (
         <div className="pad mt stack">
-          <p className="muted">Minimum stay is 2 nights. Blocked and booked dates can&apos;t be selected.</p>
+          <p className="muted">Minimum stay is {minStay} night{minStay > 1 ? "s" : ""}. Blocked and booked dates can&apos;t be selected.</p>
           <div className="between">
             <button
               className="icon-btn"

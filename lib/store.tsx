@@ -9,6 +9,7 @@ import {
   persistBooking,
   persistClient,
   persistConfirmation,
+  persistCancellation,
   persistLocale,
   persistProfile,
   persistSplitShares,
@@ -229,6 +230,8 @@ type Store = Persisted & {
   markIntro: () => void;
   markSessionChecked: () => void;
   confirmBooking: (id: string) => void;
+  cancelBooking: (id: string) => void;
+  clearBookings: () => void;
   addClient: (client: RealtorClient) => void;
   removeClient: (id: string) => void;
   brokerSubscribed: boolean;
@@ -340,9 +343,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Persisted;
-        // Purge legacy mock seed bookings so logged-in users never see Aarav Kumar's fake data
+        // Purge legacy mock seed bookings and unconfirmed local test reservations so they don't lock out the calendar
         const realBookings = (parsed.bookings || []).filter(
-          (b) => b.id !== "b1" && b.id !== "b2" && b.id !== "b3" && b.guestName !== "Aarav Kumar" && !b.guestEmail?.includes("aarav")
+          (b) =>
+            b.id !== "b1" &&
+            b.id !== "b2" &&
+            b.id !== "b3" &&
+            b.guestName !== "Aarav Kumar" &&
+            !b.guestEmail?.includes("aarav") &&
+            b.guestEmail !== "priya.s@example.com" &&
+            !(b.status === "awaiting" && (b.guestEmail === "guest@9bhk.app" || !b.paymentRef))
         );
         setState((curr) => ({
           city: parsed.city || "Chennai",
@@ -412,12 +422,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       reloadAvailability: () => setAvailabilityTick((n) => n + 1),
       occupancies: [
         ...availability,
-        ...state.bookings.map((booking) => ({
-          propertyId: booking.propertyId,
-          checkIn: booking.checkIn,
-          checkOut: booking.checkOut,
-          status: booking.status,
-        })),
+        ...state.bookings
+          .filter((booking) => booking.status === "confirmed")
+          .map((booking) => ({
+            propertyId: booking.propertyId,
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            status: booking.status,
+          })),
       ],
       markSessionChecked: () => setSessionChecked(true),
       toast,
@@ -530,6 +542,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ],
           };
         }),
+      cancelBooking: (id) =>
+        setState((s) => {
+          const booking = s.bookings.find((item) => item.id === id);
+          if (!booking) return s;
+          void persistCancellation(booking);
+          return {
+            ...s,
+            bookings: s.bookings.map((item) => (item.id === id ? { ...item, status: "cancelled" } : item)),
+          };
+        }),
+      clearBookings: () => setState((s) => ({ ...s, bookings: [] })),
       presentationMode: Boolean(state.presentationMode),
       setPresentationMode: (active) => setState((s) => ({ ...s, presentationMode: active })),
       brokerSubscribed: Boolean(state.brokerSubscribed),

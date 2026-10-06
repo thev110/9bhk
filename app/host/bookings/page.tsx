@@ -33,7 +33,7 @@ function bucket(status: Booking["status"]): TabId {
 
 function HostBookings() {
   const params = useSearchParams();
-  const { bookings, user, confirmBooking, showToast } = useStore();
+  const { bookings, user, confirmBooking, cancelBooking, showToast } = useStore();
   const t = useT();
   const initial: TabId = params.get("tab") === "earnings" ? "Earnings" : params.get("tab") === "calendar" ? "Calendar" : "Upcoming";
   const [tab, setTab] = useState<TabId>(initial);
@@ -343,6 +343,20 @@ function HostBookings() {
                     }}
                   >
                     {t("host.confirmStay")}
+                  </button>
+                ) : null}
+                {open.status !== "cancelled" ? (
+                  <button
+                    className="btn ghost block mt"
+                    type="button"
+                    style={{ width: "100%", color: "var(--terracotta)", marginTop: 8 }}
+                    onClick={() => {
+                      cancelBooking(open.id);
+                      showToast("Reservation declined. Dates released on calendar.");
+                      setOpenId(null);
+                    }}
+                  >
+                    {open.status === "awaiting" ? "Decline stay & release dates" : "Cancel stay & release dates"}
                   </button>
                 ) : null}
               </div>

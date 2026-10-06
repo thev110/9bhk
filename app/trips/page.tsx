@@ -146,7 +146,7 @@ export default function TripsPage() {
 
 function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void }) {
   const { properties } = useCatalog();
-  const { setSplit, markSplitPaid, showToast } = useStore();
+  const { setSplit, markSplitPaid, showToast, cancelBooking } = useStore();
   const t = useT();
   const { tag } = useLocale();
   const property = properties.find((item) => item.id === booking.propertyId);
@@ -201,6 +201,20 @@ function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void
           />
         ) : null}
         <p className="muted mt">{t("trips.cancellationNote")}</p>
+        {booking.status !== "cancelled" ? (
+          <button
+            className="btn outline sm block mt"
+            type="button"
+            style={{ width: "100%", borderColor: "var(--terracotta)", color: "var(--terracotta)" }}
+            onClick={() => {
+              cancelBooking(booking.id);
+              showToast("Reservation cancelled. Dates released on calendar.");
+              onClose();
+            }}
+          >
+            Cancel reservation &amp; release dates
+          </button>
+        ) : null}
         <div className="row mt">
           <button className="btn outline grow" type="button">
             {t("trips.contactHost")}
