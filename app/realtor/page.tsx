@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
@@ -10,7 +10,8 @@ import { useT } from "@/lib/i18n";
 import { BaseSheet } from "@/components/base-sheet";
 import { useCatalog } from "@/lib/catalog";
 import { CITIES, inr } from "@/lib/format";
-import { formatInrCrores } from "@/lib/properties";
+import { formatInrCrores, type Property } from "@/lib/properties";
+import { RazorpayCheckout, type RazorpayPaymentSuccess } from "@/components/RazorpayCheckout";
 
 export default function RealtorPortalPage() {
   const router = useRouter();
@@ -22,10 +23,13 @@ export default function RealtorPortalPage() {
     setPresentationMode,
     showToast,
     brokerSubscribed,
+    brokerSubscriptionPaymentId,
     setBrokerSubscribed,
     realtorProperties,
     addRealtorProperty,
     removeRealtorProperty,
+    user,
+    updateUser,
   } = useStore();
   const t = useT();
   const { properties } = useCatalog();
@@ -33,17 +37,35 @@ export default function RealtorPortalPage() {
   const [activeTab, setActiveTab] = useState<"catalog" | "clients">("catalog");
   const [addClientModalOpen, setAddClientModalOpen] = useState(false);
   const [addPropertyModalOpen, setAddPropertyModalOpen] = useState(false);
-  const [agencyName, setAgencyName] = useState("Coromandel Property Advisory");
-  const [reraNumber, setReraNumber] = useState("TN/AGT/2026/0894");
+  const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
+  const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+
+  // Agency Profile State — initialized from signed-in user or empty
+  const [agencyName, setAgencyName] = useState(user?.agencyName || "");
+  const [reraNumber, setReraNumber] = useState(user?.reraNumber || "");
+  const [tempAgencyName, setTempAgencyName] = useState(user?.agencyName || "");
+  const [tempReraNumber, setTempReraNumber] = useState(user?.reraNumber || "");
+
+  // Sync when user profile loads from database or storage
+  useEffect(() => {
+    if (user?.agencyName && !agencyName) {
+      setAgencyName(user.agencyName);
+      setTempAgencyName(user.agencyName);
+    }
+    if (user?.reraNumber && !reraNumber) {
+      setReraNumber(user.reraNumber);
+      setTempReraNumber(user.reraNumber);
+    }
+  }, [user, agencyName, reraNumber]);
 
   // New Client Form State
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
-  const [budgetMin, setBudgetMin] = useState(15);
-  const [budgetMax, setBudgetMax] = useState(35);
+  const [budgetMin, setBudgetMin] = useState(5);
+  const [budgetMax, setBudgetMax] = useState(20);
   const [preferredStretch, setPreferredStretch] = useState("Chennai");
-  const [garageNeed, setGarageNeed] = useState("Subterranean Collector Vault (<7° Supercar Ramp)");
+  const [garageNeed, setGarageNeed] = useState("Standard Covered Parking (2-4 cars)");
   const [confidential, setConfidential] = useState(true);
   const [notes, setNotes] = useState("");
 
@@ -57,14 +79,33 @@ export default function RealtorPortalPage() {
   const [propForRent, setPropForRent] = useState(true);
   const [propForSale, setPropForSale] = useState(false);
   const [propNightlyRate, setPropNightlyRate] = useState(25000);
-  const [propSalePriceCr, setPropSalePriceCr] = useState(10);
+  const [propSalePriceCr, setPropSalePriceCr] = useState(5);
   const [propPool, setPropPool] = useState(true);
   const [propNotes, setPropNotes] = useState("");
 
-  const salesProperties = properties.filter((p) => p.isForSale || p.salePrice);
-  const totalMandateValue = clients.reduce((acc, c) => acc + c.budgetMaxCr, 0);
+  const clientList = Array.isArray(clients) ? clients : [];
+  const propertyList = Array.isArray(realtorProperties) ? realtorProperties : [];
+  const totalMandateValue = clientList.reduce((acc, c) => acc + (c?.budgetMaxCr || 0), 0);
+
+  const origin =
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "https://www.9bhk.app";
+
+  function requireSubscription(actionName: string): boolean {
+    if (!brokerSubscribed) {
+      showToast(`Please activate the ₹500/month Broker Subscription to ${actionName}.`);
+      const card = document.getElementById("broker-subscription-card");
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth" });
+      }
+      return false;
+    }
+    return true;
+  }
 
   function copyToClipboard(text: string, label: string) {
+    if (!requireSubscription("share catalog links")) return;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(text);
       showToast(`Copied ${label} to clipboard`);
@@ -74,12 +115,29 @@ export default function RealtorPortalPage() {
   }
 
   function shareWhatsApp(text: string) {
+    if (!requireSubscription("share listings via WhatsApp")) return;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   }
 
+  function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    const cleanAgency = tempAgencyName.trim();
+    const cleanRera = tempReraNumber.trim();
+    setAgencyName(cleanAgency);
+    setReraNumber(cleanRera);
+    updateUser({
+      agencyName: cleanAgency,
+      reraNumber: cleanRera,
+      role: "realtor",
+    });
+    showToast("Broker profile updated successfully");
+    setEditProfileModalOpen(false);
+  }
+
   function handleCreateClient(e: React.FormEvent) {
     e.preventDefault();
+    if (!requireSubscription("onboard clients")) return;
     if (!clientName.trim() || !clientPhone.trim()) {
       showToast(t("realtor.toastNeedNamePhone"));
       return;
@@ -89,8 +147,8 @@ export default function RealtorPortalPage() {
       name: clientName.trim(),
       phone: clientPhone.trim(),
       email: clientEmail.trim() || undefined,
-      budgetMinCr: Number(budgetMin) || 10,
-      budgetMaxCr: Number(budgetMax) || 30,
+      budgetMinCr: Number(budgetMin) || 5,
+      budgetMaxCr: Number(budgetMax) || 20,
       preferredStretch,
       garageNeed,
       confidential,
@@ -108,6 +166,7 @@ export default function RealtorPortalPage() {
 
   function handleCreateProperty(e: React.FormEvent) {
     e.preventDefault();
+    if (!requireSubscription("add properties")) return;
     if (!propName.trim() || !propLocation.trim()) {
       showToast("Please enter a property name and location stretch.");
       return;
@@ -141,14 +200,31 @@ export default function RealtorPortalPage() {
     setPropNotes("");
   }
 
-  function handleToggleSubscription() {
-    const next = !brokerSubscribed;
-    setBrokerSubscribed(next);
-    showToast(
-      next
-        ? "Broker Workspace subscription active (₹500/mo). Full catalog and link generation unlocked!"
-        : "Broker Workspace subscription paused."
-    );
+  function handleImportFrom9bhk(p: Property) {
+    if (!requireSubscription("import 9bhk listings")) return;
+    if (propertyList.some((rp) => rp.id === p.id)) {
+      showToast(`"${p.name}" is already in your catalog`);
+      return;
+    }
+    const newProp: RealtorProperty = {
+      id: p.id,
+      name: p.name,
+      location: p.location,
+      city: p.city,
+      bedrooms: p.bedrooms,
+      bathrooms: p.bathrooms,
+      guests: p.guests,
+      forRent: true,
+      forSale: Boolean(p.isForSale),
+      nightlyRate: p.price,
+      salePriceCr: p.salePrice ? Number((p.salePrice / 10000000).toFixed(2)) : undefined,
+      pool: p.amenities?.some((a) => a.toLowerCase().includes("pool")) ?? false,
+      notes: p.blurb || p.highlights,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    addRealtorProperty(newProp);
+    showToast(`Added "${p.name}" to your broker catalog`);
+    setPortfolioModalOpen(false);
   }
 
   return (
@@ -173,14 +249,38 @@ export default function RealtorPortalPage() {
 
       {/* Header Banner */}
       <header className="page-head">
-        <div className="between">
-          <p className="eyebrow">{t("realtor.workspaceEyebrow")}</p>
-          <span className="pill ok">{t("realtor.reraVerified")}</span>
+        <div className="between" style={{ alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+          <div>
+            <p className="eyebrow">{t("realtor.workspaceEyebrow")}</p>
+            <h1 style={{ fontSize: 30, marginTop: 4 }}>Broker &amp; Distributor Workspace</h1>
+            <p className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
+              {agencyName ? (
+                <>
+                  <strong>{agencyName}</strong>
+                  {reraNumber ? t("realtor.agencyRera", { rera: reraNumber }) : ""}
+                </>
+              ) : (
+                <span style={{ fontStyle: "italic" }}>
+                  Agency details not configured · Tap &ldquo;Edit Profile&rdquo; to add your agency &amp; RERA number.
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            {reraNumber ? <span className="pill ok">{t("realtor.reraVerified")}</span> : null}
+            <button
+              className="btn sm outline"
+              type="button"
+              onClick={() => {
+                setTempAgencyName(agencyName);
+                setTempReraNumber(reraNumber);
+                setEditProfileModalOpen(true);
+              }}
+            >
+              <Icon name="pencil" /> Edit Profile
+            </button>
+          </div>
         </div>
-        <h1 style={{ fontSize: 30, marginTop: 4 }}>Broker &amp; Distributor Workspace</h1>
-        <p className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
-          {agencyName}{t("realtor.agencyRera", { rera: reraNumber })}
-        </p>
       </header>
 
       {/* Presentation Mode Status Banner */}
@@ -208,8 +308,8 @@ export default function RealtorPortalPage() {
         </div>
       ) : null}
 
-      {/* ₹500 Subscription Status Bar */}
-      <div className="pad mt">
+      {/* ₹500 Subscription Status Bar with Real Razorpay Checkout */}
+      <div className="pad mt" id="broker-subscription-card">
         <div
           className="card"
           style={{
@@ -220,27 +320,49 @@ export default function RealtorPortalPage() {
             padding: 16,
           }}
         >
-          <div className="between">
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="between" style={{ flexWrap: "wrap", gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <span className={`pill ${brokerSubscribed ? "forest" : "warn"}`}>
-                  {brokerSubscribed ? "₹500 / mo Active" : "Subscription Required"}
+                  {brokerSubscribed ? "✓ ₹500 / mo Active" : "Subscription Required"}
                 </span>
                 <strong style={{ fontSize: 14 }}>Broker Catalog &amp; Client Link Suite</strong>
               </div>
               <p className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>
                 {brokerSubscribed
-                  ? "Ditch messy WhatsApp forwards. Your branded digital catalog, client links, calendar booking routing, and mandate roster are active."
-                  : "Activate your ₹500 subscription to generate clean client links, send interactive calendar booking flows, and manage your property roster."}
+                  ? `Active Broker Membership. Branded digital catalog links, client mandate tracking, calendar booking routing, and WhatsApp links are fully unlocked.${
+                      brokerSubscriptionPaymentId ? ` Receipt: ${brokerSubscriptionPaymentId}` : ""
+                    }`
+                  : "Activate your ₹500 monthly subscription to unlock branded client links, interactive calendar booking, and client roster management."}
               </p>
             </div>
-            <button
-              className={`btn sm ${brokerSubscribed ? "outline" : "accent"}`}
-              type="button"
-              onClick={handleToggleSubscription}
-            >
-              {brokerSubscribed ? "Manage Plan" : "Activate ₹500 Pass"}
-            </button>
+            <div>
+              {brokerSubscribed ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="pill ok" style={{ fontSize: 11 }}>
+                    All Features Unlocked
+                  </span>
+                </div>
+              ) : (
+                <RazorpayCheckout
+                  amount={500}
+                  propertyName="Broker Workspace Monthly Subscription"
+                  bookingCode={`broker_${Date.now()}`}
+                  buttonText="Subscribe for ₹500 / mo"
+                  className="btn accent sm"
+                  guestName={user?.name || agencyName || "Broker"}
+                  guestEmail={user?.email || "broker@9bhk.app"}
+                  guestPhone={user?.phone || "+91 99999 99999"}
+                  onSuccess={(payment: RazorpayPaymentSuccess) => {
+                    setBrokerSubscribed(true, payment.paymentId);
+                    showToast(`Broker Workspace active! Payment ID: ${payment.paymentId}`);
+                  }}
+                  onError={(err) => {
+                    showToast(`Payment error: ${err.message}`);
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -252,9 +374,9 @@ export default function RealtorPortalPage() {
             <Icon name="home" />
             Broker Catalog
           </p>
-          <p className="nb">{realtorProperties.length}</p>
+          <p className="nb">{propertyList.length}</p>
           <p className="sub">
-            {realtorProperties.filter(isShowcaseEligible).length} App Showcase · {realtorProperties.filter((p) => !isShowcaseEligible(p)).length} Private
+            {propertyList.filter(isShowcaseEligible).length} App Showcase · {propertyList.filter((p) => !isShowcaseEligible(p)).length} Private
           </p>
         </div>
         <div className="stat">
@@ -262,7 +384,7 @@ export default function RealtorPortalPage() {
             <Icon name="users" />
             Client Roster
           </p>
-          <p className="nb">{clients.length}</p>
+          <p className="nb">{clientList.length}</p>
           <p className="sub">Mandates locked</p>
         </div>
         <div className="stat">
@@ -291,14 +413,14 @@ export default function RealtorPortalPage() {
             aria-selected={activeTab === "catalog"}
             onClick={() => setActiveTab("catalog")}
           >
-            Property Catalog ({realtorProperties.length})
+            Property Catalog ({propertyList.length})
           </button>
           <button
             type="button"
             aria-selected={activeTab === "clients"}
             onClick={() => setActiveTab("clients")}
           >
-            Client List ({clients.length})
+            Client List ({clientList.length})
           </button>
         </div>
       </div>
@@ -306,26 +428,43 @@ export default function RealtorPortalPage() {
       {/* ── TAB 1: PROPERTY CATALOG ────────────────────────────────────────── */}
       {activeTab === "catalog" ? (
         <div className="pad mt">
-          <div className="between">
+          <div className="between" style={{ flexWrap: "wrap", gap: 10 }}>
             <div>
               <h2>Your Digital Property Catalog</h2>
               <p className="muted" style={{ fontSize: 12 }}>
                 Organized listings you can share directly with clients instead of scattered WhatsApp images.
               </p>
             </div>
-            <div className="row" style={{ gap: 8 }}>
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
               <button
                 className="btn outline sm"
                 type="button"
                 onClick={() => {
-                  const catalogLink = `https://www.9bhk.app/buy?broker=${encodeURIComponent(agencyName)}`;
+                  const catalogLink = `${origin}/buy?broker=${encodeURIComponent(agencyName || "Broker")}`;
                   copyToClipboard(catalogLink, "Full Catalog Link");
                 }}
               >
                 Copy Catalog Link
               </button>
-              <button className="btn sm" type="button" onClick={() => setAddPropertyModalOpen(true)}>
-                + Add Property
+              <button
+                className="btn outline sm"
+                type="button"
+                onClick={() => {
+                  if (!requireSubscription("import 9bhk listings")) return;
+                  setPortfolioModalOpen(true);
+                }}
+              >
+                + Add from 9bhk Portfolio
+              </button>
+              <button
+                className="btn sm"
+                type="button"
+                onClick={() => {
+                  if (!requireSubscription("add properties")) return;
+                  setAddPropertyModalOpen(true);
+                }}
+              >
+                + Add Custom Property
               </button>
             </div>
           </div>
@@ -342,117 +481,159 @@ export default function RealtorPortalPage() {
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span className="pill info" style={{ marginTop: 2 }}>3-BHK Rule</span>
               <p style={{ fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
-                <strong>How the 9bhk showcase works:</strong> You can organize any property in your private catalog. However, <strong>only properties with 3 BHK or more can be showcased in the public 9bhk app</strong> for rent or sale. Properties under 3 BHK are marked as <em>Private Link Only</em> and will never appear in the public app, but your direct booking links work for your clients.
+                <strong>How the 9bhk showcase works:</strong> You can organize any property in your private catalog. However, <strong>only properties with 3 BHK or more can be showcased in the public 9bhk app</strong> for rent or sale. Properties under 3 BHK are marked as <em>Private Link Only</em> and will never appear in public app search, but your direct booking links work for your clients.
               </p>
             </div>
           </div>
 
-          <div className="stack mt">
-            {realtorProperties.map((prop) => {
-              const eligible = isShowcaseEligible(prop);
-              const propUrl = `https://www.9bhk.app/stays?preview=${prop.id}&broker=${encodeURIComponent(agencyName)}`;
-              const calendarBookingUrl = `https://www.9bhk.app/book/${prop.id}?broker=${encodeURIComponent(agencyName)}`;
-              const shareText = `Hi! Here are the verified details and photos for ${prop.name} (${prop.bedrooms} BHK in ${prop.location}):\n${propUrl}\n\nYou can also check the interactive calendar and schedule your dates here:\n${calendarBookingUrl}`;
+          {propertyList.length === 0 ? (
+            <div
+              className="card mt"
+              style={{
+                textAlign: "center",
+                padding: "36px 20px",
+                border: "1px dashed var(--border)",
+              }}
+            >
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🏡</div>
+              <h3 style={{ fontSize: 17, fontWeight: 700 }}>Your Broker Catalog is Empty</h3>
+              <p className="muted" style={{ fontSize: 13, maxWidth: 460, margin: "6px auto 16px" }}>
+                Add your exclusive listings, or represent verified farmhouses and beachfront estates directly from the 9bhk luxury collection.
+              </p>
+              <div className="row" style={{ justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  className="btn sm outline"
+                  type="button"
+                  onClick={() => {
+                    if (!requireSubscription("import 9bhk listings")) return;
+                    setPortfolioModalOpen(true);
+                  }}
+                >
+                  Browse 9bhk Portfolio
+                </button>
+                <button
+                  className="btn sm accent"
+                  type="button"
+                  onClick={() => {
+                    if (!requireSubscription("add custom properties")) return;
+                    setAddPropertyModalOpen(true);
+                  }}
+                >
+                  + Add Custom Property
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="stack mt">
+              {propertyList.map((prop) => {
+                const eligible = isShowcaseEligible(prop);
+                const isCatalogProperty = properties.some((p) => p.id === prop.id);
+                const propUrl = isCatalogProperty
+                  ? `${origin}/property/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`
+                  : `${origin}/book/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`;
+                const calendarBookingUrl = `${origin}/book/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`;
+                const shareText = `Hi! Here are the verified details for ${prop.name} (${prop.bedrooms} BHK in ${prop.location}):\n${propUrl}\n\nYou can also check the interactive calendar and schedule your dates here:\n${calendarBookingUrl}`;
 
-              return (
-                <article key={prop.id} className="card" style={{ padding: 16 }}>
-                  <div className="between">
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <h3 style={{ fontSize: 16, fontWeight: 800 }}>{prop.name}</h3>
-                        <span className={`pill ${eligible ? "ok" : "warn"}`} style={{ fontSize: 10.5 }}>
-                          {eligible ? "✓ 9bhk App Showcase (3+ BHK)" : "🔒 Private Link Only (<3 BHK)"}
-                        </span>
+                return (
+                  <article key={prop.id} className="card" style={{ padding: 16 }}>
+                    <div className="between">
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <h3 style={{ fontSize: 16, fontWeight: 800 }}>{prop.name}</h3>
+                          <span className={`pill ${eligible ? "ok" : "warn"}`} style={{ fontSize: 10.5 }}>
+                            {eligible ? "✓ 9bhk App Showcase (3+ BHK)" : "🔒 Private Link Only (<3 BHK)"}
+                          </span>
+                        </div>
+                        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                          {prop.location} · {prop.bedrooms} BHK · {prop.bathrooms} Bath · Sleeps {prop.guests}
+                          {prop.pool ? " · Private Pool" : ""}
+                        </p>
                       </div>
-                      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-                        {prop.location} · {prop.bedrooms} BHK · {prop.bathrooms} Bath · Sleeps {prop.guests}
-                        {prop.pool ? " · Private Pool" : ""}
-                      </p>
+                      <div style={{ textAlign: "right" }}>
+                        {prop.nightlyRate ? (
+                          <div>
+                            <strong style={{ fontSize: 14 }}>{inr(prop.nightlyRate)}</strong>
+                            <small className="muted"> / night</small>
+                          </div>
+                        ) : null}
+                        {prop.salePriceCr ? (
+                          <div style={{ fontSize: 12, color: "var(--moss)", fontWeight: 700 }}>
+                            Sale: ₹{prop.salePriceCr} Cr
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      {prop.nightlyRate ? (
-                        <div>
-                          <strong style={{ fontSize: 14 }}>{inr(prop.nightlyRate)}</strong>
-                          <small className="muted"> / night</small>
-                        </div>
-                      ) : null}
-                      {prop.salePriceCr ? (
-                        <div style={{ fontSize: 12, color: "var(--moss)", fontWeight: 700 }}>
-                          Sale: ₹{prop.salePriceCr} Cr
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
 
-                  <p className="tiny muted mt" style={{ margin: "8px 0 0", fontStyle: "italic" }}>
-                    {eligible
-                      ? "Eligible to be shown publicly in the 9bhk marketplace for renting and sales."
-                      : "Fewer than 3 BHK: Excluded from public app search. Shared exclusively via your direct link."}
-                  </p>
-
-                  {prop.notes ? (
-                    <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                      &ldquo;{prop.notes}&rdquo;
+                    <p className="tiny muted mt" style={{ margin: "8px 0 0", fontStyle: "italic" }}>
+                      {eligible
+                        ? "Eligible to be shown publicly in the 9bhk marketplace for renting and sales."
+                        : "Fewer than 3 BHK: Excluded from public app search. Shared exclusively via your direct link."}
                     </p>
-                  ) : null}
 
-                  {/* Shareable Link Rails */}
-                  <div
-                    className="mt"
-                    style={{
-                      paddingTop: 12,
-                      borderTop: "1px solid var(--border)",
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 8,
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                      <button
-                        className="btn outline sm"
-                        type="button"
-                        onClick={() => copyToClipboard(propUrl, `Catalog Link for ${prop.name}`)}
-                        title="Copy clean presentation link for your client"
-                      >
-                        Copy Client Link
-                      </button>
-                      <button
-                        className="btn outline sm"
-                        type="button"
-                        onClick={() => copyToClipboard(calendarBookingUrl, `Calendar Booking Link for ${prop.name}`)}
-                        title="Copy direct booking and calendar link"
-                      >
-                        Calendar Link
-                      </button>
-                      <button
-                        className="btn sm"
-                        type="button"
-                        style={{ background: "#25D366", color: "#fff", borderColor: "#25D366" }}
-                        onClick={() => shareWhatsApp(shareText)}
-                        title="Share catalog and calendar directly to WhatsApp"
-                      >
-                        WhatsApp
-                      </button>
-                    </div>
+                    {prop.notes ? (
+                      <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                        &ldquo;{prop.notes}&rdquo;
+                      </p>
+                    ) : null}
 
-                    <button
-                      className="btn ghost sm"
-                      type="button"
-                      style={{ color: "var(--danger)" }}
-                      onClick={() => {
-                        removeRealtorProperty(prop.id);
-                        showToast(`Removed "${prop.name}" from broker catalog`);
+                    {/* Shareable Link Rails */}
+                    <div
+                      className="mt"
+                      style={{
+                        paddingTop: 12,
+                        borderTop: "1px solid var(--border)",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 8,
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      Delete
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        <button
+                          className="btn outline sm"
+                          type="button"
+                          onClick={() => copyToClipboard(propUrl, `Catalog Link for ${prop.name}`)}
+                          title="Copy clean presentation link for your client"
+                        >
+                          Copy Client Link
+                        </button>
+                        <button
+                          className="btn outline sm"
+                          type="button"
+                          onClick={() => copyToClipboard(calendarBookingUrl, `Calendar Booking Link for ${prop.name}`)}
+                          title="Copy direct booking and calendar link"
+                        >
+                          Calendar Link
+                        </button>
+                        <button
+                          className="btn sm"
+                          type="button"
+                          style={{ background: "#25D366", color: "#fff", borderColor: "#25D366" }}
+                          onClick={() => shareWhatsApp(shareText)}
+                          title="Share catalog and calendar directly to WhatsApp"
+                        >
+                          WhatsApp
+                        </button>
+                      </div>
+
+                      <button
+                        className="btn ghost sm"
+                        type="button"
+                        style={{ color: "var(--danger)" }}
+                        onClick={() => {
+                          removeRealtorProperty(prop.id);
+                          showToast(`Removed "${prop.name}" from broker catalog`);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -466,76 +647,110 @@ export default function RealtorPortalPage() {
                 {t("realtor.rosterBody")}
               </p>
             </div>
-            <button className="btn sm" type="button" onClick={() => setAddClientModalOpen(true)}>
+            <button
+              className="btn sm"
+              type="button"
+              onClick={() => {
+                if (!requireSubscription("onboard clients")) return;
+                setAddClientModalOpen(true);
+              }}
+            >
               {t("realtor.onboardClient")}
             </button>
           </div>
 
-          <div className="stack mt">
-            {clients.map((client) => (
-              <article key={client.id} className="card" style={{ padding: 16 }}>
-                <div className="between">
-                  <div>
-                    <h3 style={{ fontSize: 16, fontWeight: 800 }}>{client.name}</h3>
-                    <p className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-                      {client.phone} {client.email ? `· ${client.email}` : ""}
-                    </p>
+          {clientList.length === 0 ? (
+            <div
+              className="card mt"
+              style={{
+                textAlign: "center",
+                padding: "36px 20px",
+                border: "1px dashed var(--border)",
+              }}
+            >
+              <div style={{ fontSize: 32, marginBottom: 8 }}>👥</div>
+              <h3 style={{ fontSize: 17, fontWeight: 700 }}>No Clients Onboarded Yet</h3>
+              <p className="muted" style={{ fontSize: 13, maxWidth: 460, margin: "6px auto 16px" }}>
+                Keep track of client budgets, corridor requirements, and parking needs. Generate personal portfolio links and send them directly via WhatsApp.
+              </p>
+              <button
+                className="btn sm accent"
+                type="button"
+                onClick={() => {
+                  if (!requireSubscription("onboard clients")) return;
+                  setAddClientModalOpen(true);
+                }}
+              >
+                + Onboard Your First Client
+              </button>
+            </div>
+          ) : (
+            <div className="stack mt">
+              {clientList.map((client) => (
+                <article key={client.id} className="card" style={{ padding: 16 }}>
+                  <div className="between">
+                    <div>
+                      <h3 style={{ fontSize: 16, fontWeight: 800 }}>{client.name}</h3>
+                      <p className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                        {client.phone} {client.email ? `· ${client.email}` : ""}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span className="pill info" style={{ fontWeight: 800, fontSize: 11 }}>
+                        ₹{client.budgetMinCr} - ₹{client.budgetMaxCr} Cr
+                      </span>
+                      {client.confidential ? (
+                        <div style={{ marginTop: 4 }}>
+                          <span className="pill warn" style={{ fontSize: 10 }}>{t("realtor.ndaProtected")}</span>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <span className="pill info" style={{ fontWeight: 800, fontSize: 11 }}>
-                      ₹{client.budgetMinCr} - ₹{client.budgetMaxCr} Cr
-                    </span>
-                    {client.confidential ? (
-                      <div style={{ marginTop: 4 }}>
-                        <span className="pill warn" style={{ fontSize: 10 }}>{t("realtor.ndaProtected")}</span>
-                      </div>
+
+                  <div className="mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 6 }}>
+                    <p style={{ fontSize: 12.5, margin: 0 }}>
+                      <strong style={{ color: "var(--moss)" }}>{t("realtor.labelCorridor")}</strong> {client.preferredStretch}
+                    </p>
+                    <p style={{ fontSize: 12.5, margin: 0 }}>
+                      <strong style={{ color: "var(--moss)" }}>{t("realtor.labelAutomotiveNeed")}</strong> {client.garageNeed}
+                    </p>
+                    {client.notes ? (
+                      <p className="muted" style={{ fontSize: 12, fontStyle: "italic", margin: "4px 0 0" }}>
+                        &ldquo;{client.notes}&rdquo;
+                      </p>
                     ) : null}
                   </div>
-                </div>
 
-                <div className="mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 6 }}>
-                  <p style={{ fontSize: 12.5, margin: 0 }}>
-                    <strong style={{ color: "var(--moss)" }}>{t("realtor.labelCorridor")}</strong> {client.preferredStretch}
-                  </p>
-                  <p style={{ fontSize: 12.5, margin: 0 }}>
-                    <strong style={{ color: "var(--moss)" }}>{t("realtor.labelAutomotiveNeed")}</strong> {client.garageNeed}
-                  </p>
-                  {client.notes ? (
-                    <p className="muted" style={{ fontSize: 12, fontStyle: "italic", margin: "4px 0 0" }}>
-                      &ldquo;{client.notes}&rdquo;
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="between mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-                  <span className="tiny">{t("realtor.addedOn", { date: client.createdAt })}</span>
-                  <div className="row" style={{ gap: 6 }}>
-                    <button
-                      className="btn outline sm"
-                      type="button"
-                      onClick={() => {
-                        const message = `Hello ${client.name}, here is our curated estate portfolio for your review:\nhttps://www.9bhk.app/buy?broker=${encodeURIComponent(agencyName)}`;
-                        shareWhatsApp(message);
-                      }}
-                    >
-                      Send Catalog
-                    </button>
-                    <button
-                      className="btn ghost sm"
-                      type="button"
-                      style={{ color: "var(--danger)" }}
-                      onClick={() => {
-                        removeClient(client.id);
-                        showToast(t("realtor.toastClientRemoved", { name: client.name }));
-                      }}
-                    >
-                      {t("realtor.removeClient")}
-                    </button>
+                  <div className="between mt" style={{ paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                    <span className="tiny">{t("realtor.addedOn", { date: client.createdAt })}</span>
+                    <div className="row" style={{ gap: 6 }}>
+                      <button
+                        className="btn outline sm"
+                        type="button"
+                        onClick={() => {
+                          const message = `Hello ${client.name}, here is our curated estate portfolio for your review:\n${origin}/buy?broker=${encodeURIComponent(agencyName || "Broker")}`;
+                          shareWhatsApp(message);
+                        }}
+                      >
+                        Send Catalog
+                      </button>
+                      <button
+                        className="btn ghost sm"
+                        type="button"
+                        style={{ color: "var(--danger)" }}
+                        onClick={() => {
+                          removeClient(client.id);
+                          showToast(t("realtor.toastClientRemoved", { name: client.name }));
+                        }}
+                      >
+                        {t("realtor.removeClient")}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -556,6 +771,98 @@ export default function RealtorPortalPage() {
           </div>
         </div>
       </section>
+
+      {/* Modal: Edit Broker Profile */}
+      <BaseSheet
+        open={editProfileModalOpen}
+        onOpenChange={setEditProfileModalOpen}
+        title="Broker Agency Profile"
+      >
+        <form className="stack" onSubmit={handleSaveProfile}>
+          <p className="muted" style={{ fontSize: 13 }}>
+            Configure your registered agency name and RERA license number. These will appear on client-facing catalogs and presentation links.
+          </p>
+
+          <label className="field">
+            <span>Agency / Advisory Name</span>
+            <input
+              className="ctrl"
+              type="text"
+              placeholder="e.g. Apex Luxury Advisory"
+              value={tempAgencyName}
+              onChange={(e) => setTempAgencyName(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span>RERA Agent Number</span>
+            <input
+              className="ctrl"
+              type="text"
+              placeholder="e.g. TN/AGENT/2026/0894"
+              value={tempReraNumber}
+              onChange={(e) => setTempReraNumber(e.target.value)}
+            />
+          </label>
+
+          <div className="between mt">
+            <button className="btn outline sm" type="button" onClick={() => setEditProfileModalOpen(false)}>
+              Cancel
+            </button>
+            <button className="btn accent sm" type="submit">
+              Save Profile
+            </button>
+          </div>
+        </form>
+      </BaseSheet>
+
+      {/* Modal: Browse & Import from 9bhk Luxury Collection */}
+      <BaseSheet
+        open={portfolioModalOpen}
+        onOpenChange={setPortfolioModalOpen}
+        title="Select from 9bhk Portfolio"
+      >
+        <div className="stack">
+          <p className="muted" style={{ fontSize: 13 }}>
+            Add published 9bhk estates to your broker catalog. You can generate branded client links and schedule calendar visits.
+          </p>
+          <div className="stack" style={{ maxHeight: "60vh", overflowY: "auto", gap: 10 }}>
+            {properties.map((p) => {
+              const alreadyAdded = propertyList.some((rp) => rp.id === p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="card"
+                  style={{
+                    padding: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: 14 }}>{p.name}</strong>
+                    <p className="muted" style={{ fontSize: 12, margin: "2px 0 0" }}>
+                      {p.location} · {p.bedrooms} BHK · {inr(p.price)}/night
+                      {p.salePrice ? ` · Sale: ${formatInrCrores(p.salePrice)}` : ""}
+                    </p>
+                  </div>
+                  <button
+                    className={`btn sm ${alreadyAdded ? "outline" : "accent"}`}
+                    type="button"
+                    disabled={alreadyAdded}
+                    onClick={() => handleImportFrom9bhk(p)}
+                  >
+                    {alreadyAdded ? "Added" : "+ Add"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </BaseSheet>
 
       {/* Modal: Add Property to Broker Catalog */}
       <BaseSheet
@@ -771,7 +1078,7 @@ export default function RealtorPortalPage() {
               <input
                 className="ctrl"
                 type="number"
-                min="5"
+                min="1"
                 max="100"
                 value={budgetMin}
                 onChange={(e) => setBudgetMin(Number(e.target.value))}
@@ -782,7 +1089,7 @@ export default function RealtorPortalPage() {
               <input
                 className="ctrl"
                 type="number"
-                min="5"
+                min="1"
                 max="150"
                 value={budgetMax}
                 onChange={(e) => setBudgetMax(Number(e.target.value))}
@@ -812,6 +1119,9 @@ export default function RealtorPortalPage() {
               value={garageNeed}
               onChange={(e) => setGarageNeed(e.target.value)}
             >
+              <option value="Standard Covered Parking (2-4 cars)">
+                Standard Covered Parking (2-4 cars)
+              </option>
               <option value="Subterranean Collector Vault (<7° Supercar Ramp)">
                 {t("realtor.optionCollectorVault")}
               </option>

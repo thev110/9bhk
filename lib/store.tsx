@@ -166,6 +166,8 @@ type Persisted = {
   clients: RealtorClient[];
   presentationMode?: boolean;
   brokerSubscribed?: boolean;
+  brokerSubscriptionPaymentId?: string;
+  brokerSubscribedAt?: string;
   realtorProperties?: RealtorProperty[];
   locale: Locale;
 };
@@ -235,7 +237,9 @@ type Store = Persisted & {
   addClient: (client: RealtorClient) => void;
   removeClient: (id: string) => void;
   brokerSubscribed: boolean;
-  setBrokerSubscribed: (active: boolean) => void;
+  brokerSubscriptionPaymentId?: string;
+  brokerSubscribedAt?: string;
+  setBrokerSubscribed: (active: boolean, paymentId?: string) => void;
   realtorProperties: RealtorProperty[];
   addRealtorProperty: (prop: RealtorProperty) => void;
   removeRealtorProperty: (id: string) => void;
@@ -264,71 +268,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     seenIntro: true,
     signedIn: false,
     notes: [],
-    clients: [
-      {
-        id: "c-101",
-        name: "Vikramaditya K (Family Office)",
-        phone: "+91 98401 22334",
-        email: "vk@chennaicapital.com",
-        budgetMinCr: 20,
-        budgetMaxCr: 40,
-        preferredStretch: "ECR · Mahabalipuram Dunes",
-        garageNeed: "Collector Vault (4+ cars, low approach ramp)",
-        confidential: true,
-        notes: "Looking for direct high-tide frontage with private beach gate for Ferrari 296 GTB & Defender.",
-        createdAt: "2026-09-27",
-      },
-    ],
+    clients: [],
     presentationMode: false,
-    brokerSubscribed: true,
-    realtorProperties: [
-      {
-        id: "rp-1",
-        name: "Coromandel Coastal Pavilion",
-        location: "East Coast Road (ECR), Chennai",
-        city: "Chennai",
-        bedrooms: 4,
-        bathrooms: 4,
-        guests: 12,
-        forRent: true,
-        forSale: true,
-        nightlyRate: 35000,
-        salePriceCr: 14.5,
-        pool: true,
-        notes: "Direct high-tide frontage, 30 kW power load, verified generator.",
-        createdAt: "2026-09-28",
-      },
-      {
-        id: "rp-2",
-        name: "Mahabalipuram Sand Dune Villa",
-        location: "Mahabalipuram Coastal Strip",
-        city: "Mahabalipuram",
-        bedrooms: 3,
-        bathrooms: 3,
-        guests: 10,
-        forRent: true,
-        forSale: false,
-        nightlyRate: 28000,
-        pool: true,
-        notes: "Private pool, sound curfew 23:00, great for family reunions.",
-        createdAt: "2026-10-01",
-      },
-      {
-        id: "rp-3",
-        name: "Poes Garden Luxury Executive Suite",
-        location: "Central Chennai",
-        city: "Chennai",
-        bedrooms: 2,
-        bathrooms: 2,
-        guests: 4,
-        forRent: true,
-        forSale: false,
-        nightlyRate: 16000,
-        pool: false,
-        notes: "2 BHK executive city property. Private link only (not showcased on 9bhk app).",
-        createdAt: "2026-10-03",
-      },
-    ],
+    brokerSubscribed: false,
+    brokerSubscriptionPaymentId: undefined,
+    brokerSubscribedAt: undefined,
+    realtorProperties: [],
     locale: DEFAULT_LOCALE,
   });
   const [ready, setReady] = useState(false);
@@ -354,6 +299,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             b.guestEmail !== "priya.s@example.com" &&
             !(b.status === "awaiting" && (b.guestEmail === "guest@9bhk.app" || !b.paymentRef))
         );
+        // Purge legacy mock seed clients
+        const realClients = (parsed.clients || []).filter(
+          (c) => c.id !== "c-101" && !c.name?.includes("Vikramaditya")
+        );
+        // Purge legacy mock seed realtor properties
+        const realRealtorProps = (parsed.realtorProperties || []).filter(
+          (p) =>
+            !["rp-1", "rp-2", "rp-3"].includes(p.id) &&
+            !p.name?.includes("Coromandel Coastal Pavilion") &&
+            !p.name?.includes("Mahabalipuram Sand Dune Villa") &&
+            !p.name?.includes("Poes Garden Luxury Executive Suite")
+        );
         setState((curr) => ({
           city: parsed.city || "Chennai",
           saved: parsed.saved || [],
@@ -363,13 +320,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           seenIntro: true,
           signedIn: parsed.signedIn === true,
           notes: parsed.notes ?? [],
-          clients: parsed.clients && parsed.clients.length ? parsed.clients : curr.clients,
+          clients: realClients,
           presentationMode: parsed.presentationMode ?? false,
-          brokerSubscribed: parsed.brokerSubscribed ?? curr.brokerSubscribed ?? true,
-          realtorProperties:
-            parsed.realtorProperties && parsed.realtorProperties.length
-              ? parsed.realtorProperties
-              : curr.realtorProperties,
+          brokerSubscribed: Boolean(parsed.brokerSubscribed),
+          brokerSubscriptionPaymentId: parsed.brokerSubscriptionPaymentId,
+          brokerSubscribedAt: parsed.brokerSubscribedAt,
+          realtorProperties: realRealtorProps,
           locale: LOCALES.includes(parsed.locale) ? (parsed.locale as Locale) : DEFAULT_LOCALE,
         }));
       }
@@ -378,6 +334,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     setReady(true);
   }, []);
+
+  // Sync realtor client mandates from Supabase for authenticated brokers
+  useEffect(() => {
+    if (!ready || !state.signedIn) return;
+    let cancelled = false;
+    void loadRealtorClients().then((loaded) => {
+      if (cancelled) return;
+      if (loaded && loaded.length > 0) {
+        setState((s) => ({ ...s, clients: loaded }));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, state.signedIn]);
 
   useEffect(() => {
     if (!ready) return;
@@ -555,8 +526,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       clearBookings: () => setState((s) => ({ ...s, bookings: [] })),
       presentationMode: Boolean(state.presentationMode),
       setPresentationMode: (active) => setState((s) => ({ ...s, presentationMode: active })),
-      brokerSubscribed: Boolean(state.brokerSubscribed),
-      setBrokerSubscribed: (active) => setState((s) => ({ ...s, brokerSubscribed: active })),
+      brokerSubscribed: Boolean(state.brokerSubscribed || state.user?.verifiedBroker),
+      brokerSubscriptionPaymentId: state.brokerSubscriptionPaymentId,
+      brokerSubscribedAt: state.brokerSubscribedAt,
+      setBrokerSubscribed: (active, paymentId) =>
+        setState((s) => ({
+          ...s,
+          brokerSubscribed: active,
+          brokerSubscriptionPaymentId: paymentId ?? s.brokerSubscriptionPaymentId,
+          brokerSubscribedAt: active ? (s.brokerSubscribedAt || new Date().toISOString()) : undefined,
+          user: s.user ? { ...s.user, verifiedBroker: active } : s.user,
+        })),
+      clients: state.clients || [],
       realtorProperties: state.realtorProperties || [],
       addRealtorProperty: (prop) =>
         setState((s) => ({

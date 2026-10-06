@@ -17,10 +17,44 @@ export default function BookPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const { properties } = useCatalog();
-  const property = properties.find((item) => item.id === params.slug);
-  // `occupancies` is the database's live bookings merged with this device's, so
-  // the grid knows about stays booked elsewhere instead of showing them free.
-  const { user, addBooking, showToast, ready, sessionChecked, occupancies, reloadAvailability } = useStore();
+  const { user, addBooking, showToast, ready, sessionChecked, occupancies, reloadAvailability, realtorProperties } = useStore();
+  const property = useMemo(() => {
+    const existing = properties.find((item) => item.id === params.slug);
+    if (existing) return existing;
+    const rp = (realtorProperties || []).find((item) => item.id === params.slug);
+    if (!rp) return undefined;
+    return {
+      id: rp.id,
+      name: rp.name,
+      tagline: `${rp.bedrooms} BHK in ${rp.location}`,
+      location: rp.location,
+      city: rp.city,
+      type: "Farmhouse",
+      setting: "seaside" as const,
+      settingName: rp.location,
+      settingDetail: "Private Broker Mandate",
+      bedrooms: rp.bedrooms,
+      beds: Math.max(rp.bedrooms, 2),
+      bathrooms: rp.bathrooms,
+      guests: rp.guests,
+      price: rp.nightlyRate || 25000,
+      cleaning: 2500,
+      deposit: 10000,
+      minStay: 1,
+      photos: ["/photos/ecr-sanctuary-1.jpg"],
+      amenities: [
+        rp.pool ? "Pool" : "Lawn",
+        "AC",
+        "Power backup",
+        "Parking",
+        "Wi-Fi",
+      ],
+      highlights: `${rp.bedrooms} BHK · Sleeps ${rp.guests}`,
+      description: rp.notes || `Private luxury ${rp.bedrooms} BHK estate in ${rp.location}.`,
+      isForSale: Boolean(rp.forSale),
+      salePrice: rp.salePriceCr ? rp.salePriceCr * 10000000 : undefined,
+    } as any;
+  }, [properties, realtorProperties, params.slug]);
   const upiId = user?.upiId || "9bhk@okhdfcbank";
 
   useEffect(() => {

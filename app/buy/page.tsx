@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BrandBar, Shell } from "@/components/shell";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -20,6 +20,43 @@ import { BaseSheet } from "@/components/base-sheet";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { settingLabel } from "@/lib/i18n/vibes";
+
+function BrokerBanner() {
+  const searchParams = useSearchParams();
+  const broker = searchParams?.get("broker");
+  if (!broker) return null;
+  return (
+    <div
+      className="card mt"
+      style={{
+        background: "color-mix(in oklch, var(--primary) 10%, var(--surface))",
+        border: "1px solid var(--primary)",
+        padding: "12px 16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: 8,
+      }}
+    >
+      <div>
+        <span className="pill forest" style={{ fontSize: 11, marginBottom: 4 }}>
+          Broker Partner Portfolio
+        </span>
+        <p style={{ margin: "4px 0 0", fontSize: 13.5, fontWeight: 700 }}>
+          Represented by {broker}
+        </p>
+      </div>
+      <Link
+        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hi ${broker}, I am reviewing the 9bhk estate portfolio you shared.`)}`}
+        target="_blank"
+        className="btn sm outline"
+      >
+        Contact Broker on WhatsApp
+      </Link>
+    </div>
+  );
+}
 
 export default function BuyPage() {
   const router = useRouter();
@@ -88,6 +125,9 @@ export default function BuyPage() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Estates for sale", href: "/buy" }]}
           schema={false}
         />
+        <Suspense fallback={null}>
+          <BrokerBanner />
+        </Suspense>
       </div>
 
       {/* Header / Mode Switcher */}

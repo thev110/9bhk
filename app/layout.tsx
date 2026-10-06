@@ -2,10 +2,14 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Manrope, Noto_Sans_Tamil, Noto_Sans_Telugu } from "next/font/google";
 import { Toaster } from "sonner";
 import { StoreProvider } from "@/lib/store";
+import dynamic from "next/dynamic";
 import { AuthSync } from "@/components/auth-sync";
 import { PwaMobileHandler } from "@/components/pwa-mobile";
-import { CommandMenu } from "@/components/command-menu";
 import { CatalogProvider } from "@/lib/catalog";
+
+const CommandMenu = dynamic(() => import("@/components/command-menu").then((mod) => mod.CommandMenu), {
+  ssr: false,
+});
 import { JsonLd } from "@/components/seo/json-ld";
 import { graph, createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
 import { SITE, SITE_URL, absoluteUrl, siteVerification } from "@/lib/seo/site";
