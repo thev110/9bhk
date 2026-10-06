@@ -42,9 +42,7 @@ export default function BookPage() {
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
-  const [paymentRef, setPaymentRef] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [paying, setPaying] = useState(false);
   const [done, setDone] = useState<{
     code: string;
     total: number;
@@ -142,37 +140,6 @@ export default function BookPage() {
     if (phone.replace(/\D/g, "").length < 10) next.phone = "The host may call to confirm arrival time.";
     setErrors(next);
     return Object.keys(next).length === 0;
-  }
-
-  function pay() {
-    if (!validateGuest()) return;
-    if (!property || !totals || !checkIn || !checkOut) return;
-    const propertyId = property.id;
-    const propertyName = property.name;
-    setPaying(true);
-    window.setTimeout(() => {
-      const code = `9B-${Math.floor(40000 + Math.random() * 5000)}`;
-      addBooking({
-        id: code,
-        code,
-        propertyId,
-        propertyName,
-        checkIn,
-        checkOut,
-        adults,
-        children,
-        total: totals.total,
-        status: "awaiting",
-        guestName: name.trim(),
-        guestEmail: email.trim(),
-        guestPhone: phone.trim(),
-        upiId,
-        paymentRef: paymentRef.trim() || undefined,
-      });
-      setPaying(false);
-      setDone({ code, total: totals.total, status: "awaiting", paymentRef: paymentRef.trim() || undefined });
-      setStep(4);
-    }, 600);
   }
 
   function handleRazorpaySuccess(result: RazorpayPaymentSuccess) {
@@ -406,29 +373,8 @@ export default function BookPage() {
             className="btn accent block"
           />
 
-          <details style={{ marginTop: 8, cursor: "pointer" }}>
-            <summary className="muted" style={{ fontSize: 13, userSelect: "none" }}>
-              Or pay host manually via UPI
-            </summary>
-            <div className="stack mt" style={{ paddingTop: 8 }}>
-              <div className="card">
-                <div className="sumline">
-                  <span className="k">UPI ID</span>
-                  <strong>{upiId}</strong>
-                </div>
-              </div>
-              <p className="muted" style={{ fontSize: 13 }}>
-                Send the total to the host&apos;s UPI ID, then add the reference below so they can match your payment.
-              </p>
-              <Field label="UPI reference" value={paymentRef} onChange={setPaymentRef} placeholder="Last 4 digits or UTR" />
-              <button className="btn outline block" type="button" onClick={pay} disabled={paying}>
-                {paying ? "Sending to the host…" : "I've paid directly"}
-              </button>
-            </div>
-          </details>
-
           <div className="row mt">
-            <button className="btn outline" type="button" onClick={() => setStep(2)} disabled={paying}>
+            <button className="btn outline" type="button" onClick={() => setStep(2)}>
               Back
             </button>
           </div>
