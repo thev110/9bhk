@@ -6,6 +6,7 @@ import { getServerCatalog } from "@/lib/server/catalog";
 import { publishableLocations } from "@/lib/seo/locations";
 
 import { CreatorAttribution } from "@/components/creator-attribution";
+import { IndieStoreBadge } from "@/components/indiestore-badge";
 
 /**
  * Footer information architecture.
@@ -118,6 +119,7 @@ export async function SiteFooter() {
           © {new Date().getFullYear()} {SITE.displayName}. All rights reserved.
         </p>
         <CreatorAttribution variant="footer" />
+        <IndieStoreBadge />
       </div>
     </footer>
   );
