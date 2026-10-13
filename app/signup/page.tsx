@@ -8,10 +8,10 @@ import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { useStore } from "@/lib/store";
 import { signInWithGoogle } from "@/lib/supabase/browser";
 import { useT } from "@/lib/i18n";
+import { safeReturnPath } from "@/lib/product-audiences";
 
 function afterAuth(): string {
-  const next = new URLSearchParams(window.location.search).get("next") || "/";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  return safeReturnPath(new URLSearchParams(window.location.search).get("next"));
 }
 
 export default function SignupPage() {
@@ -59,7 +59,7 @@ export default function SignupPage() {
 
   return (
     <Shell>
-      <PageBar title={t("auth.createAccount")} backHref="/login" />
+      <PageBar title={t("auth.createAccount")} backHref={`/login${authSearch}`} />
       <div className="auth">
         <div className="auth-hero mt">
           <img src="/assets/prop-mango-orchard.jpg" width={1080} height={720} alt={t("auth.heroAltSignup")} />

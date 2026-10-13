@@ -3,6 +3,26 @@
 import type { Dict } from "../en";
 
 export const teCore = {
+  "products.heading": "ఒకే చిరునామా. 9bhkను ఉపయోగించడానికి మూడు మార్గాలు.",
+  "products.loginHeading": "9bhkలో మీరు ఏమి చేయాలనుకుంటున్నారు?",
+  "products.label": "మీ 9bhk సేవను ఎంచుకోండి",
+  "products.stays.audience": "అతిథులు",
+  "products.pro.audience": "బ్రోకర్లు మరియు రియల్టర్లు",
+  "products.estates.audience": "కొనుగోలుదారులు మరియు యజమానులు",
+  "products.stays.title": "మీ తదుపరి విహారానికి ఒక పూర్తి ఇల్లు.",
+  "products.stays.description": "వారాంతపు విహారాలు, కుటుంబ కలయికలు మరియు వేడుకల కోసం ప్రైవేట్ ఫామ్‌హౌస్‌లు, బీచ్ ఇళ్లు మరియు విల్లాలను అద్దెకు తీసుకోండి.",
+  "products.pro.title": "మీ ఆస్తులు. మీ కస్టమర్లు. ఒకే కార్యస్థలం.",
+  "products.pro.description": "కస్టమర్ అవసరాలను నిర్వహించండి, మీ ఆస్తుల పోర్ట్‌ఫోలియోను రూపొందించండి మరియు జాబితాలను కొనుగోలుదారులతో పంచుకోండి.",
+  "products.pro.note": "వృత్తిపరమైన సాధనాలను ఉపయోగించడానికి బ్రోకర్ సభ్యత్వం అవసరం.",
+  "products.estates.title": "మీ తదుపరి ఆస్తి ప్రణాళిక ఇక్కడ మొదలవుతుంది.",
+  "products.estates.description": "అమ్మకానికి ఉన్న ఆస్తులను చూడండి, కొనుగోలు విచారణ పంపండి లేదా మీ ఆస్తిని అద్దెకు లేదా అమ్మకానికి జాబితా చేయండి.",
+  "products.stays.action": "వసతిని కనుగొనండి",
+  "products.pro.action": "బ్రోకర్ కార్యస్థలాన్ని తెరవండి",
+  "products.estates.buy": "ఆస్తిని కొనండి",
+  "products.estates.list": "ఆస్తిని జాబితా చేయండి",
+  "products.estates.intent": "నేను చేయాలనుకునేది",
+  "products.loginHint": "ఒక ఎంపికను ఎంచుకుని, క్రింద సైన్ ఇన్ చేయండి.",
+
   // ── Shell / navigation ────────────────────────────────────────────────
   "nav.primary": "ప్రధానం",
   "nav.explore": "వసతులు",

@@ -12,7 +12,7 @@ import { noindexMetadata } from "@/lib/seo/metadata";
  */
 export const metadata: Metadata = noindexMetadata(
   "Sign in",
-  "Sign in to 9bhk.app to book a farmhouse or manage your listing.",
+  "Sign in to 9bhk.app for private stays, broker tools, buying enquiries or property listings.",
   "/login",
 );
 

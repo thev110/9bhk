@@ -210,6 +210,37 @@ p{ text-wrap:pretty; }
 .btn.danger:hover{ background:color-mix(in oklch, var(--danger) 84%, var(--ink)); }
 .btn[disabled], .btn.is-disabled{ opacity:.45; pointer-events:none; }
 
+/* ── Shared product entry points ───────────────────────────────────── */
+.product-entry{ margin:24px var(--gutter) 0; }
+.product-entry-heading{ font-size:17px; font-weight:800; line-height:1.35; letter-spacing:-.015em; margin-bottom:12px; }
+.product-tabs{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; padding:4px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface-2); }
+.product-tabs button{ display:flex; flex-direction:column; justify-content:center; gap:4px; min-width:0; min-height:70px; padding:10px 5px; border:1px solid transparent; border-radius:12px; background:transparent; text-align:center; }
+.product-tabs button[aria-selected="true"]{ background:var(--surface); border-color:var(--border-strong); color:var(--primary); }
+.product-tabs button:hover{ border-color:var(--primary); }
+.product-tabs button:disabled{ opacity:.5; cursor:wait; }
+.product-tab-name{ font-size:12px; font-weight:800; letter-spacing:-.025em; }
+.product-tab-audience{ font-size:10px; line-height:1.3; color:var(--muted); overflow-wrap:anywhere; }
+.product-tabs button[aria-selected="true"] .product-tab-audience{ color:var(--primary); }
+.product-panel{ padding:18px 0 0; }
+.product-panel[hidden]{ display:none; }
+.product-panel h3{ font-size:18px; line-height:1.3; letter-spacing:-.02em; }
+.product-description{ margin-top:8px; font-size:13px; line-height:1.6; color:var(--muted); }
+.product-note{ margin-top:8px; font-size:11.5px; color:var(--moss); }
+.product-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.product-actions .btn{ min-height:44px; }
+.product-entry-login{ margin:20px 0 0; }
+.product-entry-login .product-entry-heading{ font-size:14px; }
+.product-entry-login .product-panel{ padding-top:4px; }
+.product-intents{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.product-intents button{ min-height:44px; padding:8px 12px; border:1px solid var(--border-strong); border-radius:var(--r-sm); background:var(--surface); font-size:12px; font-weight:700; }
+.product-intents button[aria-pressed="true"]{ background:var(--primary); border-color:var(--primary); color:var(--on-primary); }
+.product-intents button:disabled{ opacity:.5; cursor:wait; }
+.product-login-hint{ margin-top:10px; font-size:11.5px; color:var(--moss); }
+@media (max-width:359px){
+  .product-tab-name{ font-size:10.5px; }
+  .product-tab-audience{ font-size:9.5px; }
+}
+
 /* ── media, favourites, badges ─────────────────────────────────────── */
 .media{ position:relative; border-radius:var(--r-lg); overflow:hidden; background:var(--surface-2); }
 /* Cards now render through next/image. The existing rules already size and
