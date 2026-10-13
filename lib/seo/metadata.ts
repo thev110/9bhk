@@ -155,7 +155,7 @@ export function generateHomeMetadata(properties: Property[]): Metadata {
   const band = priceBand(properties);
 
   const description = clampDescription(
-    `Book exclusive whole-house farmhouses, beach houses & luxury villas with private pools across ECR & Chennai. Transparent pricing, verified hosts & Razorpay escrow protection.`,
+    `Explore whole-house farmhouses, beach houses & villas across ECR & Chennai. Host-declared specifications, itemized reservation quotes and secure checkout.`,
   );
 
   return buildMetadata({
@@ -183,7 +183,7 @@ export function generateDevelopersMetadata(): Metadata {
   return buildMetadata({
     title: "Developers & Architecture — Engineering 9bhk",
     description: clampDescription(
-      "Explore the technology powering 9bhk: Next.js 15 App Router, Razorpay escrow webhook pipelines, AEO structured graphs, design tokens, and open integrations.",
+      "Explore the technology powering 9bhk: server-rendered pages, payment reconciliation, structured data, and accessible design components.",
     ),
     path: "/developers",
     image: "/logo-wordmark.png",

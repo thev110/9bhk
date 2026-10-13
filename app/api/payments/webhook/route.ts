@@ -1,98 +1,25 @@
-import { NextResponse } from "next/server";
-import { isCaptureEvent, verifyWebhookSignature } from "@/lib/payments/razorpay";
-import { serviceSupabase } from "@/lib/supabase/service";
 
-/**
- * Razorpay webhook — the only place a share becomes genuinely paid.
- *
- * `payment.captured` is the sole event that settles a share. A
- * `payment.failed`, `payment.authorized` or `refund.processed` must never mark
- * a share paid, and an unrecognised event is acknowledged and ignored rather
- * than guessed at.
- */
+import { NextResponse } from "next/server";
+import { verifyWebhookSignature } from "@/lib/payments/razorpay";
+import { matchesCapturedPayment, type CapturedPayment } from "@/lib/payments/settlement";
+import { serviceSupabase } from "@/lib/supabase/service";
 export async function POST(request: Request) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!secret) {
-    return NextResponse.json(
-      { error: "RAZORPAY_WEBHOOK_SECRET is not configured" },
-      { status: 503 },
-    );
-  }
-
-  // The RAW body, before any JSON parsing. A re-serialised body produces a
-  // different HMAC and every signature check would fail.
+  if (!secret) return NextResponse.json({ error: "Payment webhook is unavailable." }, { status: 503 });
   const raw = await request.text();
-  const signature = request.headers.get("x-razorpay-signature") ?? "";
-
-  if (!(await verifyWebhookSignature(raw, signature, secret))) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-  }
-
-  let event: {
-    event?: string;
-    payload?: { payment?: { entity?: { id?: string; notes?: Record<string, string> } } };
-  };
-  try {
-    event = JSON.parse(raw) as typeof event;
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  if (!isCaptureEvent(event.event ?? "")) {
-    return NextResponse.json({ ok: true, ignored: event.event ?? "unknown" });
-  }
-
+  if (!(await verifyWebhookSignature(raw, request.headers.get("x-razorpay-signature") ?? "", secret))) return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  let event: { event?: string; payload?: { payment?: { entity?: CapturedPayment } } };
+  try { event = JSON.parse(raw); if (!event || typeof event !== "object") throw new Error(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
+  if (event.event !== "payment.captured") return NextResponse.json({ ok: true, ignored: true });
   const payment = event.payload?.payment?.entity;
-  const notes = payment?.notes ?? {};
-  const bookingCode = notes.bookingCode;
-  const hasSlot = notes.slot !== undefined && notes.slot !== null && notes.slot !== "";
-  const slot = Number(notes.slot);
-
-  if (!bookingCode) {
-    return NextResponse.json({ ok: true, ignored: "no bookingCode in payment notes" });
-  }
-
-  const supabase = serviceSupabase();
-  if (!supabase) {
-    return NextResponse.json(
-      { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
-      { status: 503 },
-    );
-  }
-
-  const { data: booking } = await supabase
-    .from("bhk_bookings")
-    .select("id")
-    .eq("code", bookingCode)
-    .maybeSingle();
-
-  if (!booking) {
-    return NextResponse.json({ ok: true, ignored: "booking not found" });
-  }
-
-  if (hasSlot && Number.isInteger(slot)) {
-    // Settle split share
-    await supabase
-      .from("bhk_split_shares")
-      .update({
-        paid: true,
-        paid_at: new Date().toISOString(),
-        payment_ref: payment?.id ?? null,
-      })
-      .eq("booking_id", booking.id)
-      .eq("slot", slot);
-
-    return NextResponse.json({ ok: true, settled: { bookingCode, slot } });
-  }
-
-  // Settle full stay booking
-  await supabase
-    .from("bhk_bookings")
-    .update({
-      status: "confirmed",
-      payment_ref: payment?.id ?? null,
-    })
-    .eq("id", booking.id);
-
-  return NextResponse.json({ ok: true, settled: { bookingCode, fullStay: true } });
+  const eventId = request.headers.get("x-razorpay-event-id");
+  if (!payment || !eventId) return NextResponse.json({ error: "Missing captured payment or event identifier" }, { status: 400 });
+  const service = serviceSupabase();
+  if (!service) return NextResponse.json({ error: "Settlement is unavailable" }, { status: 503 });
+  const { data: intent, error } = await service.from("bhk_payment_orders").select("amount_paise,currency").eq("gateway_order_id", payment.order_id).maybeSingle();
+  if (error || !intent) return NextResponse.json({ error: "Order reconciliation required" }, { status: 503 });
+  if (!matchesCapturedPayment(payment, { orderId: payment.order_id, amount: Number(intent.amount_paise), currency: intent.currency })) return NextResponse.json({ error: "Captured payment does not match stored order" }, { status: 409 });
+  const { data, error: settleError } = await service.rpc("bhk_capture_payment", { p_order: payment.order_id, p_payment: payment.id, p_amount: payment.amount, p_currency: payment.currency, p_event: eventId, p_captured_at: new Date(payment.created_at * 1000).toISOString() });
+  if (settleError) return NextResponse.json({ error: "Settlement failed; retry required" }, { status: 503 });
+  return NextResponse.json({ ok: true, status: data.status });
 }

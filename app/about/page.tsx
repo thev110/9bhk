@@ -58,9 +58,9 @@ export default async function AboutPage() {
         title="Reclaiming authentic gathering in private whole estates"
         lede={
           <p>
-            Not a hotel, and not an apartment-sharing directory. 9bhk is an escrow-protected
+            Not a hotel, and not an apartment-sharing directory. 9bhk is a whole-property
             marketplace built for families, teams, and friend circles to reserve an entire private
-            farmhouse, beach house, or villa — with verified functional specs, transparent pricing,
+            farmhouse, beach house, or villa — with host-declared specs, transparent pricing,
             and total privacy.
           </p>
         }
@@ -109,18 +109,18 @@ export default async function AboutPage() {
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 03 · Institutional Trust</div>
-            <h3>Direct Razorpay Escrow Protection</h3>
+            <h3>Payment Records and Support</h3>
             <p>
-              Your payment is safeguarded in escrow via Razorpay until your arrival. Hosts receive
-              predictable settlements through a 15-day clearance ledger, eliminating fraud for guests
-              and arbitrary chargebacks for owners.
+              Razorpay processes checkout payments. Trips show captured payment and refund request
+              status. Host payout requests are reviewed separately; this is not a promise of escrow
+              or guaranteed dispute outcomes.
             </p>
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 04 · Transparent Economics</div>
-            <h3>Flat 10% Platform Fee, Zero Checkout Traps</h3>
+            <h3>An Itemized Reservation Quote</h3>
             <p>
-              The nightly rate, cleaning fee, and our 10% service fee are itemized upfront. There are
+              The stay, cleaning fee, configured tax and service fees, and any refundable deposit are itemized upfront. There are
               no surprise resort levies, conversion fees, or hidden markups at checkout.
             </p>
           </div>
@@ -176,7 +176,7 @@ export default async function AboutPage() {
           </p>
           <p>
             For estate owners, we unlock predictable monetization for multi-crore idle assets without
-            sacrificing property care. For travelers, we deliver absolute booking security, verified
+            sacrificing property care. For travelers, we deliver booking records, host-declared
             amenities, and seamless split payments.
           </p>
         </div>
@@ -232,7 +232,7 @@ export default async function AboutPage() {
         <div className="seo-copy">
           <p>
             Coverage follows inventory, not ambition. 9bhk currently operates bookable houses across{" "}
-            {destinations.map((summary) => summary.entry.name).join(", ")}, with verified coastal
+            {destinations.map((summary) => summary.entry.name).join(", ")}, with host-declared coastal
             and countryside inventory expanding deliberately.
           </p>
         </div>

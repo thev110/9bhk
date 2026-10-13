@@ -135,12 +135,6 @@ export async function uploadPropertyDocument(input: {
         file_name: input.file.name,
         mime_type: input.file.type,
         size_bytes: input.file.size,
-        // A replaced document goes back to the start of the review line; the
-        // previous verdict was about a different file.
-        status: "pending",
-        note: null,
-        reviewed_by: null,
-        reviewed_at: null,
       },
       { onConflict: "property_id,kind" },
     )
@@ -160,7 +154,8 @@ export async function listPropertyDocuments(propertyId: string): Promise<Propert
     .select(DOCUMENT_COLUMNS)
     .eq("property_id", propertyId)
     .order("created_at", { ascending: true });
-  if (error || !data) return [];
+  if (error) throw error;
+  if (!data) return [];
   return (data as unknown as DocumentRow[]).map(fromRow);
 }
 
@@ -180,7 +175,8 @@ export async function listDocumentsForProperties(
     .select(DOCUMENT_COLUMNS)
     .in("property_id", propertyIds)
     .order("created_at", { ascending: true });
-  if (error || !data) return [];
+  if (error) throw error;
+  if (!data) return [];
   return (data as unknown as DocumentRow[]).map(fromRow);
 }
 
@@ -256,6 +252,6 @@ export async function reviewDocument(input: {
       reviewed_by: data.user?.id ?? null,
       reviewed_at: new Date().toISOString(),
     })
-    .eq("id", input.id);
+    .eq("id", input.id).select("id").single();
   return !error;
 }

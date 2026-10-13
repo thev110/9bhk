@@ -32,6 +32,7 @@ import { settingLabel } from "@/lib/i18n/vibes";
 
 export function Rating({ rating, reviews }: { rating: number; reviews: number }) {
   const t = useT();
+  if (!reviews || !Number.isFinite(rating) || rating <= 0) return null;
   return (
     <span className="rating" aria-label={t("a11y.rating", { rating: rating.toFixed(1), reviews })}>
       <Icon name="star" />
@@ -283,7 +284,7 @@ export function NearbyCard({ property }: { property: Property }) {
   );
 }
 
-export function ResultCard({ property }: { property: Property }) {
+export function ResultCard({ property, searchQuery }: { property: Property; searchQuery?: string }) {
   const t = useT();
   return (
     <article className="rowcard hit">
@@ -306,7 +307,7 @@ export function ResultCard({ property }: { property: Property }) {
       <div className="grow">
         <div className="between">
           <h3 className="p-title">
-            <Link className="hit-link" href={`/property/${property.id}`}>
+            <Link className="hit-link" href={`/property/${property.id}${searchQuery ? `?${searchQuery}` : ""}`}>
               {property.name}
             </Link>
           </h3>

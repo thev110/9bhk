@@ -5,6 +5,8 @@ import { StoreProvider } from "@/lib/store";
 import { AuthSync } from "@/components/auth-sync";
 import { PwaMobileHandler } from "@/components/pwa-mobile";
 import { CatalogProvider } from "@/lib/catalog";
+import { getServerCatalog } from "@/lib/server/catalog";
+import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { CommandMenu } from "@/components/command-menu";
 import { JsonLd } from "@/components/seo/json-ld";
 import { graph, createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
@@ -45,8 +47,6 @@ const telugu = Noto_Sans_Telugu({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: SITE.themeColor,
 };
@@ -123,7 +123,8 @@ export const metadata: Metadata = {
     : {}),
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const initialProperties = await getServerCatalog();
   return (
     <html lang={SITE.lang} className={`${manrope.variable} ${serif.variable} ${tamil.variable} ${telugu.variable}`}>
       <head>
@@ -145,8 +146,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <StoreProvider>
+          <AnalyticsBridge />
           <AuthSync />
-          <CatalogProvider>
+          <CatalogProvider initialProperties={initialProperties}>
             {children}
             <CommandMenu />
           </CatalogProvider>

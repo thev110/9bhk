@@ -23,7 +23,7 @@ export default async function DevelopersPage() {
           createAboutPageSchema({
             name: `Developers & Technical Architecture — ${SITE.displayName}`,
             description:
-              "Explore the technical architecture, escrow pipelines, and engineering design of 9bhk.",
+              "Explore the technical architecture, payment reconciliation, and engineering design of 9bhk.",
             path: "/developers",
           }),
           createBreadcrumbSchema(crumbs),
@@ -37,7 +37,7 @@ export default async function DevelopersPage() {
         lede={
           <p>
             9bhk is engineered for speed, privacy, and absolute contract predictability. Discover the
-            underlying tech stack: Next.js 15 App Router, Razorpay escrow webhook pipelines, AEO
+            underlying tech stack: Next.js 15 App Router, Razorpay payment webhook handling, AEO
             semantic knowledge graphs, and an uncompromising vanilla CSS token system.
           </p>
         }
@@ -49,28 +49,27 @@ export default async function DevelopersPage() {
             <div className="home-seo-card-badge">Pillar 01 · Server-First Performance</div>
             <h3>React Server Components &amp; Edge Delivery</h3>
             <p>
-              9bhk delivers 100% of editorial content, SEO hubs, guides, and JSON-LD structured data as
-              pre-rendered or server-streamed HTML. Zero client-side JS waterfalls, sub-second LCP on 4G
-              cellular networks, and 100/100 Core Web Vitals across mobile and desktop.
+              Editorial pages and structured data render on the server. Interactive account and search
+              features use client components. Performance is measured on the deployed site rather than
+              inferred from the framework.
             </p>
           </div>
           <div className="home-seo-card">
-            <div className="home-seo-card-badge">Pillar 02 · Escrow &amp; Payments</div>
-            <h3>Razorpay Escrow Pipeline &amp; 15-Day Clearance</h3>
+            <div className="home-seo-card-badge">Pillar 02 · Reservations &amp; Payments</div>
+            <h3>Server-Authoritative Payment Reconciliation</h3>
             <p>
-              Guest payments are captured directly through Razorpay and verified with HMAC-SHA256
-              cryptographic signatures. Funds remain safely in escrow until check-in. Host ledger balances
-              unlock with automated 15-day settlement tracking and a clean, itemized 10% platform fee.
+              Reservation holds and expected order amounts are stored before checkout. The server
+              reconciles captured payments before confirmation. Refund and payout requests retain their
+              actual processing status; provider escrow is not assumed.
             </p>
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Pillar 03 · Answer Engine Optimization</div>
             <h3>Semantic Knowledge Graph &amp; llms.txt</h3>
             <p>
-              Every property publishes validated schema.org <code>VacationRental</code> and <code>Product</code>{" "}
-              nodes. Real-time availability, direct host specifications, and FAQ clusters are instantly
-              parseable by search crawlers and AI answer engines like Perplexity, ChatGPT Search, and Google
-              AI Overviews.
+              Property pages publish structured data from public listing facts. VacationRental markup
+              requires complete public location data. Review aggregates require published reviews tied
+              to completed stays.
             </p>
           </div>
           <div className="home-seo-card">
@@ -78,7 +77,7 @@ export default async function DevelopersPage() {
             <h3>OKLCH Design Tokens &amp; Accessible Aesthetics</h3>
             <p>
               Crafted with Vanilla CSS tokens rather than heavyweight utility frameworks. Features spring
-              physics animations, tactile hover states, high-contrast typography meeting WCAG 2.1 AAA standards,
+              physics animations, tactile hover states, focus styles, browser zoom, reduced-motion support,
               and native safe-area inset support for mobile devices.
             </p>
           </div>
@@ -88,7 +87,7 @@ export default async function DevelopersPage() {
       <Section title="Payment Webhook Specifications" id="dev-webhooks">
         <div className="seo-prose">
           <p>
-            Our payments infrastructure integrates with Razorpay webhooks for real-time order and transfer
+            Our payments infrastructure integrates with Razorpay webhooks for captured payment
             reconciliation. Webhooks must be verified using the shared webhook secret:
           </p>
           <aside className="seo-factbox">
@@ -104,11 +103,11 @@ export default async function DevelopersPage() {
               </div>
               <div>
                 <dt>Supported Events</dt>
-                <dd><code>payment.captured</code>, <code>order.paid</code>, <code>refund.processed</code></dd>
+                <dd><code>payment.captured</code>. Other events are acknowledged without financial state changes.</dd>
               </div>
               <div>
                 <dt>Idempotency</dt>
-                <dd>Guaranteed atomic order locking prevents double-booking</dd>
+                <dd>Stored event receipts and database reservation constraints protect settlement</dd>
               </div>
             </dl>
           </aside>

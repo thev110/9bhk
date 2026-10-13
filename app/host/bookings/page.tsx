@@ -1,378 +1,140 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
+import { BaseSheet } from "@/components/base-sheet";
 import { formatRange, inr } from "@/lib/format";
-import { useStore, type Booking } from "@/lib/store";
+import { closureDates } from "@/lib/operations";
+import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
-import type { DictKey } from "@/lib/i18n/en";
+import { browserSupabase } from "@/lib/supabase/browser";
+import { loadHostBookings, loadHostProperties, saveHostRules, type HostProperty } from "@/lib/supabase/properties";
+import { listBookingMessages, operationRequest, sendBookingMessage, type BookingMessage } from "@/lib/supabase/community";
 
-const TABS = [
-  { id: "Upcoming", key: "trips.tabUpcoming" },
-  { id: "Past", key: "trips.tabPast" },
-  { id: "Cancelled", key: "trips.tabCancelled" },
-  { id: "Calendar", key: "host.tabCalendar" },
-  { id: "Earnings", key: "host.earnings" },
-] as const satisfies readonly { id: string; key: DictKey }[];
-
-type TabId = (typeof TABS)[number]["id"];
-
-/** Only the three booking tabs render the list, so only they have empty copy. */
-const EMPTY_KEY: Record<string, DictKey> = {
-  Upcoming: "host.emptyUpcoming",
-  Past: "host.emptyPast",
-  Cancelled: "host.emptyCancelled",
-};
-
-function bucket(status: Booking["status"]): TabId {
-  if (status === "completed") return "Past";
-  if (status === "cancelled") return "Cancelled";
-  return "Upcoming";
-}
+type HostBooking = Awaited<ReturnType<typeof loadHostBookings>>[number];
+type Payout = { id: string; amount: number; status: string; created_at: string };
+type Earnings = { requests: Payout[]; availableAmount: number; lockedAmount: number; grossAmount: number; platformFeeAmount: number; netAmount: number };
+const EMPTY_EARNINGS: Earnings = { requests: [], availableAmount: 0, lockedAmount: 0, grossAmount: 0, platformFeeAmount: 0, netAmount: 0 };
 
 function HostBookings() {
   const params = useSearchParams();
-  const { bookings, user, confirmBooking, cancelBooking, showToast } = useStore();
+  const { user, showToast } = useStore();
   const t = useT();
-  const initial: TabId = params.get("tab") === "earnings" ? "Earnings" : params.get("tab") === "calendar" ? "Calendar" : "Upcoming";
-  const [tab, setTab] = useState<TabId>(initial);
+  const [tab, setTab] = useState(params.get("tab") === "earnings" ? "Earnings" : params.get("tab") === "calendar" ? "Calendar" : "Upcoming");
+  const [bookings, setBookings] = useState<HostBooking[]>([]);
+  const [properties, setProperties] = useState<HostProperty[]>([]);
+  const [earnings, setEarnings] = useState<Earnings>(EMPTY_EARNINGS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
-
-  // ── Earnings & 15-Day Withdrawal State ──
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [payoutUpi, setPayoutUpi] = useState(user?.upiId || "host@okhdfcbank");
-  const [withdrawnTotal, setWithdrawnTotal] = useState(0);
-  const [payoutList, setPayoutList] = useState<
-    Array<{ id: string; amount: number; destination: string; date: string; status: "completed" | "processing" }>
-  >([
-    { id: "PO-7821", amount: 45000, destination: user?.upiId || "host@okhdfcbank", date: "2026-09-15", status: "completed" },
-  ]);
-
-  const rows = bookings.filter((booking) => bucket(booking.status) === tab);
-  const open = bookings.find((booking) => booking.id === openId);
-
-  // 10% platform fee calculation
-  const confirmedBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "completed");
-  const actualGross = confirmedBookings.reduce((sum, b) => sum + b.total, 0);
-  const grossBookings = actualGross > 0 ? actualGross : 124800;
-  const platformFee = Math.round(grossBookings * 0.10); // 10% platform fee
-  const netEarnings = grossBookings - platformFee;
-
-  // 15-day notice/holding period logic
-  const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
-  const now = Date.now();
-
-  const totalEligible = actualGross > 0
-    ? confirmedBookings.reduce((sum, b) => {
-        const bookedTime = new Date(b.checkIn).getTime();
-        const isEligible = now - bookedTime >= FIFTEEN_DAYS_MS;
-        return isEligible ? sum + (b.total - Math.round(b.total * 0.10)) : sum;
-      }, 0)
-    : 72500;
-
-  const availableBalance = Math.max(0, totalEligible - withdrawnTotal);
-  const lockedBalance = Math.max(0, netEarnings - availableBalance - withdrawnTotal);
-
-  function handleWithdraw() {
-    const amt = Number(withdrawAmount) || availableBalance;
-    if (amt <= 0) {
-      showToast("Please enter an amount to withdraw.");
-      return;
-    }
-    if (amt > availableBalance) {
-      showToast(`Cannot withdraw more than available balance (${inr(availableBalance)}).`);
-      return;
-    }
-    if (!payoutUpi.trim()) {
-      showToast("Please provide your UPI ID or bank account.");
-      return;
-    }
-
-    setWithdrawnTotal((prev) => prev + amt);
-    setPayoutList((prev) => [
-      {
-        id: `PO-${Math.floor(1000 + Math.random() * 9000)}`,
-        amount: amt,
-        destination: payoutUpi.trim(),
-        date: new Date().toISOString().slice(0, 10),
-        status: "processing",
-      },
-      ...prev,
+  const [propertyId, setPropertyId] = useState("");
+  const [minimumStay, setMinimumStay] = useState("1");
+  const [weekendPrice, setWeekendPrice] = useState("");
+  const [from, setFrom] = useState("");
+  const [until, setUntil] = useState("");
+  const [seasonalPrice, setSeasonalPrice] = useState("");
+  const [blocks, setBlocks] = useState<string[]>([]);
+  const [rates, setRates] = useState<Array<{ id: string; start_date: string; end_date: string; nightly_price: number }>>([]);
+  const [messages, setMessages] = useState<BookingMessage[]>([]);
+  const [message, setMessage] = useState("");
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [owned, reservations, payments] = await Promise.all([loadHostProperties(), loadHostBookings(), operationRequest<Earnings>("/api/host/payouts")]);
+      setProperties(owned); setBookings(reservations); setEarnings(payments); setError("");
+      setPropertyId(current => current || owned[0]?.id || "");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load your host workspace."); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void reload(); }, [reload, user?.email]);
+  const reloadCalendar = useCallback(async () => {
+    const db = browserSupabase();
+    if (!db || !propertyId) return;
+    const [property, prices] = await Promise.all([
+      db.from("bhk_properties").select("blocked_dates,min_stay,weekend_price").eq("id", propertyId).single(),
+      db.from("bhk_property_rates").select("id,start_date,end_date,nightly_price").eq("property_id", propertyId).order("start_date"),
     ]);
-    setWithdrawOpen(false);
-    setWithdrawAmount("");
-    showToast(`Withdrawal of ${inr(amt)} requested! Settlement in progress via Razorpay.`);
+    if (property.error || prices.error) throw property.error || prices.error;
+    setBlocks(property.data.blocked_dates ?? []); setMinimumStay(String(property.data.min_stay || 1));
+    setWeekendPrice(property.data.weekend_price == null ? "" : String(property.data.weekend_price));
+    setRates(prices.data ?? []);
+  }, [propertyId]);
+  useEffect(() => { void reloadCalendar().catch(reason => showToast(reason.message || "Could not load calendar.")); }, [reloadCalendar, showToast]);
+  useEffect(() => {
+    if (!openId) return;
+    setMessages([]);
+    void listBookingMessages(openId).then(setMessages).catch(reason => showToast(reason.message || "Could not load messages."));
+  }, [openId, showToast]);
+  async function perform(action: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true);
+    try { await action(); }
+    catch (reason) { showToast(reason instanceof Error ? reason.message : "Could not save your changes."); }
+    finally { setBusy(false); }
   }
-
-  return (
-    <Shell>
-      <PageBar title={t("host.bookings")} backHref="/host" />
-      <header className="page-head">
-        <p className="eyebrow">{t("host.workspace")}</p>
-        <h1>{t("host.manageStays")}</h1>
-        <p className="sub">{t("host.manageStaysSub")}</p>
-      </header>
-      <div className="pad">
-        <div className="seg">
-          {TABS.map((item) => (
-            <button key={item.id} type="button" aria-selected={tab === item.id} onClick={() => setTab(item.id)}>
-              {t(item.key)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {tab === "Calendar" ? (
-        <div className="pad mt stack">
-          <div className="legend">
-            <span>{t("host.calendarAvailable")}</span>
-            <span>{t("host.calendarBooked")}</span>
-            <span>{t("host.calendarBlocked")}</span>
-          </div>
-          <div className="card">
-            <h3>{t("host.tonightsRules")}</h3>
-            <div className="sumline">
-              <span className="k">{t("host.minimumStay")}</span>
-              <span>{t("host.nightMany", { n: 2 })}</span>
-            </div>
-            <div className="sumline">
-              <span className="k">{t("host.weekendPrice")}</span>
-              <span>₹8,500 {t("property.perNight")}</span>
-            </div>
-            <div className="sumline">
-              <span className="k">{t("host.checkinWindow")}</span>
-              <span>2 PM – 8 PM</span>
-            </div>
-          </div>
-          <p className="muted">{t("host.blockDatesBodyFull")}</p>
-          <button className="btn block" type="button">
-            {t("host.blockDates")}
-          </button>
-        </div>
-      ) : null}
-
-      {tab === "Earnings" ? (
-        <div className="pad mt stack">
-          <div
-            className="card"
-            style={{
-              background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in oklch, var(--primary) 8%, var(--surface)) 100%)",
-              border: "1.5px solid var(--border)",
-            }}
-          >
-            <div className="between">
-              <div>
-                <p className="muted" style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Available for withdrawal
-                </p>
-                <p className="nb" style={{ fontSize: 34, fontWeight: 800, color: "var(--ok, #18352B)", marginTop: 4 }}>
-                  {inr(availableBalance)}
-                </p>
-              </div>
-              <button
-                className="btn accent sm"
-                type="button"
-                disabled={availableBalance <= 0}
-                onClick={() => {
-                  setWithdrawAmount(String(availableBalance));
-                  setWithdrawOpen(true);
-                }}
-              >
-                Withdraw funds
-              </button>
-            </div>
-            <div className="between mt" style={{ paddingTop: 12, borderTop: "1px solid var(--border)", fontSize: 13 }}>
-              <span className="muted">Held in 15-day notice period:</span>
-              <strong className="num">{inr(lockedBalance)}</strong>
-            </div>
-            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-              Payments remain in escrow for 15 days from booking date to clear guest stay & dispute cooling, then become freely withdrawable with no minimum or maximum limits.
-            </p>
-          </div>
-
-          {withdrawOpen ? (
-            <div className="card stack" style={{ border: "1.5px solid var(--primary)", background: "var(--surface)" }}>
-              <h3>Request withdrawal</h3>
-              <p className="muted" style={{ fontSize: 13 }}>
-                Withdraw any amount up to your available balance ({inr(availableBalance)}). There is no minimum or maximum withdrawal limit.
-              </p>
-              <label className="field">
-                <span>Amount to withdraw (₹)</span>
-                <input
-                  className="ctrl"
-                  type="number"
-                  value={withdrawAmount}
-                  placeholder={String(availableBalance)}
-                  max={availableBalance}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>Payout destination (UPI ID or Bank Account)</span>
-                <input
-                  className="ctrl"
-                  type="text"
-                  value={payoutUpi}
-                  placeholder="name@okhdfcbank or Account+IFSC"
-                  onChange={(e) => setPayoutUpi(e.target.value)}
-                />
-              </label>
-              <div className="row mt">
-                <button className="btn outline" type="button" onClick={() => setWithdrawOpen(false)}>
-                  Cancel
-                </button>
-                <button className="btn grow" type="button" onClick={handleWithdraw}>
-                  Confirm payout
-                </button>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="card">
-            <h3>{t("host.breakdown")}</h3>
-            <div className="sumline">
-              <span className="k">{t("host.grossBookings")}</span>
-              <span className="num">{inr(grossBookings)}</span>
-            </div>
-            <div className="sumline">
-              <span className="k">{t("host.platformFees")}</span>
-              <span className="num" style={{ color: "var(--danger, #A6402E)" }}>−{inr(platformFee)}</span>
-            </div>
-            <div className="sumline total">
-              <span className="k">{t("host.netEarnings")} (90%)</span>
-              <span className="num">{inr(netEarnings)}</span>
-            </div>
-          </div>
-
-          <div className="card">
-            <h3>Payout ledger</h3>
-            <div className="sumline">
-              <span className="k">Total withdrawn</span>
-              <span className="num">{inr(72516 + withdrawnTotal)}</span>
-            </div>
-            <div className="sumline">
-              <span className="k">Service charge policy</span>
-              <span>10% flat per booking</span>
-            </div>
-            <div className="sumline">
-              <span className="k">Notice & cooling period</span>
-              <span>15 days post-payment</span>
-            </div>
-
-            <h4 className="mt" style={{ fontSize: 14, fontWeight: 600 }}>Recent transfers</h4>
-            <div className="stack mt" style={{ gap: 8 }}>
-              {payoutList.map((po) => (
-                <div key={po.id} className="between" style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-                  <div>
-                    <strong>{inr(po.amount)}</strong>
-                    <p className="tiny muted">{po.destination} · {po.date}</p>
-                  </div>
-                  <span className={`pill ${po.status === "completed" ? "ok" : "warn"}`} style={{ fontSize: 11 }}>
-                    {po.status === "completed" ? "Settled" : "Processing"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <p className="muted" style={{ fontSize: 12 }}>
-            Amounts reflect real-time stay payments collected via 9bhk Razorpay gateway. Withdrawals disburse via IMPS/UPI into your nominated account.
-          </p>
-        </div>
-      ) : null}
-
-      {tab !== "Calendar" && tab !== "Earnings" ? (
-        <div className="stack pad mt">
-          {rows.length === 0 ? (
-            <div className="empty">
-              <h3>{t(EMPTY_KEY[tab])}</h3>
-              <p>{t("host.emptyBookingsBody")}</p>
-            </div>
-          ) : (
-            rows.map((row) => (
-              <article className="card" key={row.id}>
-                <div className="between">
-                  <span className={`pill ${row.status === "confirmed" || row.status === "completed" ? "ok" : "warn"}`}>
-                    {row.status === "awaiting" ? t("host.statusAwaiting") : row.status === "confirmed" ? t("booking.statusConfirmed") : row.status === "completed" ? t("booking.statusCompleted") : t("booking.statusCancelled")}
-                  </span>
-                  <strong className="num">{inr(row.total)}</strong>
-                </div>
-                <h3 className="mt">{row.propertyName || row.propertyId}</h3>
-                <p className="muted">
-                  {formatRange(row.checkIn, row.checkOut)} · {t("home.guestCount", { n: row.adults + row.children })}
-                </p>
-                <div className="row mt">
-                  <span className="avatar">{row.guestName.slice(0, 2).toUpperCase()}</span>
-                  <div>
-                    <strong>{row.guestName}</strong>
-                    {row.guestEmail ? <a className="muted" href={`mailto:${row.guestEmail}`}>{row.guestEmail}</a> : <p className="muted">{t("host.noEmail")}</p>}
-                    {row.guestPhone ? <a className="muted" href={`tel:${row.guestPhone.replace(/\s/g, "")}`}>{row.guestPhone}</a> : <p className="muted">{t("host.noPhone")}</p>}
-                  </div>
-                </div>
-                <button className="btn outline sm mt" type="button" onClick={() => setOpenId(row.id)}>
-                  {t("host.viewDetails")}
-                </button>
-              </article>
-            ))
-          )}
-          {open ? (
-            <>
-              <div className="scrim is-open" onClick={() => setOpenId(null)} />
-              <div className="sheet is-open" role="dialog" aria-modal="true" aria-label={t("host.bookingDetails")}>
-                <div className="sheet-grab" />
-                <div className="sheet-head">
-                  <h2>{open.guestName}</h2>
-                  <p className="muted">{t("trips.bookingRef", { code: open.code })}</p>
-                </div>
-                <div className="card">
-                  <div className="sumline"><span className="k">{t("profile.fieldEmail")}</span><span>{open.guestEmail ? <a href={`mailto:${open.guestEmail}`}>{open.guestEmail}</a> : "—"}</span></div>
-                  <div className="sumline"><span className="k">{t("host.fieldPhone")}</span><span>{open.guestPhone ? <a href={`tel:${open.guestPhone.replace(/\s/g, "")}`}>{open.guestPhone}</a> : "—"}</span></div>
-                  <div className="sumline"><span className="k">{t("host.upi")}</span><span>{open.upiId || "—"}</span></div>
-                  <div className="sumline"><span className="k">{t("host.reference")}</span><span>{open.paymentRef || t("host.notAdded")}</span></div>
-                  <div className="sumline total"><span className="k">{t("host.total")}</span><span className="num">{inr(open.total)}</span></div>
-                </div>
-                {open.status === "awaiting" ? (
-                  <button
-                    className="btn block mt"
-                    type="button"
-                    onClick={() => {
-                      confirmBooking(open.id);
-                      showToast(t("host.toastStayConfirmed"));
-                      setOpenId(null);
-                    }}
-                  >
-                    {t("host.confirmStay")}
-                  </button>
-                ) : null}
-                {open.status !== "cancelled" ? (
-                  <button
-                    className="btn ghost block mt"
-                    type="button"
-                    style={{ width: "100%", color: "var(--terracotta)", marginTop: 8 }}
-                    onClick={() => {
-                      cancelBooking(open.id);
-                      showToast("Reservation declined. Dates released on calendar.");
-                      setOpenId(null);
-                    }}
-                  >
-                    {open.status === "awaiting" ? "Decline stay & release dates" : "Cancel stay & release dates"}
-                  </button>
-                ) : null}
-              </div>
-            </>
-          ) : null}
-        </div>
-      ) : null}
-    </Shell>
-  );
+  function datesInRange() {
+    if (!propertyId) throw new Error("Choose your listing first.");
+    return closureDates(from, until);
+  }
+  async function changeBlocks(blocked: boolean) {
+    const dates = datesInRange(), db = browserSupabase();
+    if (!db) throw new Error("Online services are not configured.");
+    const { error: failure } = await db.rpc("bhk_set_blocked_dates", { target_property: propertyId, dates, blocked });
+    if (failure) throw failure;
+    await reloadCalendar(); showToast(blocked ? "Dates blocked." : "Dates reopened.");
+  }
+  async function addRate() {
+    datesInRange();
+    const price = Number(seasonalPrice);
+    if (!Number.isInteger(price) || price <= 0) throw new Error("Enter a positive whole-rupee nightly price.");
+    const db = browserSupabase();
+    if (!db) throw new Error("Online services are not configured.");
+    const { data } = await db.auth.getUser();
+    if (!data.user) throw new Error("Sign in to continue.");
+    const { error: failure } = await db.from("bhk_property_rates").insert({ property_id: propertyId, host_id: data.user.id, start_date: from, end_date: until, nightly_price: price });
+    if (failure) throw failure;
+    await reloadCalendar(); showToast("Date-specific price saved.");
+  }
+  const rows = bookings.filter(row => tab === "Cancelled" ? row.status === "cancelled" : tab === "Past" ? row.status === "completed" : ["awaiting", "confirmed"].includes(row.status));
+  const open = bookings.find(row => row.id === openId);
+  return <Shell>
+    <PageBar title={t("host.bookings")} backHref="/host" />
+    <header className="page-head"><p className="eyebrow">{t("host.workspace")}</p><h1>{t("host.manageStays")}</h1></header>
+    <div className="pad"><div className="seg" role="tablist">{["Upcoming", "Past", "Cancelled", "Calendar", "Earnings"].map(item => <button key={item} role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div></div>
+    <div className="pad mt stack">
+      {loading && <p role="status">Loading your bookings…</p>}{error && <p role="alert">{error}</p>}
+      {tab === "Calendar" && <>
+        <label className="field">Your listing<select className="ctrl" value={propertyId} onChange={e => setPropertyId(e.target.value)}><option value="">Choose a listing</option>{properties.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label>
+        {propertyId && <><div className="card stack"><h3>Booking rules</h3>
+          <label className="field">Minimum nights<input className="ctrl" type="number" min="1" max="90" value={minimumStay} onChange={e => setMinimumStay(e.target.value)} /></label>
+          <label className="field">Saturday / Sunday price (₹; blank uses base price)<input className="ctrl" type="number" min="1" value={weekendPrice} onChange={e => setWeekendPrice(e.target.value)} /></label>
+          <button className="btn" disabled={busy} onClick={() => perform(async () => { await saveHostRules(propertyId, Number(minimumStay), weekendPrice ? Number(weekendPrice) : null); showToast("Booking rules saved."); })}>Save rules</button>
+        </div><div className="card stack"><h3>Dates and seasonal prices</h3>
+          <label className="field">First night<input className="ctrl" type="date" value={from} onChange={e => setFrom(e.target.value)} /></label>
+          <label className="field">Checkout date (not included)<input className="ctrl" type="date" value={until} onChange={e => setUntil(e.target.value)} /></label>
+          <div className="row"><button className="btn" disabled={busy} onClick={() => perform(() => changeBlocks(true))}>Block dates</button><button className="btn outline" disabled={busy} onClick={() => perform(() => changeBlocks(false))}>Reopen dates</button></div>
+          <p className="muted">Blocked nights: {blocks.length ? blocks.join(", ") : "None"}</p>
+          <label className="field">Price per night for this range (₹)<input className="ctrl" type="number" min="1" value={seasonalPrice} onChange={e => setSeasonalPrice(e.target.value)} /></label>
+          <button className="btn outline" disabled={busy} onClick={() => perform(addRate)}>Save date-specific price</button>
+          {rates.map(rate => <div className="between" key={rate.id}><span>{formatRange(rate.start_date, rate.end_date)} · {inr(rate.nightly_price)} / night</span><button className="btn ghost sm" disabled={busy} onClick={() => perform(async () => { const db = browserSupabase(); if (!db) throw new Error("Services unavailable."); const result = await db.from("bhk_property_rates").delete().eq("id", rate.id).select("id").single(); if (result.error) throw result.error; await reloadCalendar(); })}>Remove</button></div>)}
+        </div></>}
+      </>}
+      {tab === "Earnings" && <><div className="card"><h3>Available for withdrawal</h3><p className="nb">{inr(earnings.availableAmount ?? 0)}</p><p className="muted">Eligible captured stay payments, after fees and existing payout requests. Requests are reviewed before transfer.</p>
+        <button className="btn mt" disabled={busy || loading || Boolean(error) || !(earnings.availableAmount > 0)} onClick={() => perform(async () => { await operationRequest("/api/host/payouts", {}); await reload(); showToast("Payout request saved for review."); })}>Request payout</button>
+      </div><div className="card"><h3>Payment breakdown</h3>{[["Captured gross", earnings.grossAmount], ["Platform fees", earnings.platformFeeAmount], ["Net earnings", earnings.netAmount], ["Not yet eligible", earnings.lockedAmount]].map(([label, value]) => <div className="sumline" key={String(label)}><span>{label}</span><span>{inr(Number(value) || 0)}</span></div>)}</div>
+        <div className="card"><h3>Payout requests</h3>{!earnings.requests?.length && <p className="muted">No payout requests yet.</p>}{earnings.requests?.map(row => <div className="sumline" key={row.id}><span>{new Date(row.created_at).toLocaleDateString()} · {row.status}</span><strong>{inr(row.amount)}</strong></div>)}</div></>}
+      {!["Calendar", "Earnings"].includes(tab) && <>{!loading && !rows.length && <p className="muted">No {tab.toLowerCase()} bookings.</p>}{rows.map(row => <article className="card" key={row.id}><div className="between"><span className="pill">{row.status}</span><strong>{inr(row.total)}</strong></div><h3 className="mt">{row.property_name}</h3><p className="muted">{formatRange(row.check_in, row.check_out)} · {row.adults + row.children} guests</p><p>{row.guest_name}</p><button className="btn outline sm mt" onClick={() => setOpenId(row.id)}>View details</button></article>)}</>}
+    </div>
+    <BaseSheet open={Boolean(open)} onOpenChange={value => { if (!value) setOpenId(null); }} title="Booking details">
+      {open && <div className="stack"><h3>{open.property_name}</h3><p>{open.code} · {open.guest_name}</p><p>{formatRange(open.check_in, open.check_out)} · {inr(open.total)}</p><p className="muted">Payment reference: {open.payment_ref || "No captured payment recorded"}</p>
+        {open.guest_email && <a href={`mailto:${open.guest_email}`}>{open.guest_email}</a>}{open.guest_phone && <a href={`tel:${open.guest_phone.replace(/[^+\d]/g, "")}`}>{open.guest_phone}</a>}
+        <h3>Guest conversation</h3>{messages.map(row => <p className="card" key={row.id}>{row.body}<small className="muted"> · {new Date(row.created_at).toLocaleString()}</small></p>)}
+        <label className="field">Message<textarea className="ctrl" value={message} maxLength={4000} onChange={e => setMessage(e.target.value)} /></label><button className="btn" disabled={busy || !message.trim()} onClick={() => perform(async () => { await sendBookingMessage(open.id, message); setMessage(""); setMessages(await listBookingMessages(open.id)); showToast("Message saved."); })}>Send message</button>
+        {["awaiting", "confirmed"].includes(open.status) && <button className="btn outline" disabled={busy} onClick={() => perform(async () => { const result = await operationRequest<{ refundStatus: string }>(`/api/bookings/${encodeURIComponent(open.code)}/cancel`, {}); await reload(); setOpenId(null); showToast(result.refundStatus === "requested" ? "Cancelled. Refund request saved for review." : "Booking cancelled."); })}>Cancel reservation</button>}
+      </div>}
+    </BaseSheet>
+  </Shell>;
 }
-
-export default function HostBookingsPage() {
-  const t = useT();
-  return (
-    <Suspense fallback={<Shell><PageBar title={t("host.bookings")} backHref="/host" /></Shell>}>
-      <HostBookings />
-    </Suspense>
-  );
-}
+export default function HostBookingsPage() { return <Suspense fallback={<Shell><p>Loading bookings…</p></Shell>}><HostBookings /></Suspense>; }

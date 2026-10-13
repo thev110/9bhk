@@ -59,7 +59,7 @@ type ProfileRow = {
  */
 const DECISION_STATUS: Record<ListingDecision, string> = {
   approve: "published",
-  changes: "pending",
+  changes: "draft",
   reject: "rejected",
 };
 
@@ -84,7 +84,8 @@ export async function loadReviewQueue(): Promise<ReviewListing[]> {
     )
     .eq("status", "pending")
     .order("submitted_at", { ascending: false, nullsFirst: false });
-  if (error || !data) return [];
+  if (error) throw error;
+  if (!data) return [];
 
   const rows = data as unknown as PropertyRow[];
   if (rows.length === 0) return [];
@@ -100,7 +101,10 @@ export async function loadReviewQueue(): Promise<ReviewListing[]> {
           .from("bhk_profiles")
           .select("id, full_name, email, created_at")
           .in("id", hostIds)
-          .then(({ data: found }) => (found as unknown as ProfileRow[] | null) ?? [])
+          .then(({ data: found, error: profileError }) => {
+            if (profileError) throw profileError;
+            return (found as unknown as ProfileRow[] | null) ?? [];
+          })
       : Promise.resolve([] as ProfileRow[]),
     listDocumentsForProperties(rows.map((row) => row.id)),
   ]);
@@ -156,6 +160,11 @@ export async function decideListing(input: {
   if (!supabase || !input.id) return false;
 
   const { data } = await supabase.auth.getUser();
+  if (!data.user) return false;
+  if (input.decision === "approve") {
+    const documents = await listDocumentsForProperties([input.id]);
+    if (!["ownership_proof", "tax_receipt", "host_id"].every(kind => documents.some(doc => doc.kind === kind && doc.status === "verified"))) return false;
+  }
   const { error } = await supabase
     .from("bhk_properties")
     .update({
@@ -163,8 +172,12 @@ export async function decideListing(input: {
       review_note: input.note?.trim() || null,
       reviewed_by: data.user?.id ?? null,
       reviewed_at: new Date().toISOString(),
+      ...(input.decision === "approve" ? {
+        verification_status: "verified", verification_type: "Ownership proof, tax receipt and host ID reviewed",
+        verification_date: new Date().toISOString().slice(0, 10), verified_by: data.user.id,
+      } : { verification_status: "unverified", verification_type: null, verification_date: null, verified_by: null }),
     })
-    .eq("id", input.id);
+    .eq("id", input.id).select("id").single();
   return !error;
 }
 
