@@ -8,7 +8,7 @@ import { CatalogProvider } from "@/lib/catalog";
 import { CommandMenu } from "@/components/command-menu";
 import { JsonLd } from "@/components/seo/json-ld";
 import { graph, createOrganizationSchema, createWebsiteSchema } from "@/lib/seo/schema";
-import { SITE, SITE_URL, absoluteUrl, siteVerification } from "@/lib/seo/site";
+import { SITE, SITE_URL, SITE_SOCIAL_PREVIEW, absoluteUrl, siteVerification } from "@/lib/seo/site";
 import { rootMetadataBase } from "@/lib/seo/metadata";
 import "./design.css";
 import "./seo.css";
@@ -90,22 +90,23 @@ export const metadata: Metadata = {
     siteName: SITE.displayName,
     locale: SITE.locale,
     url: absoluteUrl("/"),
-    title: "9bhk.app — private farmhouses, beach houses & villas for groups",
-    description: SITE.description,
+    title: SITE_SOCIAL_PREVIEW.title,
+    description: SITE_SOCIAL_PREVIEW.description,
     images: [
       {
-        url: absoluteUrl("/logo-wordmark.png"),
-        width: 2004,
-        height: 785,
-        alt: "9bhk.app — private stays for groups",
+        url: absoluteUrl(SITE_SOCIAL_PREVIEW.image),
+        width: SITE_SOCIAL_PREVIEW.width,
+        height: SITE_SOCIAL_PREVIEW.height,
+        alt: SITE_SOCIAL_PREVIEW.alt,
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "9bhk.app — private farmhouses, beach houses & villas for groups",
-    description: SITE.description,
-    images: [absoluteUrl("/logo-wordmark.png")],
+    title: SITE_SOCIAL_PREVIEW.title,
+    description: SITE_SOCIAL_PREVIEW.description,
+    images: [{ url: absoluteUrl(SITE_SOCIAL_PREVIEW.image), alt: SITE_SOCIAL_PREVIEW.alt }],
   },
   appleWebApp: {
     capable: true,

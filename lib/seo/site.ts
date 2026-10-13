@@ -54,6 +54,17 @@ export const SITE = {
   phone: undefined as string | undefined,
 } as const;
 
+/** Default card for links shared to the site; dimensions match the shipped PNG. */
+export const SITE_SOCIAL_PREVIEW = {
+  title: "One house. Everyone together. | 9bhk.app",
+  description:
+    "Turn the group chat into a getaway. Explore private farmhouses, beach houses and villas across Chennai & ECR for weekends, reunions and celebrations.",
+  image: "/assets/9bhk-social-preview-v1.png",
+  width: 1672,
+  height: 941,
+  alt: "9bhk.app — One house. Everyone together. Private stays across Chennai and ECR, with a poolside getaway pictured.",
+} as const;
+
 /** Currency used by every published price on 9bhk. */
 export const CURRENCY = "INR";
 

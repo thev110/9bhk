@@ -15,7 +15,7 @@ import type { Property } from "@/lib/properties";
 import { capacityBand, hasPool, inr, isBeachfront, joinList, listingCount, priceBand } from "@/lib/seo/copy";
 import { locationFor, type LocationEntry, type LocationSummary } from "@/lib/seo/locations";
 import { categoryFor, type StayCategory } from "@/lib/seo/taxonomy";
-import { absoluteUrl, resolveCanonical, SITE, SITE_URL, siteVerification } from "@/lib/seo/site";
+import { absoluteUrl, resolveCanonical, SITE, SITE_URL, SITE_SOCIAL_PREVIEW, siteVerification } from "@/lib/seo/site";
 import type { Guide } from "@/lib/content/guides";
 
 /** Clamp a title to a SERF-safe length without cutting mid-word when avoidable. */
@@ -38,6 +38,8 @@ function clampDescription(value: string, max = 158): string {
 export type BuildOptions = {
   title: string;
   description: string;
+  /** Optional sharing headline; the search title stays specific to the page. */
+  socialTitle?: string;
   /** Site-relative path; the canonical is derived from it. */
   path: string;
   image?: string | null;
@@ -72,6 +74,7 @@ export type BuildOptions = {
  * absent dimension is ignored by every consumer, a wrong one is acted upon.
  */
 const OG_IMAGE_DIMENSIONS: Record<string, { width: number; height: number }> = {
+  [SITE_SOCIAL_PREVIEW.image]: { width: SITE_SOCIAL_PREVIEW.width, height: SITE_SOCIAL_PREVIEW.height },
   "/assets/prop-palm-grove.jpg": { width: 800, height: 1000 },
   "/assets/prop-blue-horizon.jpg": { width: 640, height: 640 },
   "/logo-wordmark.png": { width: 2004, height: 785 },
@@ -95,10 +98,11 @@ function ogImage(url: string, alt: string) {
  */
 export function buildMetadata(options: BuildOptions): Metadata {
   const title = clampTitle(options.title);
+  const socialTitle = clampTitle(options.socialTitle ?? options.title);
   const description = clampDescription(options.description);
   const canonical = resolveCanonical(options.canonical ?? options.path);
-  const image = options.image ? absoluteUrl(options.image) : absoluteUrl("/logo-wordmark.png");
-  const imageAlt = options.imageAlt ?? `${SITE.name} — ${SITE.description}`;
+  const image = absoluteUrl(options.image || SITE_SOCIAL_PREVIEW.image);
+  const imageAlt = options.imageAlt ?? (options.image ? `${SITE.name} — ${SITE.description}` : SITE_SOCIAL_PREVIEW.alt);
 
   return {
     /*
@@ -122,7 +126,7 @@ export function buildMetadata(options: BuildOptions): Metadata {
       type: options.type ?? "website",
       url: canonical,
       siteName: SITE.displayName,
-      title,
+      title: socialTitle,
       description,
       locale: SITE.locale,
       images: [ogImage(image, imageAlt)],
@@ -131,9 +135,9 @@ export function buildMetadata(options: BuildOptions): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: socialTitle,
       description,
-      images: [image],
+      images: [{ url: image, alt: imageAlt }],
     },
   };
 }
@@ -149,21 +153,14 @@ export function noindexMetadata(title: string, description: string, path: string
 
 /* ── Per-page generators ─────────────────────────────────────────────── */
 
-export function generateHomeMetadata(properties: Property[]): Metadata {
-  const coastal = properties.filter((property) => property.setting === "seaside").length;
-  const capacity = capacityBand(properties);
-  const band = priceBand(properties);
-
-  const description = clampDescription(
-    `Book exclusive whole-house farmhouses, beach houses & luxury villas with private pools across ECR & Chennai. Transparent pricing, verified hosts & Razorpay escrow protection.`,
-  );
-
+export function generateHomeMetadata(_properties: Property[]): Metadata {
   return buildMetadata({
     title: "9bhk — Luxury Farmhouses, Beach Houses & Private Villas in Chennai & ECR",
-    description,
+    socialTitle: SITE_SOCIAL_PREVIEW.title,
+    description: SITE_SOCIAL_PREVIEW.description,
     path: "/",
-    image: "/assets/prop-palm-grove.jpg",
-    imageAlt: "Private pool and lawn at a 9bhk farmhouse stay in ECR",
+    image: SITE_SOCIAL_PREVIEW.image,
+    imageAlt: SITE_SOCIAL_PREVIEW.alt,
   });
 }
 
