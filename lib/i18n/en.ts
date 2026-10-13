@@ -20,6 +20,27 @@ import { realtorKeys } from "./keys/realtor";
  * English is always the safety net.
  */
 export const en = {
+  // Product entry points share one homepage and one sign-in flow.
+  "products.heading": "One address. Three ways to use 9bhk.",
+  "products.loginHeading": "What brings you to 9bhk?",
+  "products.label": "Choose your 9bhk product",
+  "products.stays.audience": "Guests",
+  "products.pro.audience": "Brokers & Realtors",
+  "products.estates.audience": "Buyers & Owners",
+  "products.stays.title": "A whole house for your next getaway.",
+  "products.stays.description": "Rent private farmhouses, beach houses and villas for weekends, reunions and celebrations.",
+  "products.pro.title": "Your properties. Your clients. One workspace.",
+  "products.pro.description": "Organize client requirements, build your property portfolio and share listings with buyers.",
+  "products.pro.note": "Professional tools require a broker subscription.",
+  "products.estates.title": "Your next property move starts here.",
+  "products.estates.description": "Explore estates for sale, send a buying enquiry, or list your own property for rent or sale.",
+  "products.stays.action": "Find a stay",
+  "products.pro.action": "Open broker workspace",
+  "products.estates.buy": "Buy a property",
+  "products.estates.list": "List a property",
+  "products.estates.intent": "I want to",
+  "products.loginHint": "Choose an option, then sign in below.",
+
   // ── Shell / navigation ────────────────────────────────────────────────
   "nav.primary": "Primary",
   "nav.explore": "Stays",

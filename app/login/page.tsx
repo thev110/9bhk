@@ -6,14 +6,11 @@ import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { OtpField } from "@/components/otp-field";
-import { defaultUser, useStore } from "@/lib/store";
+import { useStore } from "@/lib/store";
 import { signInWithGoogle } from "@/lib/supabase/browser";
 import { useT } from "@/lib/i18n";
-
-function afterAuth(): string {
-  const next = new URLSearchParams(window.location.search).get("next") || "/";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
-}
+import { ProductEntryPoints } from "@/components/product-entry-points";
+import { audienceForDestination, destinationForAudience, destinationForEstateIntent, safeReturnPath, type ProductAudience } from "@/lib/product-audiences";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,10 +27,30 @@ export default function LoginPage() {
   const [phoneError, setPhoneError] = useState("");
   const [busy, setBusy] = useState(false);
   const [authSearch, setAuthSearch] = useState("");
+  const [audience, setAudience] = useState<ProductAudience>("stays");
+  const [requestedDestination, setRequestedDestination] = useState("/");
+  const [destination, setDestination] = useState("/");
 
   useEffect(() => {
     setAuthSearch(window.location.search);
+    const next = safeReturnPath(new URLSearchParams(window.location.search).get("next"));
+    setRequestedDestination(next);
+    setDestination(next);
+    setAudience(audienceForDestination(next));
   }, []);
+
+  const signupParams = new URLSearchParams(authSearch);
+  signupParams.set("next", destination);
+  const signupHref = `/signup?${signupParams.toString()}`;
+
+  function chooseAudience(next: ProductAudience) {
+    setAudience(next);
+    setDestination(destinationForAudience(next, requestedDestination));
+  }
+
+  function chooseEstateDestination(next: string) {
+    setDestination(destinationForEstateIntent(next === "/buy" ? "buy" : "list", requestedDestination));
+  }
 
   function enter(next: { name: string; email: string; phone: string; city: string }) {
     setBusy(true);
@@ -41,7 +58,7 @@ export default function LoginPage() {
       signIn(next);
       markIntro();
       showToast(t("toast.signedIn"));
-      router.push(afterAuth());
+      router.push(destination);
     }, 400);
   }
 
@@ -101,15 +118,15 @@ export default function LoginPage() {
           <div className="stack sm">
             <p className="auth-eyebrow">{t("auth.welcome")}</p>
             <h2 className="auth-title">{t("auth.signInToApp")}</h2>
-            <p className="muted">{t("auth.tagline")}</p>
           </div>
+          <ProductEntryPoints variant="login" value={audience} onChange={chooseAudience} destination={destination} onDestinationChange={chooseEstateDestination} disabled={busy} />
           <div className="stack mt-lg">
             <button
               className="btn block lg"
               type="button"
               disabled={busy}
               onClick={async () => {
-                const started = await signInWithGoogle(afterAuth());
+                const started = await signInWithGoogle(destination);
                 if (!started) showToast(t("auth.googleDisabled"));
               }}
             >
@@ -209,7 +226,7 @@ export default function LoginPage() {
           </div>
           <p className="tiny center mt-lg">
             {t("auth.newToApp")} {" "}
-            <Link className="inline-link" href={`/signup${authSearch}`}>
+            <Link className="inline-link" href={signupHref}>
               {t("auth.createAccount")}
             </Link>
           </p>

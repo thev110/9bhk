@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandBar } from "@/components/shell";
+import { ProductEntryPoints } from "@/components/product-entry-points";
 import { Icon, settingIcon, vibeIcon } from "@/components/icon";
 import { FeatureCard, NearbyCard, RailCard } from "@/components/cards";
 import { SETTINGS, SETTING_LABEL, VIBES } from "@/lib/properties";
@@ -125,6 +126,8 @@ export function HomeExperience({ hero }: { hero?: React.ReactNode }) {
           </button>
         </div>
       </section>
+
+      <ProductEntryPoints />
 
       <section className="section">
         <div className="section-head">

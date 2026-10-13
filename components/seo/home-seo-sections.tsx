@@ -10,6 +10,7 @@ import { locationSummaries, publishableLocations } from "@/lib/seo/locations";
 import { SITE } from "@/lib/seo/site";
 import { CONTENT } from "@/lib/content/guides";
 import { CreatorAttribution } from "@/components/creator-attribution";
+import { IndieStoreBadge } from "@/components/indiestore-badge";
 
 /**
  * Homepage editorial layer.
@@ -322,6 +323,7 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
           <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid color-mix(in oklch, var(--fg) 10%, transparent)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, fontSize: 12.5 }}>
             <span className="muted">© {new Date().getFullYear()} {SITE.displayName}. All rights reserved.</span>
             <CreatorAttribution variant="footer" />
+            <IndieStoreBadge />
           </div>
         </div>
       </section>
