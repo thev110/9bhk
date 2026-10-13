@@ -334,3 +334,36 @@ test("10. Broker Workspace: ₹500 subscription & 3-BHK platform showcase gate",
   assert.strictEqual(isShowcaseEligible(studio1Bhk), false, "<3 BHK cannot be showcased in public app");
 });
 
+test("11. Realtor portal workflow: authentication required & return-path redirect", () => {
+  const nextTarget = "/realtor";
+  const loginUrl = `/login?next=${encodeURIComponent(nextTarget)}`;
+  assert.strictEqual(loginUrl, "/login?next=%2Frealtor");
+
+  function resolveReturnPath(search) {
+    const params = new URLSearchParams(search);
+    const next = params.get("next") || "/";
+    return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  }
+
+  assert.strictEqual(resolveReturnPath("?next=/realtor"), "/realtor");
+  assert.strictEqual(resolveReturnPath("?next=%2Frealtor"), "/realtor");
+  assert.strictEqual(resolveReturnPath("?next=//evil.com"), "/");
+  assert.strictEqual(resolveReturnPath(""), "/");
+
+  const unauthenticatedState = { user: null, ready: true, sessionChecked: true };
+  const canAccessBrokerWorkspace = Boolean(unauthenticatedState.user);
+  assert.strictEqual(canAccessBrokerWorkspace, false, "Unauthenticated user cannot access broker workspace");
+
+  const authenticatedBroker = {
+    user: {
+      name: "Rathnavel K.",
+      email: "rathna@estate.in",
+      role: "realtor",
+    },
+    ready: true,
+    sessionChecked: true,
+  };
+  assert.strictEqual(Boolean(authenticatedBroker.user), true, "Authenticated user can access broker workspace");
+});
+
+

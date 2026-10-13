@@ -30,9 +30,17 @@ export default function RealtorPortalPage() {
     removeRealtorProperty,
     user,
     updateUser,
+    ready,
+    sessionChecked,
   } = useStore();
   const t = useT();
   const { properties } = useCatalog();
+
+  // Route protection: redirect unauthenticated visitors to login with return URL
+  useEffect(() => {
+    if (!ready || !sessionChecked || user) return;
+    router.replace(`/login?next=${encodeURIComponent("/realtor")}`);
+  }, [ready, sessionChecked, user, router]);
 
   const [activeTab, setActiveTab] = useState<"catalog" | "clients">("catalog");
   const [addClientModalOpen, setAddClientModalOpen] = useState(false);
@@ -227,23 +235,99 @@ export default function RealtorPortalPage() {
     setPortfolioModalOpen(false);
   }
 
+  if (!ready || !sessionChecked) {
+    return (
+      <Shell>
+        <PageBar title={t("realtor.portalTitle")} backHref="/buy" />
+        <div className="pad center mt" style={{ padding: "80px 20px", textAlign: "center" }}>
+          <p className="muted">Verifying broker credentials...</p>
+        </div>
+      </Shell>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Shell>
+        <PageBar title={t("realtor.portalTitle")} backHref="/buy" />
+        <div className="pad mt" style={{ maxWidth: 540, margin: "40px auto" }}>
+          <div
+            className="card"
+            style={{
+              padding: 32,
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: "color-mix(in oklch, var(--primary) 12%, var(--surface))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--primary)",
+              }}
+            >
+              <Icon name="shield" style={{ width: 30, height: 30 }} />
+            </div>
+            <div>
+              <span className="pill warn">Authentication Required</span>
+              <h2 style={{ fontSize: 24, marginTop: 12, marginBottom: 8 }}>
+                Broker &amp; Distributor Workspace
+              </h2>
+              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5, margin: "0 auto", maxWidth: 440 }}>
+                This workspace is exclusive to certified real estate agents, brokers, and wealth advisors. Please sign in or create an account to access client mandate tracking, your digital catalog, and presentation mode.
+              </p>
+            </div>
+            <div className="stack" style={{ width: "100%", gap: 10, marginTop: 12 }}>
+              <Link className="btn accent block" href="/login?next=/realtor">
+                {t("auth.signIn")}
+              </Link>
+              <Link className="btn outline block" href="/signup?next=/realtor">
+                {t("auth.createAccount")}
+              </Link>
+              <Link
+                className="btn ghost sm"
+                href="/onboarding"
+                style={{ fontSize: 12, color: "var(--moss)", marginTop: 4 }}
+              >
+                New to 9bhk? Onboard as a Certified Broker →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
+
   return (
     <Shell>
       <PageBar
         title={t("realtor.portalTitle")}
         backHref="/buy"
         right={
-          <button
-            className={`btn sm ${presentationMode ? "accent" : "outline"}`}
-            type="button"
-            onClick={() => {
-              const next = !presentationMode;
-              setPresentationMode(next);
-              showToast(next ? t("realtor.toastPresentationOn") : t("realtor.toastPresentationOff"));
-            }}
-          >
-            {presentationMode ? t("realtor.presentationActive") : t("realtor.presentationMode")}
-          </button>
+          <div className="row" style={{ gap: 8 }}>
+            <Link className="btn sm ghost" href="/profile" title="View Profile">
+              <Icon name="user" /> {user.name ? user.name.split(" ")[0] : "Profile"}
+            </Link>
+            <button
+              className={`btn sm ${presentationMode ? "accent" : "outline"}`}
+              type="button"
+              onClick={() => {
+                const next = !presentationMode;
+                setPresentationMode(next);
+                showToast(next ? t("realtor.toastPresentationOn") : t("realtor.toastPresentationOff"));
+              }}
+            >
+              {presentationMode ? t("realtor.presentationActive") : t("realtor.presentationMode")}
+            </button>
+          </div>
         }
       />
 
@@ -258,11 +342,15 @@ export default function RealtorPortalPage() {
                 <>
                   <strong>{agencyName}</strong>
                   {reraNumber ? t("realtor.agencyRera", { rera: reraNumber }) : ""}
+                  <span style={{ marginLeft: 8, opacity: 0.8 }}>· {user.name} ({user.email})</span>
                 </>
               ) : (
-                <span style={{ fontStyle: "italic" }}>
-                  Agency details not configured · Tap &ldquo;Edit Profile&rdquo; to add your agency &amp; RERA number.
-                </span>
+                <>
+                  <span>Signed in as <strong>{user.name}</strong> ({user.email}) · </span>
+                  <span style={{ fontStyle: "italic" }}>
+                    Agency details not configured · Tap &ldquo;Edit Profile&rdquo; to add your agency &amp; RERA number.
+                  </span>
+                </>
               )}
             </p>
           </div>
@@ -282,6 +370,46 @@ export default function RealtorPortalPage() {
           </div>
         </div>
       </header>
+
+      {/* Incomplete Agency Profile Banner */}
+      {!agencyName && !reraNumber ? (
+        <div className="pad mt">
+          <div
+            className="card"
+            style={{
+              background: "color-mix(in oklch, var(--primary) 8%, var(--surface))",
+              border: "1px dashed var(--primary)",
+              padding: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="pill info">Setup Incomplete</span>
+                <strong>Welcome, {user.name || "Partner"}! Set up your Broker Credentials</strong>
+              </div>
+              <p className="muted" style={{ fontSize: 12.5, marginTop: 4, margin: 0 }}>
+                Add your agency name and RERA registration number so your branded digital catalog and WhatsApp links display your credentials to clients.
+              </p>
+            </div>
+            <button
+              className="btn accent sm"
+              type="button"
+              onClick={() => {
+                setTempAgencyName(agencyName || user.agencyName || "");
+                setTempReraNumber(reraNumber || user.reraNumber || "");
+                setEditProfileModalOpen(true);
+              }}
+            >
+              Configure Agency Profile
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* Presentation Mode Status Banner */}
       {presentationMode ? (
@@ -350,9 +478,9 @@ export default function RealtorPortalPage() {
                   bookingCode={`broker_${Date.now()}`}
                   buttonText="Subscribe for ₹500 / mo"
                   className="btn accent sm"
-                  guestName={user?.name || agencyName || "Broker"}
-                  guestEmail={user?.email || "broker@9bhk.app"}
-                  guestPhone={user?.phone || "+91 99999 99999"}
+                  guestName={user.name || agencyName || "Broker"}
+                  guestEmail={user.email || "broker@9bhk.app"}
+                  guestPhone={user.phone || "+91 99999 99999"}
                   onSuccess={(payment: RazorpayPaymentSuccess) => {
                     setBrokerSubscribed(true, payment.paymentId);
                     showToast(`Broker Workspace active! Payment ID: ${payment.paymentId}`);
