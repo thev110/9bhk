@@ -36,7 +36,7 @@ import { SITE } from "@/lib/seo/site";
  * until the next deploy.
  */
 export const dynamicParams = true;
-export const revalidate = 3600;
+export const revalidate = 60;
 
 type Params = { params: Promise<{ slug: string }> };
 

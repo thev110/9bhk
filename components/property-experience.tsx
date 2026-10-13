@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { PageBar, Shell } from "@/components/shell";
@@ -26,6 +26,9 @@ import { propertyFaq } from "@/lib/seo/faq";
 import { propertyPageSchema } from "@/lib/seo/schema";
 import { relatedWithFallback } from "@/lib/seo/related";
 import { guidesForListing } from "@/lib/content/guides";
+import { listVerifiedReviews } from "@/lib/supabase/community";
+import { bookingQuery } from "@/lib/search-state";
+import { track } from "@/lib/seo/analytics";
 
 /**
  * Interactive half of the property page.
@@ -67,6 +70,19 @@ export function PropertyExperience({
   const [buyerPhone, setBuyerPhone] = useState(user?.phone || "");
   const [buyerNote, setBuyerNote] = useState("");
   const [submittedViewing, setSubmittedViewing] = useState(false);
+  const [submittingViewing, setSubmittingViewing] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [reviews, setReviews] = useState<Awaited<ReturnType<typeof listVerifiedReviews>>>([]);
+  const [tripQuery, setTripQuery] = useState("");
+  const [savingProperty, setSavingProperty] = useState(false);
+
+  useEffect(() => {
+    setTripQuery(bookingQuery(new URLSearchParams(window.location.search)));
+    track("property_view", { propertyId: slug });
+    let active = true;
+    void listVerifiedReviews(slug).then((rows) => { if (active) setReviews(rows); }).catch(() => { if (active) setReviews([]); });
+    return () => { active = false; };
+  }, [slug]);
 
   if (!property) {
     return (
@@ -97,6 +113,8 @@ export function PropertyExperience({
   // Optional, like the garage: a house not set up for functions simply has no
   // event spec, and the page never invents one.
   const celebration = property.celebration;
+  const photos = property.photos?.length ? property.photos : [property.image];
+  const verified = property.verification?.status === "verified";
 
   async function handleRequestViewing(e: React.FormEvent) {
     e.preventDefault();
@@ -105,7 +123,7 @@ export function PropertyExperience({
       showToast(t("toast.needNamePhone"));
       return;
     }
-    setSubmittedViewing(true);
+    setSubmittingViewing(true);
     try {
       await addViewingRequest({
         propertyId: property.id,
@@ -115,14 +133,14 @@ export function PropertyExperience({
         buyerEmail: user?.email,
         notes: buyerNote.trim() || undefined,
       });
-    } catch {
-      /* ignore if offline */
+      setSubmittedViewing(true);
+      track("inquiry", { propertyId: property.id });
+      showToast(t("toast.viewingReceived"));
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "The viewing request could not be saved. Please retry.");
+    } finally {
+      setSubmittingViewing(false);
     }
-    showToast(t("toast.viewingReceived"));
-    setTimeout(() => {
-      setViewingModalOpen(false);
-      setSubmittedViewing(false);
-    }, 2000);
   }
 
   const stats = [
@@ -143,10 +161,17 @@ export function PropertyExperience({
             className="icon-btn"
             type="button"
             aria-pressed={isSaved(property.id)}
+            disabled={savingProperty}
             aria-label={t(isSaved(property.id) ? "a11y.removeName" : "a11y.saveName", { name: property.name })}
-            onClick={() => {
-              toggleSaved(property.id);
-              showToast(t(isSaved(property.id) ? "toast.removed" : "toast.saved", { name: property.name }));
+            onClick={async () => {
+              if (savingProperty) return;
+              const wasSaved = isSaved(property.id);
+              setSavingProperty(true);
+              try {
+                await toggleSaved(property.id);
+                showToast(t(wasSaved ? "toast.removed" : "toast.saved", { name: property.name }));
+              } catch (error) { showToast(error instanceof Error ? error.message : "Could not save this property."); }
+              finally { setSavingProperty(false); }
             }}
           >
             <Icon name={isSaved(property.id) ? "heart-fill" : "heart"} />
@@ -206,9 +231,16 @@ export function PropertyExperience({
           />
         </div>
       </div>
-      <p className="pad muted" style={{ marginTop: 8, fontSize: 13, fontWeight: 700 }}>
-        {t("detail.morePhotos")}
-      </p>
+      <div className="pad" style={{ marginTop: 8 }}>
+        <button className="btn outline sm" type="button" onClick={() => setGalleryOpen(true)}>
+          {photos.length} {photos.length === 1 ? "photo" : "photos"}
+        </button>
+      </div>
+      <BaseSheet open={galleryOpen} onOpenChange={setGalleryOpen} title={property.name}>
+        <div className="stack">
+          {photos.map((src, index) => <Image key={`${src}-${index}`} src={src} width={1000} height={700} sizes="(max-width: 600px) 100vw, 600px" quality={78} alt={`${property.name} — photo ${index + 1}`} style={{ width: "100%", height: "auto", borderRadius: 12 }} />)}
+        </div>
+      </BaseSheet>
 
       <div className="pad mt stack">
         <div>
@@ -246,7 +278,7 @@ export function PropertyExperience({
               <span className="p-sale-tag" style={{ margin: 0, textTransform: "uppercase", fontSize: 12, letterSpacing: ".08em" }}>
                 {t("detail.acquisitionOpportunity")}
               </span>
-              <span className="pill forest" style={{ fontSize: 11 }}>{t("detail.clearTitle")}</span>
+              <span className="pill forest" style={{ fontSize: 11 }}>{verified ? "Verification recorded" : "Owner-supplied details"}</span>
             </div>
             <div className="between mt" style={{ alignItems: "baseline" }}>
               <div>
@@ -254,9 +286,7 @@ export function PropertyExperience({
                   {formatInrCrores(property.salePrice)}
                 </p>
                 <p className="sub" style={{ fontSize: 13, color: "var(--muted)", marginTop: 2 }}>
-                  {t("detail.groundAndTitle", {
-                    ground: property.landArea || t("detail.estateGround"),
-                  })}
+                  {property.landArea || t("detail.estateGround")}
                 </p>
               </div>
               <button
@@ -295,7 +325,7 @@ export function PropertyExperience({
                 <Icon name={settingIcon(property.setting)} style={{ width: 14, height: 14, color: "var(--moss)" }} />
                 {settingLabel(t, property.setting)}
               </span>
-              <span className="sub">{t("detail.subVerifiedSetting")}</span>
+              <span className="sub">Host-declared setting</span>
             </div>
             <div className="spec-box">
               <span className="k">{t("detail.settingDetailLabel")}</span>
@@ -320,7 +350,7 @@ export function PropertyExperience({
           <div>
             <h3 className="sec-title">{t("detail.shorelineTitle")}</h3>
             <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-              {t("detail.shorelineBody")}
+              Beach access and frontage below are declared by the host. Confirm access arrangements before booking.
             </p>
             <div className="spec-grid">
               <div className="spec-box">
@@ -329,22 +359,21 @@ export function PropertyExperience({
                   <Icon name="waves" style={{ width: 14, height: 14, color: "var(--moss)" }} />
                   {property.beachFrontage}
                 </span>
-                <span className="sub">{t("detail.subUninterrupted")}</span>
+                <span className="sub">Host-declared frontage</span>
               </div>
               <div className="spec-box">
                 <span className="k">{t("detail.highTideLine")}</span>
-                <span className="v">{t("detail.meters", { n: property.tideDistanceMeters ?? 0 })}</span>
-                <span className="sub">{t("detail.subDirectOcean")}</span>
+                <span className="v">{property.tideDistanceMeters == null ? "Not specified" : t("detail.meters", { n: property.tideDistanceMeters })}</span>
+                <span className="sub">Host-declared distance</span>
               </div>
               <div className="spec-box">
                 <span className="k">{t("detail.sandAccess")}</span>
-                <span className="v">{t("detail.privateBoardwalk")}</span>
-                <span className="sub">{t("detail.subGateToDune")}</span>
+                <span className="v">{property.privateBeachAccess ? "Host lists private beach access" : "Ask the host about beach access"}</span>
               </div>
               <div className="spec-box">
                 <span className="k">{t("detail.coastalZone")}</span>
                 <span className="v">{property.coastalZone}</span>
-                <span className="sub">{t("detail.subVerifiedClearance")}</span>
+                <span className="sub">Host-declared coastal zone</span>
               </div>
             </div>
           </div>
@@ -468,12 +497,16 @@ export function PropertyExperience({
         <div>
           <h3 className="sec-title">{t("detail.covenantsTitle")}</h3>
           <ul className="stack sm" style={{ paddingLeft: 18, marginTop: 10 }}>
-            <li>{t("detail.covenant1")}</li>
-            <li>{t("detail.covenant2")}</li>
-            <li>{t("detail.covenant3")}</li>
-            <li>{t("detail.covenant4")}</li>
+            {(property.houseRules?.length ? property.houseRules : ["Confirm arrival and departure times with the host.", "Ask the host about event permissions and quiet hours before booking."]).map((rule) => <li key={rule}>{rule}</li>)}
           </ul>
         </div>
+
+        {reviews.length > 0 ? (
+          <section aria-label="Reviews from verified stays" className="stack">
+            <h3 className="sec-title">Reviews from verified stays</h3>
+            {reviews.map((review) => <article className="card" key={review.id}><strong>{review.rating}/5 · Verified stay</strong><p className="mt">{review.body}</p></article>)}
+          </section>
+        ) : null}
 
         <PropertySeoBlocks property={property} variant="tail" serverSchema={schema} />
       </div>
@@ -539,8 +572,8 @@ export function PropertyExperience({
                 className="btn"
                 href={
                   user
-                    ? `/book/${property.id}`
-                    : `/login?next=${encodeURIComponent(`/book/${property.id}`)}`
+                    ? `/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`
+                    : `/login?next=${encodeURIComponent(`/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`)}`
                 }
               >
                 {t("action.reserveStay")}
@@ -553,7 +586,7 @@ export function PropertyExperience({
       {/* Private Walkthrough / Acquisition Modal */}
       <BaseSheet
         open={viewingModalOpen}
-        onOpenChange={setViewingModalOpen}
+        onOpenChange={(open) => { setViewingModalOpen(open); if (!open) setSubmittedViewing(false); }}
         title={t("buy.scheduleWalkthrough")}
       >
         {submittedViewing ? (
@@ -561,9 +594,9 @@ export function PropertyExperience({
             <div className="pill ok" style={{ margin: "0 auto", padding: "8px 16px" }}>
               {t("buy.requestReceived")}
             </div>
-            <h3 style={{ marginTop: 12 }}>{t("buy.advisorAssigned")}</h3>
+            <h3 style={{ marginTop: 12 }}>Viewing request saved</h3>
             <p className="muted" style={{ fontSize: 13 }}>
-              {t("detail.tourBody")}
+              Your request is pending scheduling. You will be contacted once a time is confirmed.
             </p>
           </div>
         ) : (
@@ -605,8 +638,8 @@ export function PropertyExperience({
             </label>
             <div className="between mt">
               <span className="pill forest">{t("detail.confidentialDirect")}</span>
-              <button className="btn accent" type="submit">
-                {t("action.confirmWalkthrough")}
+              <button className="btn accent" type="submit" disabled={submittingViewing}>
+                {submittingViewing ? "Saving…" : t("action.confirmWalkthrough")}
               </button>
             </div>
           </form>

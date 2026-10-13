@@ -150,8 +150,8 @@ export default function ProfilePage() {
         <button
           className="btn outline"
           type="button"
-          onClick={() => {
-            signOut();
+          onClick={async () => {
+            try { await signOut(); } catch (e) { showToast(e instanceof Error ? e.message : "Could not sign out."); return; }
             showToast(t("toast.signedOut"));
           }}
         >
@@ -176,7 +176,7 @@ export default function ProfilePage() {
             </label>
             <label className="field">
               {t("profile.fieldEmail")}
-              <input className="ctrl" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <input type="email" className="ctrl" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               <span className="help">{t("profile.fieldEmailHelp")}</span>
             </label>
             <label className="field">
@@ -228,10 +228,9 @@ export default function ProfilePage() {
             <button
               className="btn block"
               type="button"
-              onClick={() => {
-                updateUser(form);
-                setEditing(false);
-                showToast(t("toast.savedChanges"));
+              onClick={async () => {
+                try { await updateUser(form); setEditing(false); showToast(t("toast.savedChanges")); }
+                catch (e) { showToast(e instanceof Error ? e.message : "Profile was not saved."); }
               }}
             >
               {t("action.saveChanges")}

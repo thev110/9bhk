@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { ResultCard } from "@/components/cards";
@@ -14,6 +14,7 @@ import { filterLabel, settingLabel } from "@/lib/i18n/vibes";
 import { useStore } from "@/lib/store";
 import { isPastDate, isRangeAvailable, monthMatrix, nightsBetween, occupiedNights } from "@/lib/availability";
 import { useCalendarStart } from "@/lib/use-calendar";
+import { validIsoDay } from "@/lib/search-state";
 
 function settingFromLabel(label: string): Setting | null {
   return SETTINGS.find((s) => SETTING_LABEL[s] === label) ?? null;
@@ -35,11 +36,12 @@ export function SearchScreen() {
   const initialVibe = params.get("vibe") ?? "";
   const initialSetting = settingFromLabel(params.get("setting") ?? "");
   const initialCity = params.get("city") ?? "";
-  const initialGuests = Number(params.get("guests") || 2);
+  const requestedGuests = Number(params.get("guests") || 2);
+  const initialGuests = Number.isInteger(requestedGuests) && requestedGuests >= 1 && requestedGuests <= 100 ? requestedGuests : 2;
 
   const [q, setQ] = useState(initialQ);
-  const [sort, setSort] = useState("recommended");
-  const [active, setActive] = useState<string[]>(initialVibe ? [initialVibe] : []);
+  const [sort, setSort] = useState(params.get("sort") ?? "recommended");
+  const [active, setActive] = useState<string[]>(initialVibe ? initialVibe.split(",").filter((value) => FILTERS.includes(value as typeof FILTERS[number])) : []);
   const [setting, setSetting] = useState<Setting | null>(initialSetting);
   const [city, setCity] = useState(initialCity);
   const [guests, setGuests] = useState(initialGuests);
@@ -48,13 +50,25 @@ export function SearchScreen() {
   // Live occupancy from the database merged with this device's bookings, so a
   // weekend taken by someone else filters the listing out instead of showing
   // the house as free.
-  const { occupancies } = useStore();
+  const { occupancies, availabilityReady } = useStore();
   // Opens on the current month. Resolved after mount rather than during render,
   // because the server renders this page too, and "today" on the server is not
   // necessarily "today" for the viewer.
   const { cursor, today, goToMonth, canGoBack } = useCalendarStart();
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState(validIsoDay(params.get("checkIn") ?? "") ? params.get("checkIn")! : "");
+  const [checkOut, setCheckOut] = useState(validIsoDay(params.get("checkOut") ?? "") ? params.get("checkOut")! : "");
+  const searchQuery = useMemo(() => {
+    const query = new URLSearchParams();
+    if (q.trim()) query.set("q", q.trim());
+    if (city) query.set("city", city);
+    if (setting) query.set("setting", SETTING_LABEL[setting]);
+    if (active.length) query.set("vibe", active.join(","));
+    if (guests) query.set("guests", String(guests));
+    if (sort !== "recommended") query.set("sort", sort);
+    if (checkIn && checkOut > checkIn) { query.set("checkIn", checkIn); query.set("checkOut", checkOut); }
+    return query.toString();
+  }, [q, city, setting, active, guests, sort, checkIn, checkOut]);
+  useEffect(() => { window.history.replaceState(null, "", `/search${searchQuery ? `?${searchQuery}` : ""}`); }, [searchQuery]);
 
   /** Occupied nights per property, computed once for the whole grid. */
   const nightMap = useMemo(() => {
@@ -87,13 +101,13 @@ export function SearchScreen() {
     // Dates are a hard filter, not a sort: a house with a clashing booking
     // cannot be shown as an available result at all.
     if (checkIn && checkOut) {
-      list = list.filter((p) => isRangeAvailable(p, occupancies, { checkIn, checkOut }));
+      list = availabilityReady ? list.filter((p) => nights >= (p.minStay ?? 2) && isRangeAvailable(p, occupancies, { checkIn, checkOut })) : [];
     }
     if (sort === "low") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
     if (sort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
     return list;
-  }, [q, sort, active, setting, city, guests, properties, checkIn, checkOut, occupancies]);
+  }, [q, sort, active, setting, city, guests, properties, checkIn, checkOut, occupancies, availabilityReady, nights]);
 
   function toggle(filter: string) {
     setActive((curr) => (curr.includes(filter) ? curr.filter((f) => f !== filter) : [...curr, filter]));
@@ -215,8 +229,8 @@ export function SearchScreen() {
 
       {results.length === 0 ? (
         <div className="empty">
-          <h3>{t("search.emptyTitle")}</h3>
-          <p>{t("search.emptyBody")}</p>
+          <h3>{checkIn && checkOut && !availabilityReady ? "Availability is not verified" : t("search.emptyTitle")}</h3>
+          <p>{checkIn && checkOut && !availabilityReady ? "Live availability has not been loaded. Clear the dates to browse listings, or retry when the marketplace is available." : t("search.emptyBody")}</p>
           <button
             className="btn sm mt"
             type="button"
@@ -226,6 +240,8 @@ export function SearchScreen() {
               setCity("");
               setQ("");
               setGuests(2);
+              setCheckIn("");
+              setCheckOut("");
             }}
           >
             {t("search.clearAll")}
@@ -234,7 +250,7 @@ export function SearchScreen() {
       ) : (
         <div className="list-stack pad mt" role="list">
           {results.map((p) => (
-            <ResultCard key={p.id} property={p} />
+            <ResultCard key={p.id} property={p} searchQuery={searchQuery} />
           ))}
         </div>
       )}

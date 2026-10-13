@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { signIn, showToast } = useStore();
+  const { user, updateUser, showToast } = useStore();
   const t = useT();
 
   const [step, setStep] = useState<"role" | "details" | "complete">("role");
@@ -34,39 +34,18 @@ export default function OnboardingPage() {
 
   const [busy, setBusy] = useState(false);
 
-  function handleComplete() {
-    if (!name.trim()) {
-      showToast(t("onboarding.toastNeedName"));
-      return;
-    }
+  async function handleComplete() {
+    if (!user) { router.push("/login?next=/onboarding"); return; }
+    if (!name.trim()) { showToast(t("onboarding.toastNeedName")); return; }
     setBusy(true);
-
-    const newUser = {
-      ...defaultUser,
-      name: name.trim(),
-      phone: phone.trim() || "+91 98400 00000",
-      city: city || "Chennai",
-      role,
-      agencyName: role === "realtor" ? agencyName.trim() : undefined,
-      reraNumber: role === "realtor" ? reraNumber.trim() : undefined,
-      verifiedBroker: role === "realtor",
-    };
-
-    signIn(newUser);
-
-    setTimeout(() => {
-      setBusy(false);
-      if (role === "realtor") {
-        showToast(t("onboarding.toastRealtorActivated"));
-        router.push("/realtor");
-      } else if (role === "seller") {
-        showToast(t("onboarding.toastSellerWelcome"));
-        router.push("/host/new");
-      } else {
-        showToast(t("onboarding.toastBuyerWelcome"));
-        router.push(buyerIntent === "buy" ? "/buy" : "/");
-      }
-    }, 600);
+    try {
+      await updateUser({ name: name.trim(), phone: phone.trim(), city, role,
+        agencyName: role === "realtor" ? agencyName.trim() : undefined,
+        reraNumber: role === "realtor" ? reraNumber.trim() : undefined });
+      showToast("Profile saved. Broker verification is reviewed separately.");
+      router.push(role === "realtor" ? "/realtor" : role === "seller" ? "/host/new" : buyerIntent === "buy" ? "/buy" : "/");
+    } catch (e) { showToast(e instanceof Error ? e.message : "Profile was not saved."); }
+    finally { setBusy(false); }
   }
 
   return (

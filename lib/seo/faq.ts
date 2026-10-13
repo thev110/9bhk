@@ -147,7 +147,7 @@ export function propertyFaq(property: Property): QA[] {
 
   items.push({
     question: "How do I book it?",
-    answer: `Open the listing and choose Reserve. A booking is a request until the host confirms it. Once confirmed, payment is completed securely through Razorpay escrow, holding the funds until check-in.`,
+    answer: `Open the listing and choose Reserve. Review the server quote and create a short-lived date hold before checkout. Confirmation follows reconciliation of a captured Razorpay payment.`,
   });
 
   return items;
@@ -231,7 +231,7 @@ export function categoryFaq(
   items.push({
     question: `How do I book a ${category.singular.toLowerCase()} on 9bhk?`,
     answer:
-      "Open a listing and choose Reserve. You pick your dates, the host confirms the request, and payment is processed securely via Razorpay escrow with complete guest protection until check-in.",
+      "Open a listing and choose Reserve. Pick available dates, review the itemized server quote, and pay through Razorpay. Confirmation follows captured-payment reconciliation.",
   });
 
   return items;
@@ -304,70 +304,14 @@ export function locationFaq(
 /** Platform-level Q&A for /faq. Facts only. */
 export function platformFaq(): QA[] {
   return [
-    {
-      question: "What is 9bhk (9bhk.app)?",
-      answer:
-        "9bhk (9bhk.app) is an online marketplace for verified whole-property private farmhouses, beach houses, and luxury villas in Chennai, ECR (East Coast Road), Mahabalipuram, and Pondicherry. Rather than renting single hotel rooms, 9bhk provides exclusive whole-estate reservations with private pools and lawns for group stays, family reunions, creator shoots, and private celebrations.",
-    },
-    {
-      question: "What does 9BHK mean, and is 9bhk.app just a 9-bedroom house?",
-      answer:
-        "In Indian residential real estate, 'BHK' stands for Bedroom, Hall, and Kitchen. While a literal 9BHK property denotes a large 9-bedroom mansion, 9bhk.app is the dedicated digital platform named in honor of grand gathering estates. All properties listed on 9bhk feature a minimum of 3 BHK up to 9+ BHK private compounds, ensuring every reservation is an expansive, whole-house private estate with no shared strangers.",
-    },
-    {
-      question: "What problem does 9bhk solve for group travel?",
-      answer:
-        "Booking a private farmhouse or villa in South India has traditionally been an unverified, high-risk process dominated by informal brokers, fake photos, and unbacked deposits. Groups often arrive to find under-maintained pools, inadequate electrical loads that trip under sound systems, or surprise caretaker charges. 9bhk solves this by verifying property specs directly from owners, enforcing transparent pricing, and protecting every booking with Razorpay escrow.",
-    },
-    {
-      question: "How is 9bhk different from Airbnb, MakeMyTrip, or local brokers?",
-      answer:
-        "Unlike mass OTAs and informal brokers, 9bhk enforces three clear standards: (1) Strictly whole properties with a 3-bedroom floor — zero shared spaces or individual room bookings. (2) Verified functional specs — we declare actual electrical kW, generator capacity, sound curfews, and beach frontage. (3) Transparent escrow protection — a flat 10% platform fee with zero surprise checkout markups, holding funds safely until check-in with a 15-day host settlement clearance.",
-    },
-    {
-      question: "Who is 9bhk built for, and why does it focus on whole-house gathering?",
-      answer:
-        "9bhk is built for groups who need private space to be together: extended families celebrating reunions, founders hosting leadership offsites, creative teams filming campaigns, and close friend groups. Modern travel isolates groups into separate hotel rooms; 9bhk provides a communal living room, private pool, dining area, and grounds exclusively for your circle.",
-    },
-    {
-      question: "What impact is 9bhk creating in the estate rental economy?",
-      answer:
-        "9bhk brings institutional transparency and contract predictability to the luxury private estate ecosystem. We help property owners monetize multi-crore private farmhouses and beach villas safely with vetted guests, while giving families and groups guaranteed booking security and scam-free hospitality.",
-    },
-    {
-      question: "Where does 9bhk have properties?",
-      answer:
-        "The 9bhk catalog covers the Chennai coast — ECR, Mahabalipuram, the northern beach road and city neighbourhoods — plus Pondicherry, the Kanchipuram and Chengalpattu countryside, and the Tamil Nadu hill stations.",
-    },
-    {
-      question: "Do I book a room or the whole house?",
-      answer:
-        "Always the whole house. Every listing on 9bhk is a private estate reserved exclusively for your dates, which is why bedrooms start at three and pricing is per house rather than per person.",
-    },
-    {
-      question: "How does booking and payment work?",
-      answer:
-        "You select your dates and submit a booking request. Once the host confirms, you pay securely through Razorpay using UPI, cards, or netbanking. Your payment is held in escrow until check-in. The total price comprises the nightly rate, cleaning fee, and 10% platform service fee, all itemized upfront with zero hidden charges.",
-    },
-    {
-      question: "How do cancellations and refunds work?",
-      answer:
-        "Our standard policy provides a full refund up to 7 days before check-in, 50% refund up to 48 hours before check-in, and non-refundable within 48 hours. Refunds are processed automatically through the original payment method.",
-    },
-    {
-      question: "Can I list my farmhouse or villa on 9bhk?",
-      answer:
-        "Yes. Owners of private whole-house properties can apply to list. Our team verifies the property's specifications, electrical load, amenities, and ownership before publishing.",
-    },
-    {
-      question: "Is 9bhk also a property sales marketplace?",
-      answer:
-        "Yes. Select private estates are also available for outright acquisition, displaying verified land area, title disclosures, and asking prices directly on the listing.",
-    },
-    {
-      question: "What specifications are verified on a listing?",
-      answer:
-        "We verify bedroom and bathroom counts, sleeping capacity, swimming pool filtration, electrical load in kW, backup generator capacity, sound curfew hours, vehicle parking slots, and exact high-tide coastal distance for beachfront properties.",
-    },
+    { question: "What is 9bhk (9bhk.app)?", answer: "9bhk is a marketplace for whole-property farmhouses, beach houses, and villas for private group stays. Public listings require at least three bedrooms." },
+    { question: "Do I book a room or the whole house?", answer: "Listings are for the whole property, with capacity, amenities, and house rules declared by the host." },
+    { question: "How does booking and payment work?", answer: "Sign in, choose an available date range, and review the itemized reservation quote. A short-lived hold reserves the dates before Razorpay checkout. A booking is confirmed only after the server reconciles a captured payment." },
+    { question: "What is included in the quote?", answer: "The quote itemizes the nightly stay, cleaning, configured taxes and service fees, and any refundable security deposit. The final server quote is shown before payment." },
+    { question: "How do cancellations and refunds work?", answer: "Cancellation eligibility depends on the reservation dates and recorded policy. A refund request is tracked separately from cancellation; requested does not mean the gateway has refunded the payment. Check the trip status or contact support." },
+    { question: "Are all listing details verified?", answer: "Specifications are supplied by the host. A verification label appears only when a review has been recorded. Published reviews must be tied to a completed stay." },
+    { question: "Can I list my farmhouse or villa?", answer: "Owners can save a draft and submit supporting documents for review. Publication and verification are controlled by staff." },
+    { question: "Can groups split the payment?", answer: "A reservation can be funded by separate group shares before it is paid in full. Share status comes from captured gateway payments. A fully paid reservation cannot be charged again through Split Pay." },
+    { question: "Is 9bhk also a property sales marketplace?", answer: "Some listings include an asking price and a viewing-request option. A listing or document review is not a guarantee of clear legal title." },
   ];
 }

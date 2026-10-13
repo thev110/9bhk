@@ -172,24 +172,24 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
             </p>
           </div>
           <div className="home-seo-card">
-            <div className="home-seo-card-badge">02 · Verified Direct Specs</div>
+            <div className="home-seo-card-badge">02 · Host-declared Specs</div>
             <h3>The specification is the host&apos;s own</h3>
             <p>
-              Capacity, bedrooms, amenities, generator capacity, and beach frontage are declared directly by verified owners. 9bhk never inflates specs or creates synthetic amenities.
+              Capacity, bedrooms, amenities, generator capacity, and beach frontage are supplied by the host. Verification is shown only when a review has been recorded.
             </p>
           </div>
           <div className="home-seo-card">
-            <div className="home-seo-card-badge">03 · Escrow Protection</div>
-            <h3>Direct Razorpay escrow protection</h3>
+            <div className="home-seo-card-badge">03 · Payment Records</div>
+            <h3>Secure checkout and payment tracking</h3>
             <p>
-              Your payment is safeguarded in escrow via Razorpay until check-in. Hosts receive transparent payouts following a 15-day clearance window, ensuring full dispute protection.
+              Payment is processed through Razorpay. Your trip records the captured payment, cancellation, and refund request status. Host payout requests are reviewed separately; a checkout payment does not itself establish escrow.
             </p>
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">04 · Transparent Fee</div>
             <h3>One clear total, zero checkout surprises</h3>
             <p>
-              The nightly rate, cleaning fee, and standard 10% platform fee are itemized upfront. No hidden resort fees or inflated final screens when you confirm your reservation.
+              The reservation quote itemizes the stay, cleaning, configured tax and service fees, and any refundable deposit before checkout.
             </p>
           </div>
         </div>
@@ -211,11 +211,11 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
             location context are all on the page before you enquire.
           </li>
           <li>
-            <strong>Send a booking request.</strong> Pick your dates. The request stays pending
-            until the host confirms it.
+            <strong>Reserve your dates.</strong> Pick your dates and create a short-lived reservation
+            hold before payment.
           </li>
           <li>
-            <strong>Confirm with secure payment.</strong> Pay seamlessly with UPI or card via Razorpay escrow. Funds are held safely with clear cancellation protections until your arrival.
+            <strong>Confirm with secure payment.</strong> Pay through Razorpay. Confirmation follows server reconciliation of a captured payment; cancellation and refund status remain visible in your trip.
           </li>
         </ol>
       </section>

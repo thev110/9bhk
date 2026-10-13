@@ -72,6 +72,11 @@ export type Property = {
   bathrooms: number;
   price: number;
   cleaning: number;
+  deposit?: number;
+  minStay?: number;
+  taxRate?: number;
+  platformFeeRate?: number;
+  photos?: string[];
   highlights: string;
   searchLine: string;
   amenities: string[];

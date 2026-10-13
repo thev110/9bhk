@@ -1,4 +1,6 @@
+import "server-only";
 import { toPaise } from "@/lib/split";
+import type { CapturedPayment } from "@/lib/payments/settlement";
 
 /**
  * Razorpay integration points.
@@ -131,6 +133,7 @@ export async function createOrder(request: OrderRequest): Promise<RazorpayOrder>
       Authorization: `Basic ${btoa(`${env.keyId}:${env.keySecret}`)}`,
     },
     body: JSON.stringify(buildOrderPayload(request)),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!response.ok) {
@@ -185,5 +188,13 @@ export async function verifyWebhookSignature(
  * else is informational — a `payment.failed` must never release a stay.
  */
 export function isCaptureEvent(event: string): boolean {
-  return event === "payment.captured" || event === "order.paid";
+  return event === "payment.captured";
+}
+
+export async function fetchPayment(paymentId: string): Promise<CapturedPayment> {
+  const env = readRazorpayEnv();
+  if (!env || !/^pay_[a-zA-Z0-9]+$/.test(paymentId)) throw new Error("Payment verification unavailable");
+  const response = await fetch(`${RAZORPAY_API}/payments/${encodeURIComponent(paymentId)}`, { headers: { Authorization: `Basic ${btoa(`${env.keyId}:${env.keySecret}`)}` }, cache: "no-store", signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error("Payment provider verification failed");
+  return await response.json() as CapturedPayment;
 }

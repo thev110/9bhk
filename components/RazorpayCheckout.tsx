@@ -1,24 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { accessToken } from "@/lib/supabase/browser";
 
 export interface RazorpayPaymentSuccess {
   paymentId: string;
   orderId: string;
   signature: string;
+  bookingCode?: string;
+  total?: number;
+  status?: string;
 }
 
 interface RazorpayCheckoutProps {
   amount: number; // In rupees
   propertyName?: string;
   bookingCode?: string;
+  bookingId?: string;
+  kind?: "booking" | "subscription";
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
-  onSuccess?: (result: RazorpayPaymentSuccess) => void;
+  onSuccess?: (result: RazorpayPaymentSuccess) => void | Promise<void>;
   onError?: (error: Error) => void;
   onDismiss?: () => void;
   onBeforeCheckout?: () => boolean | Promise<boolean>;
+  prepareCheckout?: () => Promise<{ bookingId: string }>;
   buttonText?: string;
   className?: string;
   disabled?: boolean;
@@ -37,6 +44,8 @@ export function RazorpayCheckout({
   amount,
   propertyName = "9bhk Stay",
   bookingCode,
+  bookingId,
+  kind = "booking",
   guestName = "",
   guestEmail = "",
   guestPhone = "",
@@ -44,6 +53,7 @@ export function RazorpayCheckout({
   onError,
   onDismiss,
   onBeforeCheckout,
+  prepareCheckout,
   buttonText = "Pay with Razorpay",
   className = "btn accent block",
   disabled = false,
@@ -80,27 +90,20 @@ export function RazorpayCheckout({
 
   const handleCheckout = async () => {
     if (loading || disabled) return;
-    if (onBeforeCheckout) {
-      const allowed = await onBeforeCheckout();
-      if (!allowed) return;
-    }
     setLoading(true);
 
     try {
+      if (onBeforeCheckout && !(await onBeforeCheckout())) { setLoading(false); return; }
+      const token = await accessToken();
+      if (!token) throw new Error("Please sign in to start checkout.");
+      const reservation = prepareCheckout ? await prepareCheckout() : { bookingId };
+      if (kind === "booking" && !reservation.bookingId) throw new Error("Prepare a reservation before paying.");
       // 1. Create Order via server route
       const orderResponse = await fetch("/api/razorpay/order", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          amount,
-          receipt: bookingCode || `9bhk_${Date.now()}`,
-          notes: {
-            propertyName,
-            bookingCode: bookingCode || "",
-            guestName,
-            guestEmail,
-            guestPhone,
-          },
+          kind, bookingId: reservation.bookingId,
         }),
       });
 
@@ -145,7 +148,7 @@ export function RazorpayCheckout({
             // 3. Server-side HMAC SHA-256 signature verification
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
               body: JSON.stringify(response),
             });
 
@@ -156,10 +159,13 @@ export function RazorpayCheckout({
             }
 
             setLoading(false);
-            onSuccess?.({
+            await onSuccess?.({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
               signature: response.razorpay_signature,
+              bookingCode: verifyData.bookingCode,
+              total: verifyData.total,
+              status: verifyData.status,
             });
           } catch (verifyError: unknown) {
             setLoading(false);

@@ -42,7 +42,7 @@ export default async function CreatorsPage() {
           <p>
             From dramatic beachfront infinity pools along the ECR to secluded orchard compounds in
             Chengalpattu, 9bhk connects lifestyle creators, fashion houses, film crews, and brands
-            with verified whole-house locations built for visual storytelling.
+            with whole-house locations and host-declared specifications.
           </p>
         }
       />
@@ -143,7 +143,7 @@ export default async function CreatorsPage() {
         links={destinations.slice(0, 4).map((d) => ({
           href: `/locations/${d.entry.slug}`,
           label: `${d.entry.name} Private Stays`,
-          note: `${d.count} verified whole estates`,
+          note: `${d.count} whole estates`,
         }))}
       />
     </EditorialShell>

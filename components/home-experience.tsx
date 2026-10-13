@@ -8,7 +8,9 @@ import { Icon, settingIcon, vibeIcon } from "@/components/icon";
 import { FeatureCard, NearbyCard, RailCard } from "@/components/cards";
 import { SETTINGS, SETTING_LABEL, VIBES } from "@/lib/properties";
 import { useCatalog } from "@/lib/catalog";
-import { CITIES } from "@/lib/format";
+import { CITIES, isoDate, formatRange } from "@/lib/format";
+import { hasSupabase } from "@/lib/supabase/browser";
+import { track } from "@/lib/seo/analytics";
 import { useStore } from "@/lib/store";
 import { BaseSheet } from "@/components/base-sheet";
 import { useT } from "@/lib/i18n";
@@ -30,10 +32,14 @@ export function HomeExperience({ hero }: { hero?: React.ReactNode }) {
   const [q, setQ] = useState("");
   const [sheet, setSheet] = useState<"where" | "when" | "guests" | null>(null);
   const [guests, setGuests] = useState(2);
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [today, setToday] = useState("");
   const [helloKey, setHelloKey] = useState<DictKey>("home.greeting.evening");
 
   useEffect(() => {
     setHelloKey(greetingKey());
+    setToday(isoDate(new Date()));
   }, []);
 
   const featured = properties.filter((p) => p.group === "featured");
@@ -45,15 +51,22 @@ export function HomeExperience({ hero }: { hero?: React.ReactNode }) {
 
   function search(e?: FormEvent) {
     e?.preventDefault();
+    track("search");
     const params = new URLSearchParams();
+    if (city) params.set("city", city);
     if (q.trim()) params.set("q", q.trim());
     if (guests) params.set("guests", String(guests));
+    if (checkIn && checkOut > checkIn) {
+      params.set("checkIn", checkIn);
+      params.set("checkOut", checkOut);
+    }
     router.push(`/search?${params.toString()}`);
   }
 
   return (
     <>
       <BrandBar onLocation={() => setSheet("where")} />
+      {!hasSupabase() ? <p className="pad muted" role="status">Preview inventory. Sign-in and reservations require a configured marketplace.</p> : null}
       <section className="greet">
         <div className="between" style={{ alignItems: "center" }}>
           <p className="hello" style={{ margin: 0 }}>{t(helloKey)}</p>
@@ -114,7 +127,7 @@ export function HomeExperience({ hero }: { hero?: React.ReactNode }) {
               <Icon name="calendar" />
               {t("home.when")}
             </span>
-            <span className="v">{t("home.addDates")}</span>
+            <span className="v">{checkIn && checkOut > checkIn ? formatRange(checkIn, checkOut) : t("home.addDates")}</span>
           </button>
           <button className="sum-cell" type="button" onClick={() => setSheet("guests")}>
             <span className="k">
@@ -247,10 +260,14 @@ export function HomeExperience({ hero }: { hero?: React.ReactNode }) {
         onOpenChange={(open) => !open && setSheet(null)}
         title={t("home.whenTitle")}
       >
-        <p className="muted">{t("home.whenBody")}</p>
+        <div className="stack">
+          <label className="field">{t("trips.checkIn")}<input className="ctrl" type="date" min={today} value={checkIn} onChange={(event) => { setCheckIn(event.target.value); if (checkOut <= event.target.value) setCheckOut(""); }} /></label>
+          <label className="field">{t("trips.checkOut")}<input className="ctrl" type="date" min={checkIn || today} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} /></label>
+        </div>
         <button
           className="btn block mt"
           type="button"
+          disabled={!checkIn || checkOut <= checkIn}
           onClick={() => {
             setSheet(null);
             search();

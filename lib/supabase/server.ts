@@ -5,10 +5,8 @@ import { cookies } from "next/headers";
  * A Supabase client bound to the request's cookies, for server components and
  * route handlers.
  *
- * Cookie writes are deliberately dropped: a server component is not allowed to
- * mutate response cookies, and refreshing the session is the auth callback's
- * job, where it can set headers. Reading the session is all anything here
- * needs.
+ * Route handlers persist refreshed cookies. Middleware handles refreshes for
+ * server components, where Next does not allow writing response cookies.
  *
  * Returns null when Supabase is not configured, so callers decide what an
  * unconfigured deployment means for them rather than crashing.
@@ -24,8 +22,9 @@ export async function serverSupabase() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll() {
-        /* Not writable from a server component; see the note above. */
+      setAll(values) {
+        try { values.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); }
+        catch { /* Middleware refreshes cookies for server components. */ }
       },
     },
   });

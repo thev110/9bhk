@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { PRIVATE_ROUTE_PREFIXES, SITE_URL } from "@/lib/seo/site";
 
@@ -52,7 +53,7 @@ function isPrivate(pathname: string): boolean {
   );
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const host = request.headers.get("host");
@@ -63,7 +64,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308);
   }
 
-  const response = NextResponse.next();
+  let response = NextResponse.next({ request });
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (url && key && !/\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2?|css|js|map|txt|xml)$/i.test(pathname)) {
+    const supabase = createServerClient(url, key, { cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll(values) {
+        values.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+      },
+    } });
+    await supabase.auth.getUser();
+  }
   if (isPrivate(pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }

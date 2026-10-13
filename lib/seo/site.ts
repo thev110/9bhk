@@ -34,7 +34,7 @@ export const SITE = {
    * inventory size, ratings or awards.
    */
   description:
-    "9bhk (9bhk.app) is an online marketplace for verified whole-house luxury farmhouses, beach houses, and private villas (3–9+ BHK) across Chennai and ECR, built for group stays, private celebrations, and estate sales.",
+    "9bhk is a whole-property marketplace for farmhouses, beach houses and private villas across Chennai, ECR and beyond, with host-declared specifications and itemized reservation quotes.",
   /**
    * TODO(business-data): supply the registered legal entity name so
    * `legalName` can be published in Organization/footer. Until then the brand
