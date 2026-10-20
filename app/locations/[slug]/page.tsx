@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EditorialShell, PageHero, Section, StatStrip } from "@/components/seo/page-frame";
@@ -204,7 +205,7 @@ export default async function LocationPage({ params }: Params) {
         <Section
           title={`Guides about ${location.name}`}
           id="guides"
-          aside={<a href="/guides">All guides</a>}
+          aside={<Link href="/guides">All guides</Link>}
         >
           <ul className="seo-guide-grid">
             {guides.map((guide) => (

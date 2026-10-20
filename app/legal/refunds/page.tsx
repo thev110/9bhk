@@ -24,7 +24,7 @@ export const metadata: Metadata = buildMetadata({
 export default function RefundsPage() {
   return (
     <LegalBody doc="refunds" backHref="/legal/privacy" crumbs={staticCrumbs("Refund policy", "/legal/refunds")}>
-      <p>You can submit cancellation requests before the recorded check-in time. Started and completed stays require support review. The trip shows the refund request's current status. Cancelling a reservation does not itself mean money has been returned.</p>
+      <p>You can submit cancellation requests before the recorded check-in time. Started and completed stays require support review. The trip shows the refund request&apos;s current status. Cancelling a reservation does not itself mean money has been returned.</p>
       <ul className="stack sm" style={{ paddingLeft: 18 }}>
         <li>Captured payments associated with a cancelled reservation are recorded for refund review.</li>
         <li>The recorded request amount is subject to review of the applicable reservation terms; it is not a completed or guaranteed refund.</li>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { EditorialShell, PageHero, Section, StatStrip } from "@/components/seo/page-frame";
 import { PropertyGrid } from "@/components/seo/property-card";
@@ -130,7 +131,7 @@ export default async function StaysPage() {
         title="Browse by destination"
         id="by-destination"
         description="Destination pages open only where 9bhk has enough inventory in that destination to justify one."
-        aside={<a href="/locations">All destinations</a>}
+        aside={<Link href="/locations">All destinations</Link>}
       >
         <ul className="seo-links">
           {destinations.map((summary) => (
