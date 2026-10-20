@@ -41,11 +41,12 @@ their end-to-end acceptance remains open in [IMPLEMENTATION_PROGRESS.md](IMPLEME
 
 1. Revoke the exposed payment and signing credentials, review provider access,
    and configure fresh secrets. Current-tree cleanup does not erase Git history.
-2. Back up the database. Review and apply the four `20261013` migrations in order.
-   The core migration intentionally fails on invalid/overlapping historical stays;
-   reconcile these records first. Legacy payment references are marked for review.
-   Legacy inventory below three bedrooms is returned to draft for review rather
-   than relabelled with invented bedroom counts.
+2. Back up the database before applying the `20261020*` migrations. The four
+   `20261013000000`-`20261013030000` migrations, plus `20261013040000`, are
+   **already applied in production** (see "Production migration state" below).
+   Legacy payment references are marked for review. Legacy inventory below three
+   bedrooms is returned to draft for review rather than relabelled with invented
+   bedroom counts.
 3. Verify email confirmation/recovery URLs and SMS provider settings in Supabase.
 4. Test with fresh Razorpay TEST credentials and the signed captured-payment webhook.
 5. Schedule authenticated POST `/api/bookings/expire` with the server's `CRON_SECRET`.
@@ -61,8 +62,29 @@ their end-to-end acceptance remains open in [IMPLEMENTATION_PROGRESS.md](IMPLEME
    endpoint has bounded per-process throttling; use a deployment-level rate limit
    when enabling it at scale, and adopt a retention policy for usage/audit records.
 
-No production migrations, external financial actions, credential rotation, or
-history rewriting are performed by this local implementation.
+## Production migration state (read-only check, 20 October 2026)
+
+Production `supabase_migrations.schema_migrations` lists all five `20261013*`
+migrations as applied: `20261013000000_secure_transactions`,
+`20261013010000_account_persistence`, `20261013020000_community_operations`,
+`20261013030000_operational_monitoring` and
+`20261013040000_evidence_backed_specifications`. The first four match this repo
+apart from whitespace. An earlier version of this file said no production
+migrations had been run; that was wrong.
+
+Drift found and now committed to the repo:
+
+- `20261013040000_evidence_backed_specifications` was applied in prod but existed
+  in no Git ref. It is now committed verbatim from prod's recorded statements.
+- `bhk_properties.is_featured`, `featured_until`, `host_tier` (with
+  `bhk_properties_host_tier_check`) and `media_verified`, the
+  `public.rls_auto_enable()` event-trigger function and its `ensure_rls` event
+  trigger exist in prod with no migration. `20261013050000_prod_schema_drift`
+  adds them idempotently (a no-op on prod).
+
+None of the `20261020*` migrations are applied in production yet. External
+financial actions, credential rotation and history rewriting are not performed
+by this implementation.
 
 ## Local validation
 
@@ -83,4 +105,4 @@ Completed local checks on 13 October 2026:
 - The independent review child failed due to the account usage limit. It did not
   produce a final review sign-off. No replacement reviewer was started.
 
-Changes are local and uncommitted. Main and production have not been updated.
+Changes are on a review branch, not main. Production has only the `20261013*` migrations listed above.
