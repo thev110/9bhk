@@ -206,7 +206,6 @@ export const hostKeys = {
   "host.payoutArrives": "arrives 5 Jul 2026",
   "host.payouts": "Payouts",
   "host.pendingPayout": "Pending payout",
-  "host.platformFees": "Platform fees (10%)",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "host.toastStayConfirmed": "Stay confirmed. The guest can see it in notifications.",
