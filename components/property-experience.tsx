@@ -527,6 +527,11 @@ export function PropertyExperience({
               <p className="muted" style={{ fontSize: 11, margin: 0 }}>
                 {t("detail.askingOrStay", { price: property.price.toLocaleString("en-IN") })}
               </p>
+              {property.price > 0 && !property.platformFeeRate ? (
+                <p className="muted" data-no-platform-fee style={{ fontSize: 11, margin: 0 }}>
+                  {t("pricing.noPlatformFee")}
+                </p>
+              ) : null}
             </div>
           ) : (
             <div>
@@ -536,6 +541,11 @@ export function PropertyExperience({
               <p className="muted" style={{ fontSize: 12 }}>
                 {t("detail.exclusiveStay")}
               </p>
+              {!property.platformFeeRate ? (
+                <p className="muted" data-no-platform-fee style={{ fontSize: 11, margin: 0 }}>
+                  {t("pricing.noPlatformFee")}
+                </p>
+              ) : null}
             </div>
           )}
         </div>
