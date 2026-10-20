@@ -1,5 +1,19 @@
 # Audit repairs and feature implementation
 
+## Current update — 20 October 2026
+
+Baseline repairs are committed as `994c7dc`. The original independent reviewer
+resumed, identified three further defects, and verified their local repairs.
+Backend feature expansion is now underway; see [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md)
+for precise scope, remaining interfaces and financial configuration.
+
+The user requested implementation before testing. The latest expansion has not
+received a full test/build/migration or independent review pass. The Stitch
+workflow was retired at the user's request. The historical results below apply to the earlier
+baseline, not all current working-tree files.
+
+## Historical baseline — 13 October 2026
+
 Work branch: `codex/audit-fixes`. Original comparison: `ec74fc1`.
 
 ## Implemented code
@@ -16,12 +30,12 @@ Work branch: `codex/audit-fixes`. Original comparison: `ec74fc1`.
 - Checked viewing requests, real galleries, search date/location handoff, browser zoom.
 - Optional first-party coarse usage events and persisted booking transition notifications.
 
-## Deferred interfaces
+## Interface status
 
-The user chose to leave new Stitch-generated screens pending because there is
-no connected Stitch MCP server. `.stitch/next-prompt.md` preserves the next task.
-There is no invented Stitch project or generated screen. Group planning/inbox
-standalone screens and the wider desktop redesign remain deferred.
+The user considers the existing UI complete and retired the Stitch workflow.
+Current page files provide the established guest, host, broker and admin views.
+Several new feature contracts still have no connected controls in those pages;
+their end-to-end acceptance remains open in [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md).
 
 ## Deployment requirements
 

@@ -12,15 +12,18 @@ Use Node.js 24 or later. Copy .env.example to ignored .env.local and supply fres
 approved credentials. With no backend configured, public pages show preview inventory;
 authentication and reservations fail closed.
 
-Run npm ci, npm run dev, and npm run validate. The tests execute local PostgreSQL
-migrations with modeled Supabase roles; they never use live payment credentials.
+Run npm ci and npm run dev. When the implementation phase is ready for validation,
+run npm run validate. The tests execute local PostgreSQL migrations with modeled
+Supabase roles; they never use live payment credentials.
 
-Read IMPLEMENTATION_STATUS.md and PAYMENTS_SETUP.md before deployment. New database
-migrations must be reviewed/applied before these transaction features are enabled.
-Refund and host payout requests are persisted for staff processing; the application
-does not represent a request as an executed transfer or promise provider escrow.
+Read IMPLEMENTATION_PROGRESS.md and PAYMENTS_SETUP.md before deployment. The
+expanded guest, broker and seller backend is local and unvalidated. Refund, host
+and service-provider payout dispatch adapters require explicit staff review and
+disabled-by-default provider configuration. A request is never displayed as a
+completed transfer merely because the dispatch API was called; no escrow is promised.
 
-New Stitch-generated screens are deferred at the user's request. The next design
-task is preserved in .stitch/next-prompt.md.
+The existing UI is the accepted visual baseline. The Stitch workflow is retired.
+New feature controls still need integration and verification before their
+end-to-end requirements can be marked accepted.
 
 Created by Rathnavel Karthi. All rights reserved.

@@ -28,3 +28,16 @@ The gateway integration does not itself establish an escrow arrangement. Host
 payout requests and refund requests must display their actual processing state.
 Validate listing tax rates, fees, refund terms, and settlement rules against the
 business's approved configuration before launch.
+
+The new implementation also includes separate staff-reviewed refund dispatch,
+RazorpayX host/provider payouts, deposit cases and service payment/refund flows.
+These paths have not yet been verified in staging. Keep
+`REFUND_DISPATCH_ENABLED=false` and `PAYOUT_DISPATCH_ENABLED=false` until test
+credentials, provider webhook secrets, verified destinations, reconciliation
+procedures and business terms have been approved. RazorpayX uses separate
+`RAZORPAYX_KEY_ID`, `RAZORPAYX_KEY_SECRET`, `RAZORPAYX_ACCOUNT_NUMBER` and
+`RAZORPAYX_WEBHOOK_SECRET`; send its signed events to `/api/payouts/webhook`.
+Schedule `/api/bookings/expire`, `/api/services/expire`,
+`/api/discovery/alerts` and `/api/notifications/deliver` with `CRON_SECRET`.
+The current implementation sends in-app notifications; no email or SMS delivery
+provider is configured for new alerts.

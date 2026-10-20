@@ -353,9 +353,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       void persistProfile({ ...state.user, locale }).then(() => reloadAccount()).catch(e => showToast(e.message));
     },
     toggleSaved: async id => {
-      if (!state.user) { showToast("Please sign in to save properties."); return; }
-      try { await persistSaved(id, !state.saved.includes(id)); await reloadAccount(); }
-      catch (e) { showToast(e instanceof Error ? e.message : "Could not save property."); }
+      if (!state.user) throw new Error("Please sign in to save properties.");
+      await persistSaved(id, !state.saved.includes(id));
+      await reloadAccount();
     },
     isSaved: id => state.saved.includes(id),
     signIn: async () => { await reloadAccount(); },

@@ -1,0 +1,18 @@
+import { timingSafeEqual } from "node:crypto";
+import { NextResponse } from "next/server";
+import { serviceSupabase } from "@/lib/supabase/service";
+
+export async function POST(request: Request) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected) return NextResponse.json({ error: "Search alerts are not configured." }, { status: 503 });
+  const actual = request.headers.get("authorization") ?? "";
+  const token = `Bearer ${expected}`;
+  if (Buffer.byteLength(actual) !== Buffer.byteLength(token) || !timingSafeEqual(Buffer.from(actual), Buffer.from(token))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const db = serviceSupabase();
+  if (!db) return NextResponse.json({ error: "Search alerts are unavailable." }, { status: 503 });
+  const { data, error } = await db.rpc("bhk_match_saved_searches", { p_limit: 10 });
+  if (error) return NextResponse.json({ error: "Search matching failed. Retry required." }, { status: 503 });
+  return NextResponse.json({ success: true, ...data }, { headers: { "Cache-Control": "no-store" } });
+}
