@@ -1,6 +1,6 @@
 # Complete expansion scope and acceptance tracker
 
-Prepared: 13 October 2026. All entries are planned. Existing local foundations are reused, but no entry is marked accepted merely because a table or screen exists. This is a new milestone; historical planning documents remain intact.
+Prepared: 13 October 2026. Updated: 20 October 2026. Backend implementation is underway across the scope; [current implementation coverage](../../IMPLEMENTATION_PROGRESS.md) distinguishes written code from remaining feature integration and verification. No entry is end-to-end accepted. The user retired Stitch, accepted the existing UI as the visual baseline, and requested testing after implementation.
 
 | ID | Requirement | Phase | Acceptance evidence |
 |---|---|---|---|
@@ -37,7 +37,7 @@ Prepared: 13 October 2026. All entries are planned. Existing local foundations a
 
 - The researched “one property, two workflows” concept is covered by S08 rather than duplicated as another requirement.
 - Existing messaging, support, reviews, gallery, account persistence and broker subscription foundations are prerequisites and reused journeys. Production readiness is covered by F01–F03.
-- Group UI, inbox UI and desktop layout work belong in the planned design/integration phases. Their earlier Stitch deferral is a recorded prerequisite, not an accepted deliverable.
+- The existing UI is the visual baseline. Group and inbox controls still require code integration where the current pages do not expose their new backend contracts.
 - No proposed feature is dropped because it is scheduled in a later release.
 
 ## Tracking rules

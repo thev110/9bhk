@@ -1,6 +1,29 @@
 # 9bhk complete feature implementation plan
 
-Prepared: 13 October 2026. Status: proposed execution plan; no new product implementation or deployment is performed by this document.
+Prepared: 13 October 2026. Execution resumed: 20 October 2026. Status audited: 20 October 2026. See [current implementation evidence](IMPLEMENTATION_PROGRESS.md). The existing visual design is complete per the user and is outside the remaining work. Testing follows implementation. No production deployment has occurred.
+
+## Phase status at the current worktree
+
+The plan contains **14 phases (0–13), not 12**. **0 of 14 phases meet their stated completion criteria.** Code has been written toward phases 0–12; phase 13 has no release-validation evidence. This count uses each phase's **Done when** condition, not the presence of a migration, helper or API route. The latest combined changes are local and uncommitted; no staging migrations or provider transactions were run.
+
+| Phase | Current state | Main gap before it can be called complete |
+|---|---|---|
+| 0 — Reviewed baseline | Repairs committed; scoped independent re-review passed | Review final diff, migrate staging data, verify real auth/payment recovery |
+| 1 — Permissions/shared infrastructure | Design accepted; role-scoped contracts, audit and outbox code written | Integrate and verify role journeys, permissions and shared error handling |
+| 2 — Financial operations | Refund/payout adapters, deposits and policy snapshots written | Approve terms/destinations, configure providers, reconcile in staging and verify operator workflow |
+| 3 — Listing evidence | Facts, media/evidence, review expiry and completeness code written | Verify guest filtering, evidence display and staff review workflow |
+| 4 — Discovery/quotes | Comparison, flexible-date, occasion and price-context contracts written | Verify full search-to-checkout consistency and provenance in app flows |
+| 5 — Broker CRM | Opportunities, stage history, tasks, matching and team assignments written | Verify broker intake-to-outcome, assignment and revocation flows |
+| 6 — Qualification/viewings | Questions, appointment lifecycle, conflict guards and feedback written | Verify concurrent slots, stay conflicts and participant access |
+| 7 — Portfolios/mandates/documents | Versioned grants, approvals and private document access written | Verify cross-device recipient access, withdrawal and audit history |
+| 8 — Shared trip organiser | Group planning, roles, conversations and funding records written | Verify multi-account trip, reload, revocation and payment journeys |
+| 9 — Seller/deal coordination | Activity counts, offers, co-broker records and sale-state guards written | Verify owner workflow, approvals, milestones and stay/sale consistency |
+| 10 — Optional services | Service orders, approvals, payment/refund and payout paths written | Confirm provider operations and reconcile a complete service lifecycle |
+| 11 — Saved searches/notifications | Matching, preferences, reminders and in-app outbox written | Verify scheduled delivery, opt-outs, retries and operator visibility |
+| 12 — Stay before buying | Opt-in, enrollment and single-use credit records written | Approve commercial terms and verify a buyer's stay/viewing/credit journey |
+| 13 — Full audit and rollout | Earlier limited checks exist for baseline only | Final-diff review, full test/build/staging/browser/provider pass and release approval |
+
+The visual design is not a blocker in this count. A phase remains open when its behavior and acceptance evidence are missing. The user deferred the testing phase until implementation work is done, so these gaps are recorded rather than reported as passing.
 
 ## 1. Objective and scope
 
@@ -18,7 +41,7 @@ The authoritative scope checklist is [the expansion requirements](.planning/feat
 
 ## 2. Starting point
 
-Read [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) before execution. The current worktree is on `codex/audit-fixes`, with local uncommitted repairs. Existing foundations include:
+Read [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) before execution. The current worktree is on `codex/audit-fixes`; baseline repairs are committed and feature expansion is local and uncommitted. Existing foundations include:
 
 - Supabase authentication, account hydration and access controls.
 - Server-priced reservation holds, captured-payment reconciliation and split funding.
@@ -28,7 +51,7 @@ Read [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) before execution. The 
 - Group-plan, membership, invitation, shortlist and vote backend records.
 - Public catalog projection, listing/document guards and operational audit records.
 
-Recorded checks passed 70 tests, typecheck, a clean production build and local page/script probes. They are evidence of local checks, not production validation. The independent reviewer failed at the account usage limit and did not issue final sign-off. Database migrations are unapplied; credentials require rotation; actual refund/payout execution remains unfinished. Existing catalog key coverage also does not establish that every new interface string is translated.
+Recorded baseline checks passed 70 tests, typecheck, a clean production build and local page/script probes. They are historical evidence, not validation of the current expansion. A resumed independent review approved a limited repair and initial-feature scope; the final aggregate diff has not been reviewed. New database migrations are unapplied; credentials require rotation; refund/payout adapters have not been exercised with providers. Existing catalog key coverage also does not establish that every new interface string is translated.
 
 Reuse these foundations after validating them. Do not build competing authentication, property, reservation, message or group systems.
 
@@ -91,9 +114,9 @@ These names are proposed; Phase 1 must reconcile them with the actual schema bef
 - Design loading/error/empty/permission-denied states before implementing happy paths.
 - Define migration conventions, typed server contracts, pagination, audit events, idempotency keys and a background job/outbox interface.
 - Plan translations and accessibility alongside each screen; audit the English-only strings introduced in the repair branch.
-- Connect Stitch before generating the deferred screens. Preserve real project/screen metadata, integrate generated designs into Next.js, and update the baton after each completed iteration. Until connected, specifications and backend work can proceed; generated screen work remains pending.
+- Use the existing application design system for any remaining feature integration. Stitch is not a dependency or an active design workflow.
 
-**Done when:** journeys, contracts, permissions, design references and test scenarios are reviewable; required new screens have an approved generation/integration path. No invented Stitch IDs or placeholder functionality.
+**Done when:** journeys, contracts, permissions, design references and test scenarios are reviewable; required feature controls are connected to the application and can be verified in their role journeys.
 
 ### Phase 2 — Complete payment, refund, deposit and payout operations
 
@@ -173,7 +196,7 @@ These names are proposed; Phase 1 must reconcile them with the actual schema bef
 
 **Requirement:** G06. **Dependency:** 2–4, 7's reusable access-grant patterns.
 
-- Reuse existing group plans, memberships, invitations, shortlists and votes; build the deferred guest interface rather than a new backend.
+- Reuse existing group plans, memberships, invitations, shortlists and votes; connect the new trip behaviors to the accepted application interface.
 - Add dates, guest roster, room preferences/allocation, notes, itinerary items and booking-linked group roles.
 - Distinguish collaborator, invited payer and booked guest; each role receives only appropriate information and actions.
 - Connect split funding, reservation progress, shared instructions and group conversations.
@@ -308,7 +331,6 @@ Each feature PR/changeset contains schema/API/UI together where feasible, tests 
 | Messaging/calendar providers | Phase 6/11 | Required consent and verified delivery; no unsolicited automatic outreach |
 | Service supply and cancellation responsibilities | Phase 10 | Start only with providers who can confirm availability and handle failures |
 | Trial-stay purchase credits | Phase 12 | Owner opt-in and approved versioned terms; never an automatic blanket discount |
-| Stitch connection and design approval | Generated UI phases | Preserve deferred tasks until a real connection is available |
 
 Capture decisions as short records with owner, date and affected requirements. Unresolved integration/business decisions block only their dependent work; specifications and independent foundations continue.
 

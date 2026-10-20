@@ -4,6 +4,18 @@ export async function POST(request: Request) {
   try {
     const { user, service } = await authenticated(request);
     const body = await jsonBody(request);
+    if (body.occasionRequestId !== undefined) {
+      if (typeof body.occasionRequestId !== "string" || !/^[0-9a-f-]{36}$/i.test(body.occasionRequestId)) throw new TransactionError("Choose an approved occasion request.", 400);
+      for (const key of ["guestName", "guestEmail", "guestPhone"]) {
+        if (typeof body[key] !== "string" || (body[key] as string).length > 320) throw new TransactionError("Invalid guest details.", 400);
+      }
+      const booking = await rpc(service, "bhk_prepare_occasion_booking", { p_user: user.id,
+        p_request: body.occasionRequestId, p_name: body.guestName, p_email: body.guestEmail, p_phone: body.guestPhone });
+      return NextResponse.json({ success: true, ...booking });
+    }
+    if (body.occasion !== undefined || body.eventGuests !== undefined || body.attendees !== undefined) {
+      throw new TransactionError("Get host approval for the occasion before booking.", 409);
+    }
     for (const key of ["propertyId", "checkIn", "checkOut", "guestName", "guestEmail", "guestPhone"]) {
       if (typeof body[key] !== "string" || (body[key] as string).length > 320) throw new TransactionError("Invalid guest or stay details.", 400);
     }
