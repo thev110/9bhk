@@ -5,6 +5,9 @@
     "name": "Rathnavel Karthi",
     "url": "https://www.linkedin.com/in/rathnavel-karthi-114991135/"
   },
+  "engines": {
+    "node": ">=22.15"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
