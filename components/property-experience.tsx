@@ -6,9 +6,9 @@ import Image from "next/image";
 import { PageBar, Shell } from "@/components/shell";
 import { useStore } from "@/lib/store";
 import { Icon, settingIcon } from "@/components/icon";
-import { Rating } from "@/components/cards";
+import { Rating, SampleBadge } from "@/components/cards";
 import { useCatalog } from "@/lib/catalog";
-import { formatInrCrores, hasGarage, isSeaside } from "@/lib/properties";
+import { formatInrCrores, hasGarage, isSeaside, SAMPLE_LISTING_LABEL } from "@/lib/properties";
 import { BaseSheet } from "@/components/base-sheet";
 import NumberFlow from "@number-flow/react";
 import { useT } from "@/lib/i18n";
@@ -259,6 +259,7 @@ export function PropertyExperience({
           </h2>
           <p className="p-loc">{property.settingName}</p>
           <div className="row wrap mt" style={{ marginTop: 8, gap: 6 }}>
+            <SampleBadge property={property} />
             <Rating rating={property.rating} reviews={property.reviews} />
             {property.guestFavourite ? <span className="pill ok">{t("property.guestFavourite")}</span> : null}
             <span className="pill forest">
@@ -568,16 +569,23 @@ export function PropertyExperience({
                   {t("action.privateViewing")}
                 </button>
               ) : null}
-              <Link
-                className="btn"
-                href={
-                  user
-                    ? `/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`
-                    : `/login?next=${encodeURIComponent(`/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`)}`
-                }
-              >
-                {t("action.reserveStay")}
-              </Link>
+              {property.sample ? (
+                // Sample listings have no host; the server refuses holds and checkout too.
+                <button className="btn" type="button" disabled aria-disabled="true" title={SAMPLE_LISTING_LABEL}>
+                  {SAMPLE_LISTING_LABEL}
+                </button>
+              ) : (
+                <Link
+                  className="btn"
+                  href={
+                    user
+                      ? `/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`
+                      : `/login?next=${encodeURIComponent(`/book/${property.id}${tripQuery ? `?${tripQuery}` : ""}`)}`
+                  }
+                >
+                  {t("action.reserveStay")}
+                </Link>
+              )}
             </>
           )}
         </div>

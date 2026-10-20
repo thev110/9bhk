@@ -89,6 +89,8 @@ export type Row = {
   verification_type?: string | null;
   verification_date?: string | null;
   verified_by?: string | null;
+  /** `host_id is not null`, exposed by bhk_public_properties without the host's identity. */
+  bookable?: boolean | null;
 };
 
 /**
@@ -172,6 +174,8 @@ export function fromRow(row: Row): SeoProperty {
     blurb: row.blurb || row.description || "",
     type: row.type || "Villa",
     guestFavourite: Number(row.verified_review_count) >= 5 && Number(row.verified_review_rating) >= 4.8,
+    // No host behind the row: a sample. Labelled in the UI, refused server-side.
+    sample: row.bookable === false,
     group:
       row.group_name === "featured" || row.group_name === "nearby" || row.group_name === "popular"
         ? row.group_name
@@ -251,7 +255,7 @@ export function fromRow(row: Row): SeoProperty {
  */
 export function previewCatalog(): SeoProperty[] {
   return PROPERTIES.filter((property) => property.bedrooms >= 3 && property.status !== "draft")
-    .map((property) => ({ ...property, rating: 0, reviews: 0, guestFavourite: false, photos: [property.image] }));
+    .map((property) => ({ ...property, rating: 0, reviews: 0, guestFavourite: false, sample: true, photos: [property.image] }));
 }
 
 export function mergeCatalog(rows: Row[] | null | undefined, fallback: SeoProperty[] = previewCatalog()): SeoProperty[] {

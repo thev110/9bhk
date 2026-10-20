@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { useCatalog } from "@/lib/catalog";
+import { SAMPLE_LISTING_LABEL } from "@/lib/properties";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { isPastDate, monthMatrix, occupiedNights } from "@/lib/availability";
@@ -99,6 +100,22 @@ export default function BookPage() {
     () => (property ? occupiedNights(property, occupancies) : new Set<string>()),
     [property, occupancies],
   );
+
+  if (property?.sample) {
+    return (
+      <Shell>
+        <PageBar title={property.name} backHref={`/property/${property.id}`} />
+        <div className="empty" data-sample-listing>
+          <span className="pill warn">{SAMPLE_LISTING_LABEL}</span>
+          <h3>This is a sample listing.</h3>
+          <p className="muted">It shows what a 9bhk listing looks like. There is no host behind it, so dates can&apos;t be held and no payment can be taken.</p>
+          <Link className="btn" href="/">
+            Back to explore
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
 
   if (!property) {
     return (

@@ -53,3 +53,9 @@ test("itemized estimate reconciles fees/taxes and does not tax the refundable de
   assert.deepEqual(actual, { stay: 2000, cleaning: 200, tax: 240, platformFee: 200, deposit: 500, discount: 0, total: 3140 });
   assert.equal(quote(1000, 0, 1, { taxRate: 0, platformFeeRate: 0 }).total, 1000);
 });
+
+test("host-less rows and preview listings are marked as samples; hosted rows are not", () => {
+  assert.equal(fromRow(row({ bookable: false })).sample, true);
+  assert.equal(fromRow(row({ bookable: true })).sample, false);
+  assert.ok(previewCatalog().every(property => property.sample === true));
+});

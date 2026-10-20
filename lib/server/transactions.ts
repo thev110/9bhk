@@ -40,9 +40,28 @@ export async function rpc(service: NonNullable<ReturnType<typeof serviceSupabase
 export function failure(error: unknown) {
   return NextResponse.json({ success: false, error: error instanceof TransactionError ? error.message : "The service is temporarily unavailable. Please retry." }, { status: error instanceof TransactionError ? error.status : 503 });
 }
+type ServiceClient = NonNullable<ReturnType<typeof serviceSupabase>>;
+export const SAMPLE_NOT_BOOKABLE = "This is a sample listing and can't be booked. No payment has been taken.";
+/** Listings without a host account are samples: never hold or charge for them. */
+export async function assertBookableProperty(service: ServiceClient, propertyId: string) {
+  const { data, error } = await service.from("bhk_properties").select("host_id").eq("id", propertyId).maybeSingle();
+  if (error) throw new TransactionError("The reservation service could not check this listing. Please retry.", 503);
+  if (!data) throw new TransactionError("Property is unavailable");
+  if (!(data as { host_id: string | null }).host_id) throw new TransactionError(SAMPLE_NOT_BOOKABLE, 409);
+}
+/** Refuses checkout for a hold whose listing has no host (sample listing). */
+export async function assertBookableBooking(service: ServiceClient, bookingId: string) {
+  const { data, error } = await service.from("bhk_bookings").select("host_id,property_id").eq("id", bookingId).maybeSingle();
+  if (error) throw new TransactionError("The reservation service could not check this booking. Please retry.", 503);
+  if (!data) return; // bhk_claim_order reports a missing or foreign booking as not payable.
+  const booking = data as { host_id: string | null; property_id: string };
+  if (!booking.host_id) throw new TransactionError(SAMPLE_NOT_BOOKABLE, 409);
+  await assertBookableProperty(service, booking.property_id);
+}
 export async function checkoutOrder(service: NonNullable<ReturnType<typeof serviceSupabase>>, userId: string, kind: "booking" | "share" | "subscription", bookingId?: string, shareId?: string) {
   const env = readRazorpayEnv();
   if (!env) throw new TransactionError("Payment checkout is not configured. No payment has been taken.", 503);
+  if ((kind === "booking" || kind === "share") && bookingId) await assertBookableBooking(service, bookingId);
   const intent = await rpc(service, "bhk_claim_order", { p_user: userId, p_kind: kind, p_booking: bookingId ?? null, p_share: shareId ?? null });
   if (intent.status === "ready" && intent.gateway_order_id) return { success: true, configured: true, keyId: env.keyId, orderId: intent.gateway_order_id, amount: Number(intent.amount_paise), currency: intent.currency };
   try {

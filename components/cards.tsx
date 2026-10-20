@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "motion/react";
 import NumberFlow from "@number-flow/react";
-import { formatInrCrores, hasGarage, type Property } from "@/lib/properties";
+import { formatInrCrores, hasGarage, SAMPLE_LISTING_LABEL, type Property } from "@/lib/properties";
 import { Icon, settingIcon } from "./icon";
 import { FavButton } from "./shell";
 import { useT } from "@/lib/i18n";
@@ -80,6 +80,16 @@ function cardAlt(property: Property): string {
   return property.alt?.trim() || property.name;
 }
 
+/** Visible on every card for a host-less listing. */
+export function SampleBadge({ property }: { property: Property }) {
+  if (!property.sample) return null;
+  return (
+    <span className="pill warn" data-sample-listing style={{ fontSize: 11, fontWeight: 800 }}>
+      {SAMPLE_LISTING_LABEL}
+    </span>
+  );
+}
+
 export function RailCard({ property, priority = false }: { property: Property; priority?: boolean }) {
   const t = useT();
   return (
@@ -115,6 +125,7 @@ export function RailCard({ property, priority = false }: { property: Property; p
       <Link href={`/property/${property.id}`} className="hit" style={{ textDecoration: "none", color: "inherit" }}>
         <div className="p-body">
           <h3 className="p-title">{property.name}</h3>
+          <SampleBadge property={property} />
           <p className="p-loc">{property.settingName}</p>
           <div className="p-meta">
             <Rating rating={property.rating} reviews={property.reviews} />
@@ -184,6 +195,7 @@ export function FeatureCard({ property, priority = false }: { property: Property
               </span>
             ) : null}
           </div>
+          <SampleBadge property={property} />
           <p className="p-loc">{property.settingName}</p>
           <div className="p-meta">
             <Rating rating={property.rating} reviews={property.reviews} />
@@ -251,6 +263,7 @@ export function NearbyCard({ property }: { property: Property }) {
       </div>
       <div className="n-body">
         <h3 className="p-title">{property.name}</h3>
+        <SampleBadge property={property} />
         <p className="p-loc">{property.settingDetail}</p>
         {hasGarage(property) ? (
           <div className="p-garage-pill" style={{ margin: 0, padding: "2px 6px", fontSize: 10 }}>
@@ -317,6 +330,7 @@ export function ResultCard({ property, searchQuery }: { property: Property; sear
             </span>
           ) : null}
         </div>
+        <SampleBadge property={property} />
         <p className="p-loc">{property.settingName}</p>
         <p className="p-amen" style={{ marginTop: 4 }}>
           {settingLabel(t, property.setting)} · {property.settingDetail}

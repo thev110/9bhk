@@ -44,11 +44,15 @@ test("real auth helper rejects a supplied token that the provider does not valid
   transactionMocks.getUser = async () => ({ data: { user: { id: "user-test", email: "staff@example.com" } } });
   await assert.rejects(transactions.authenticated(new Request("https://local.test", { headers: { Authorization: "Bearer test" } }), true), error => error.status === 403);
 });
-function serviceFixture(intent, bindingError = null) {
+function serviceFixture(intent, bindingError = null, rows = {}) {
   const calls = [];
+  const tables = { bhk_bookings: { host_id: "host-test", property_id: "hosted-estate" }, bhk_properties: { host_id: "host-test" }, ...rows };
   const service = {
     rpc: async (name, args) => { calls.push({ name, args }); return name === "bhk_claim_order" ? { data: intent } : { data: null, error: bindingError }; },
-    from: () => ({ update: value => { calls.push({ update: value }); return { eq: () => ({ eq: async () => ({ error: null }) }) }; } }),
+    from: table => ({
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: tables[table] ?? null, error: null }) }) }),
+      update: value => { calls.push({ update: value }); return { eq: () => ({ eq: async () => ({ error: null }) }) }; },
+    }),
   };
   return { service, calls };
 }
@@ -75,4 +79,20 @@ test("provider or database binding failure never returns a usable checkout", asy
   assert.deepEqual(calls.at(-1), { update: { status: "failed" } });
   transactionMocks.createOrder = async () => ({ id: "order_test", amount: 1, currency: "INR" });
   await assert.rejects(transactions.checkoutOrder(serviceFixture({ id: "bad-amount", amount_paise: 50000, status: "creating" }).service, "user-test", "subscription"));
+});
+test("sample (host-less) listings are refused before any hold or payment order exists", async () => {
+  transactionMocks.orderCalls.length = 0;
+  transactionMocks.createOrder = async () => ({ id: "order_test", amount: 240000, currency: "INR" });
+  for (const rows of [{ bhk_bookings: { host_id: null, property_id: "sample-estate" } }, { bhk_properties: { host_id: null } }]) {
+    const { service, calls } = serviceFixture({ id: "intent-test", amount_paise: 240000, status: "creating" }, null, rows);
+    await assert.rejects(transactions.checkoutOrder(service, "user-test", "booking", "booking-test"), error => error.status === 409 && /sample listing/i.test(error.message));
+    await assert.rejects(transactions.checkoutOrder(service, "user-test", "share", "booking-test", "share-test"), error => error.status === 409);
+    assert.equal(calls.filter(call => call.name === "bhk_claim_order").length, 0);
+  }
+  assert.equal(transactionMocks.orderCalls.length, 0);
+  const sample = serviceFixture(null, null, { bhk_properties: { host_id: null } }).service;
+  await assert.rejects(transactions.assertBookableProperty(sample, "sample-estate"), error => error.status === 409);
+  await transactions.assertBookableProperty(serviceFixture(null).service, "hosted-estate");
+  const route = await readFile(new URL("../app/api/bookings/prepare/route.ts", import.meta.url), "utf8");
+  assert.ok(route.indexOf("assertBookableProperty(service") < route.indexOf('rpc(service, "bhk_prepare_booking"'), "prepare route must check the listing before creating a hold");
 });

@@ -86,6 +86,12 @@ export type Property = {
   blurb: string;
   type: string;
   guestFavourite?: boolean;
+  /**
+   * True when the listing has no host account behind it (seed/sample data).
+   * Sample listings are shown for illustration only: the UI labels them and
+   * the server refuses holds and checkout for them.
+   */
+  sample?: boolean;
   group: "featured" | "nearby" | "popular";
   status?: "published" | "draft";
   /** Optional. Listings without a garage simply omit it. */
@@ -865,3 +871,6 @@ export function matchesFilter(property: Property, filter: string): boolean {
     .toLowerCase();
   return blob.includes(key);
 }
+
+/** Label shown on any listing without a host. Booking is blocked server-side. */
+export const SAMPLE_LISTING_LABEL = "Sample - not bookable";
