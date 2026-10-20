@@ -49,7 +49,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "very_high",
         competitorsTargeted: ["Airbnb", "WhatsApp Brokers", "Justdial"],
         competitorGap:
-          "Brokers circulate unverified photos and demand non-refundable UPI advances. 9bhk guarantees verified private pools, direct host specs, and Razorpay escrow protection.",
+          "Brokers circulate unverified photos and demand non-refundable UPI advances. 9bhk lists whole homes with host-supplied specs and takes payment only through Razorpay checkout.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "ECR Beach Houses with Private Pool — Verified Whole Estates | 9bhk",
         schema: "VacationRental",
@@ -109,7 +109,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "medium",
         competitorsTargeted: ["Local Brokers"],
         competitorGap:
-          "Uthandi has high-end gated beach villas traded only via WhatsApp. 9bhk brings them online with escrow safety.",
+          "Uthandi has high-end gated beach villas traded only via WhatsApp. 9bhk brings them online with Razorpay checkout instead of UPI advances.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "Beach Houses in Uthandi ECR — Luxury Private Villas | 9bhk",
         schema: "VacationRental",
@@ -433,7 +433,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
   },
   {
     id: "competitor-alternatives",
-    name: "Competitor Displacement & Safe Escrow Booking",
+    name: "Competitor Displacement & Safer Online Booking",
     description:
       "Searchers frustrated by OTA fees, deceptive listings, and WhatsApp payment fraud looking for trusted alternatives.",
     primaryRoute: "/about",
@@ -469,9 +469,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["WhatsApp Fraud / Direct UPI"],
         competitorGap:
-          "Guests lose deposits to bogus Instagram accounts. 9bhk safeguards all booking funds in Razorpay escrow until check-in.",
+          "Guests lose deposits to bogus Instagram accounts. 9bhk takes payment only through Razorpay checkout, never a UPI advance to a stranger.",
         targetRoute: "/faq",
-        targetTitle: "Safe ECR Beach House Booking — Escrow Protection & Zero Fraud | 9bhk",
+        targetTitle: "Safer ECR Beach House Booking — Pay Through Razorpay, Not UPI Advances | 9bhk",
         schema: "FAQPage",
         priority: 9,
       },

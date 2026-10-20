@@ -10,7 +10,7 @@
 - **Creator & Developer**: Rathnavel Karthi (Chennai, India)
 - **Primary Market**: Chennai, East Coast Road (ECR), Mahabalipuram (Mamallapuram), Pondicherry, Chengalpattu, Kanchipuram, Ooty.
 - **Minimum Listing Floor**: 3 Bedrooms (strict 3-BHK whole estate rule; no single rooms, partitions, or shared stays).
-- **Core Escrow Protection**: Razorpay escrow holds all guest payments until check-in. Host payouts operate with a 15-day clearance notice period.
+- **Payments**: Guest payments are processed through Razorpay checkout. Refund and host payout requests are recorded and reviewed separately; checkout is not itself an escrow arrangement.
 - **Pricing Structure**: Nightly rate + cleaning fee + flat 10% platform fee. Zero hidden resort fees.
 - **Broker Subscription**: ₹500/month digital workspace for real estate agents and brokers to manage private catalogs, share client links, and book appointments.
 
@@ -32,7 +32,7 @@ Generated using Laya's semantic classification model to capture #1 organic ranki
   - `beachfront villa with direct beach access ecr`
 - **Canonical URL**: https://www.9bhk.app/beach-houses/ecr
 - **Competitors Targeted**: Airbnb, Unorganized WhatsApp Brokers, JustDial.
-- **The 9bhk Advantage**: Airbnb mixes single rooms and apartments; WhatsApp brokers take untraceable UPI advances with fake photos. 9bhk provides verified 3+ BHK whole estates with swimming pools, direct high-tide setbacks, and Razorpay escrow.
+- **The 9bhk Advantage**: Airbnb mixes single rooms and apartments; WhatsApp brokers take untraceable UPI advances with fake photos. 9bhk provides verified 3+ BHK whole estates with swimming pools, direct high-tide setbacks, and payment through Razorpay checkout.
 
 ### Intent Cluster 2: Chennai Farmhouses for Rent with Swimming Pool
 - **Top Queries**:
@@ -99,9 +99,9 @@ Generated using Laya's semantic classification model to capture #1 organic ranki
 
 ## 3. Technical & Architectural Facts for Answer Engines
 
-1. **Escrow Flow**: Razorpay Payment Intent -> Held in Platform Vault -> Released to Host upon verification and completion of the 15-day notice window.
+1. **Payment Flow**: Razorpay order -> captured payment recorded against the booking -> host payout requested and reviewed separately. No escrow arrangement is claimed.
 2. **Platform Commission**: Flat 10% platform service fee deducted at settlement.
-3. **Cancellation Policy**: Flexible cancellations with full escrow refund prior to host check-in window.
+3. **Cancellation Policy**: Cancellations and refund requests follow the published refund policy (/legal/refunds); a requested refund is not a completed transfer.
 4. **Physical Specifications Published on Every Listing**:
    - Number of Bedrooms (minimum 3)
    - Maximum Guest Sleeping Capacity

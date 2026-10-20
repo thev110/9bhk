@@ -77,8 +77,8 @@ export default async function CreatorsPage() {
             <div className="home-seo-card-badge">03 · Affiliate Partner</div>
             <h3>Creator Referral &amp; Booking Commission</h3>
             <p>
-              Curate and recommend your favorite 9bhk villas to your community. Earn standard
-              commissions on confirmed reservations with transparent real-time tracking.
+              Curate and recommend your favorite 9bhk villas to your community. Creator commissions
+              are on the way; we&apos;ll publish the terms before any referral earns one.
             </p>
           </div>
         </div>

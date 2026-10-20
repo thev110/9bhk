@@ -84,7 +84,7 @@ export function splitProgress(shares: SplitShare[]): SplitProgress {
 }
 
 /**
- * Whether the host payout may be released. Escrow releases on the check-in day,
+ * Whether the host payout may be released. A payout becomes eligible on the check-in day,
  * not at booking time — a group that books in March and pays in full should not
  * hand the host cash for a stay that is still six weeks away.
  */

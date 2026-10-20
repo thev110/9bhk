@@ -374,12 +374,12 @@ export const GUIDES: Guide[] = [
       {
         question: "Who built 9bhk and why?",
         answer:
-          "9bhk was designed, architected, and built by Rathnavel Karthi, an independent product builder from Chennai, India, to provide transparent, escrow-backed booking for whole private estates.",
+          "9bhk was designed, architected, and built by Rathnavel Karthi, an independent product builder from Chennai, India, to make booking whole private estates more transparent.",
       },
       {
         question: "How does 9bhk protect payments?",
         answer:
-          "Guest payments are captured directly through Razorpay escrow and held until check-in. Hosts receive settlements under a 15-day clearance window.",
+          "Payment is processed through Razorpay checkout; refund and host payout requests are recorded and reviewed separately. Checkout does not itself establish an escrow arrangement.",
       },
       {
         question: "What is the three-bedroom floor?",
@@ -403,7 +403,7 @@ export const GUIDES: Guide[] = [
         items: [
           { label: "Creator", value: "Rathnavel Karthi (Chennai, India)" },
           { label: "Core Floor", value: "Minimum 3 bedrooms; whole house only" },
-          { label: "Trust Mechanism", value: "Razorpay escrow with 15-day host settlement" },
+          { label: "Payments", value: "Razorpay checkout; refunds and payouts reviewed separately" },
           { label: "Verified Specs", value: "Sanctioned kW, backup generator, high-tide meters" },
           { label: "Economics", value: "Flat 10% platform fee, zero hidden checkout fees" },
         ],
@@ -411,7 +411,7 @@ export const GUIDES: Guide[] = [
       { kind: "h2", text: "Engineering for high-trust gatherings" },
       {
         kind: "p",
-        text: "I built 9bhk to institutionalize trust across South India's private estate economy. We verify real specifications directly with property owners, safeguard guest payments with Razorpay escrow until check-in, and provide hosts with transparent 15-day settlement clearance.",
+        text: "I built 9bhk to institutionalize trust across South India's private estate economy. We verify real specifications directly with property owners, process guest payments through Razorpay checkout, and record every refund and payout request with its status.",
       },
       {
         kind: "p",
