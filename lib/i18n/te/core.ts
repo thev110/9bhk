@@ -371,7 +371,6 @@ export const teCore = {
   "detail.presentationSub": "బ్రాండ్ రహిత క్లైంట్ వీక్షణ · ప్రత్యక్ష హోస్ట్ వివరాలు దాచబడ్డాయి",
   "action.exit": "నిగమించండి",
   "toast.exitedPresentation": "క్లైంట్ ప్రెజెంటేషన్ మోడ్ నుంచి నిగమించారు",
-  "detail.morePhotos": "+ 18 ఎంపిక చేసిన ఆర్కిటెక్చర్ ఫోటోలు",
   "property.listedForSale": "అమ్మకానికి జాబితా చేయబడింది",
   "detail.tideBoundary": "తీరానికి {m}మీ",
   "detail.acquisitionOpportunity": "అధికార సమగ్రకరణ అవకాశం",

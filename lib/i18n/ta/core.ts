@@ -371,7 +371,6 @@ export const taCore = {
   "detail.presentationSub": "பெயரின்றி வாடிக்கையாளர் காட்சி · நேரடி வழங்குபவர் விவரங்கள் மறைக்கப்பட்டவை",
   "action.exit": "வெளியேறு",
   "toast.exitedPresentation": "வாடிக்கையாளர் சிறப்பு முறையிலிருந்து வெளியேற்றப்பட்டது",
-  "detail.morePhotos": "+ 18 தேர்ந்தெடுக்கப்பட்ட அமைப்புப் படங்கள்",
   "property.listedForSale": "விற்பனைக்குப் பட்டியலிடப்பட்டது",
   "detail.tideBoundary": "கடற்கோளுக்கு {m}மீ",
   "detail.acquisitionOpportunity": "கொள்முதல் வாய்ப்பு",

@@ -14,6 +14,7 @@ export default function HostPage() {
   const [upi, setUpi] = useState(user?.upiId ?? "");
   const [properties, setProperties] = useState<HostProperty[]>([]);
   const [upcoming, setUpcoming] = useState(0);
+  const [bookingCount, setBookingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -24,6 +25,7 @@ export default function HostPage() {
       if (!active) return;
       setProperties(rows);
       const today = new Date().toISOString().slice(0, 10);
+      setBookingCount(bookings.length);
       setUpcoming(bookings.filter(b => b.status === "confirmed" && b.check_out >= today).length);
       setError("");
     }).catch(reason => { if (active) setError(reason.message || "Could not load your host workspace."); })
@@ -48,6 +50,7 @@ export default function HostPage() {
       </div>
       <div className="stats"><div className="stat"><p className="lb">{t("host.statUpcoming")}</p><p className="nb">{loading ? "—" : upcoming}</p></div>
         <div className="stat"><p className="lb">{t("host.yourProperties")}</p><p className="nb">{loading ? "—" : properties.length}</p></div></div>
+      {!loading && !error && bookingCount === 0 && <p className="muted" data-empty="bookings">{t("host.noBookingsYet")}</p>}
       <div className="between"><h2>{t("host.yourProperties")}</h2><Link className="btn sm" href="/host/new">{t("host.add")}</Link></div>
       {loading && <p role="status">Loading your listings…</p>}
       {properties.map(item => <article className="card" key={item.id}>

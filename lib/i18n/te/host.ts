@@ -30,14 +30,12 @@ export const teHost = {
   "host.yourProperties": "మీ ఆస్తులు",
 
   // ── Host dashboard stats ───────────────────────────────────────────────
-  "host.statAcrossFarmhouses": "3 ఫారంహౌసుల్లో",
   "host.statLast30": "గత 30 రోజులు",
-  "host.statNextCheckin": "తదుపరి చెక్-ఇన్ 3 రోజుల్లో",
   "host.statOccupancy": "ఆక్రమణ",
   "host.statThisMonth": "ఈ నెల",
   "host.statUpcoming": "రాబోయే రాత్రులు",
+  "host.noBookingsYet": "ఇంకా బుకింగ్‌లు లేవు",
   "host.statViews": "చూపులు",
-  "host.statViewsDelta": "గత నెలతో పోలిస్తే +18%",
 
   // ── Listing wizard — progress chrome ───────────────────────────────────
   "host.backToHosting": "హోస్టింగ్‌కు తిరిగి",
@@ -189,15 +187,11 @@ export const teHost = {
   "host.breakdown": "వివరణ",
   "host.cleaningFeesCollected": "శుచిస్సూతర ఫీజులు వసూలయ్యాయి",
   "host.downloadStatement": "స్టేట్‌మెంట్ డౌన్‌లోడ్ చేయండి",
-  "host.earningsDisclaimer": "మొత్తాలు మీ చెల్లింపు ప్రైవైడర్ నుంచి వస్తాయి — ఇది ప్రోటోటైప్ డేటా ఆకారాన్ని మాత్రమే చూపుతుంది, నిజమైన లెక్కల కాదు.",
-  "host.earningsSummary": "3 ఫారంహౌసుల్లో · 14 రాత్రులు బుక్ అయ్యాయి · ▲ 18%",
   "host.grossBookings": "మొత్తం బుకింగ్‌లు",
-  "host.lastPayout": "చివరి చెల్లింపు 28 జూన్ 2026",
   "host.netEarnings": "నెట్ ఆదాయం",
   "host.netEarningsPeriod": "నెట్ ఆదాయం · జూన్ 2026",
   "host.paidOut": "చెల్లించారు",
   "host.payoutAccount": "చెల్లింపు ఖాతా",
-  "host.payoutArrives": "5 జూలై 2026 నాడు వస్తుంది",
   "host.payouts": "చెల్లింపులు",
   "host.pendingPayout": "పెండింగ్ చెల్లింపు",
 

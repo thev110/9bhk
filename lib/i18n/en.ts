@@ -386,7 +386,6 @@ export const en = {
   "detail.presentationSub": "Unbranded client view · direct host info hidden",
   "action.exit": "Exit",
   "toast.exitedPresentation": "Exited Client Presentation Mode",
-  "detail.morePhotos": "+ 18 curated architectural photos",
   "property.listedForSale": "Listed for Sale",
   "detail.tideBoundary": "{m}m to the shoreline",
   "detail.acquisitionOpportunity": "Acquisition Opportunity",

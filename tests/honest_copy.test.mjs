@@ -43,3 +43,14 @@ test("Verified requires a recorded staff review (status, reviewer and date)", ()
   assert.equal(hasStaffVerification({ verification: { status: "verified", date: "2026-10-01" } }), false);
   assert.equal(hasStaffVerification({ verification: { status: "verified", date: "2026-10-01", verifiedBy: "00000000-0000-0000-0000-000000000001" } }), true);
 });
+
+test("no placeholder metrics (deltas, fake counts, fake payout dates, seed ratings)", () => {
+  const offenders = [];
+  for (const file of COPY) {
+    const text = fs.readFileSync(file, "utf8");
+    for (const m of text.matchAll(/[+▲▼]\s?\d+(?:\.\d+)?\s?%|\d+ nights booked|\d+ இரவுகள் முன்பதிவு|\d+ రాత్రులు బుక్|across \d+ farmhouses|last payout \d|arrives \d+ [A-Z][a-z]{2} \d{4}|\+ ?\d+ curated .*photos/g)) offenders.push(`${file}: ${m[0]}`);
+  }
+  assert.deepEqual(offenders, []);
+  const seeds = fs.readFileSync("lib/properties.ts", "utf8");
+  assert.doesNotMatch(seeds, /\b(rating: [1-9]|reviews: [1-9]|guestFavourite: true)/);
+});
