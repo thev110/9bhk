@@ -23,7 +23,7 @@ begin
     'total',total_amount,'nights',p_check_out-p_check_in,'taxRate',p.tax_rate);
 end;
 $$;
-revoke all on function public.bhk_stay_quote(text,date,date,integer,integer) from public;
+revoke all on function public.bhk_stay_quote(text,date,date,integer,integer) from public, anon, authenticated;
 grant execute on function public.bhk_stay_quote(text,date,date,integer,integer) to service_role;
 
 create function public.bhk_discovery_quotes(p_properties text[],p_check_in date,p_check_out date,p_adults integer,p_children integer,p_flex integer default 0)
@@ -50,7 +50,7 @@ begin
   return jsonb_build_object('quotes',results,'quotedAt',now(),'reservesInventory',false,'optionalExtrasIncluded',false);
 end;
 $$;
-revoke all on function public.bhk_discovery_quotes(text[],date,date,integer,integer,integer) from public;
+revoke all on function public.bhk_discovery_quotes(text[],date,date,integer,integer,integer) from public, anon, authenticated;
 grant execute on function public.bhk_discovery_quotes(text[],date,date,integer,integer,integer) to service_role;
 
 -- Preserve reservation locking, expired-hold refunds and booking limits while

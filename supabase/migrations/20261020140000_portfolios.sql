@@ -57,7 +57,7 @@ begin
     end if;
   end loop;
 end $$;
-revoke all on function public.bhk_assert_portfolio_properties(uuid,text[]) from public;
+revoke all on function public.bhk_assert_portfolio_properties(uuid,text[]) from public, anon, authenticated;
 
 create function public.bhk_save_portfolio(p_id uuid,p_title text,p_display_name text,p_agency text,p_intro text,p_properties text[])
 returns uuid language plpgsql security definer set search_path=public as $$
@@ -125,7 +125,7 @@ begin
     'introduction',version_row.introduction,'properties',properties);
 end $$;
 revoke all on function public.bhk_save_portfolio(uuid,text,text,text,text,text[]),public.bhk_share_portfolio(uuid,uuid,timestamptz),
-  public.bhk_revoke_portfolio_share(uuid),public.bhk_read_portfolio(uuid) from public;
+  public.bhk_revoke_portfolio_share(uuid),public.bhk_read_portfolio(uuid) from public, anon, authenticated;
 grant execute on function public.bhk_save_portfolio(uuid,text,text,text,text,text[]),public.bhk_share_portfolio(uuid,uuid,timestamptz),
   public.bhk_revoke_portfolio_share(uuid),public.bhk_read_portfolio(uuid) to authenticated;
 commit;

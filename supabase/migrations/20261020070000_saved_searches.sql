@@ -29,6 +29,9 @@ create table public.bhk_saved_search_matches (
 );
 alter table public.bhk_saved_searches enable row level security;
 alter table public.bhk_saved_search_matches enable row level security;
+-- Supabase grants ALL to anon/authenticated by default; start from zero so the
+-- column-level grants below are the only write paths.
+revoke all on public.bhk_saved_searches,public.bhk_saved_search_matches from anon,authenticated;
 grant select,delete on public.bhk_saved_searches to authenticated;
 grant insert(user_id,name,city,check_in,check_out,adults,children,min_bedrooms,max_total_paise,required_features,enabled),
   update(name,city,check_in,check_out,adults,children,min_bedrooms,max_total_paise,required_features,enabled) on public.bhk_saved_searches to authenticated;
@@ -67,7 +70,7 @@ begin
   return new;
 end;
 $$;
-revoke all on function public.bhk_saved_search_change() from public;
+revoke all on function public.bhk_saved_search_change() from public, anon, authenticated;
 create trigger saved_search_change before insert or update or delete on public.bhk_saved_searches
   for each row execute function public.bhk_saved_search_change();
 

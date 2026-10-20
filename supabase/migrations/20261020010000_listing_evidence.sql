@@ -3,7 +3,7 @@ create function public.bhk_owns_evidence_listing(target text)
 returns boolean language sql stable security definer set search_path=public as $$
   select exists(select 1 from bhk_properties where id=target and host_id=auth.uid());
 $$;
-revoke all on function public.bhk_owns_evidence_listing(text) from public;
+revoke all on function public.bhk_owns_evidence_listing(text) from public, anon, authenticated;
 grant execute on function public.bhk_owns_evidence_listing(text) to authenticated;
 
 create table public.bhk_listing_media (
@@ -69,6 +69,9 @@ alter table public.bhk_listing_media enable row level security;
 alter table public.bhk_listing_facts enable row level security;
 alter table public.bhk_listing_occasions enable row level security;
 alter table public.bhk_listing_fact_reviews enable row level security;
+-- Supabase grants ALL to anon/authenticated by default; start from zero so the
+-- column-level grants below are the only write paths.
+revoke all on public.bhk_listing_media,public.bhk_listing_facts,public.bhk_listing_occasions,public.bhk_listing_fact_reviews from anon,authenticated;
 grant select,delete on public.bhk_listing_media,public.bhk_listing_facts,public.bhk_listing_occasions to authenticated;
 grant insert,update on public.bhk_listing_media,public.bhk_listing_occasions to authenticated;
 grant insert(property_id,fact_key,value,source_label,observed_on,media_id),
@@ -141,7 +144,7 @@ begin
     values(target_property,target_key,fact.value,fact.media_id,(select to_jsonb(m) from bhk_listing_media m where m.id=fact.media_id),fact.source_label,fact.observed_on,decision,scope,auth.uid(),case when decision='reviewed' then valid_until else null end);
 end;
 $$;
-revoke all on function public.bhk_review_listing_fact(text,text,text,text,timestamptz) from public;
+revoke all on function public.bhk_review_listing_fact(text,text,text,text,timestamptz) from public, anon, authenticated;
 grant execute on function public.bhk_review_listing_fact(text,text,text,text,timestamptz) to authenticated;
 
 -- Public projection excludes reviewer identity and unpublished listings.

@@ -90,7 +90,7 @@ begin
     'interpretation','Asking listings and attributed completed-sale claims are separate. No market valuation is calculated.');
 end $$;
 revoke all on function public.bhk_save_price_comparable(uuid,text,text,bigint,text,text,date,text,numeric,text,text,text),
-  public.bhk_review_price_comparable(uuid,text,text,timestamptz),public.bhk_read_price_context(text) from public;
+  public.bhk_review_price_comparable(uuid,text,text,timestamptz),public.bhk_read_price_context(text) from public, anon, authenticated;
 grant execute on function public.bhk_save_price_comparable(uuid,text,text,bigint,text,text,date,text,numeric,text,text,text),
   public.bhk_review_price_comparable(uuid,text,text,timestamptz),public.bhk_read_price_context(text) to authenticated;
 commit;

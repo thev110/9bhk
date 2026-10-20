@@ -21,8 +21,11 @@ export async function migratedDatabase() {
     grant select,insert,update,delete on storage.objects to anon,authenticated,service_role;
     create function storage.foldername(value text) returns text[] language sql immutable as $$ select (string_to_array(value,'/'))[1:greatest(cardinality(string_to_array(value,'/'))-1,0)] $$;
     grant execute on all functions in schema storage to anon,authenticated,service_role;
-    alter default privileges in schema public grant all on tables to service_role;
-    alter default privileges in schema public grant all on sequences to service_role;
+    -- Hosted Supabase grants ALL on new public objects to anon/authenticated/service_role
+    -- explicitly, so 'revoke ... from public' alone does not remove anon access.
+    alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+    alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+    alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
   `);
   const dir = path.resolve("supabase/migrations");
   for (const name of (await fs.readdir(dir)).filter(name => name.endsWith(".sql")).sort()) {

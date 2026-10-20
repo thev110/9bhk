@@ -40,6 +40,8 @@ create table public.bhk_notification_outbox(
   unique(user_id,event_key)
 );
 alter table public.bhk_notification_outbox enable row level security;
+-- Supabase grants ALL to anon/authenticated by default; outbox writes are service-only.
+revoke all on public.bhk_notification_outbox from anon,authenticated;
 grant select on public.bhk_notification_outbox to authenticated;
 create policy notification_outbox_staff on public.bhk_notification_outbox for select to authenticated using(public.bhk_is_staff());
 grant all on public.bhk_notification_outbox, public.bhk_notification_preferences to service_role;

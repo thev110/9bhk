@@ -161,11 +161,11 @@ begin
   return new;
 end $$;
 create trigger cancel_booking_services after update of status on public.bhk_bookings for each row execute function public.bhk_cancel_booking_services();
-revoke all on function public.bhk_cancel_booking_services() from public;
+revoke all on function public.bhk_cancel_booking_services() from public, anon, authenticated;
 revoke all on function public.bhk_register_service_provider(text),public.bhk_review_service_provider(uuid,boolean),
   public.bhk_add_service_offering(text,text,text,text,date,date),public.bhk_set_service_offering_active(uuid,boolean),
   public.bhk_request_service(uuid,uuid,date,date,text),public.bhk_approve_service_at_property(uuid),
-  public.bhk_quote_service(uuid,bigint,text,timestamptz),public.bhk_transition_service(uuid,text,text) from public;
+  public.bhk_quote_service(uuid,bigint,text,timestamptz),public.bhk_transition_service(uuid,text,text) from public, anon, authenticated;
 grant execute on function public.bhk_register_service_provider(text),public.bhk_review_service_provider(uuid,boolean),
   public.bhk_add_service_offering(text,text,text,text,date,date),public.bhk_set_service_offering_active(uuid,boolean),
   public.bhk_request_service(uuid,uuid,date,date,text),public.bhk_approve_service_at_property(uuid),

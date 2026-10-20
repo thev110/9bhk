@@ -36,7 +36,7 @@ begin
   if capacity is null and p_occasion in ('celebration','wedding','shoot','corporate_retreat') and listing.hosts_celebrations then capacity:=listing.max_event_guests; end if;
   if p_attendees is null or capacity is null or p_attendees<1 or p_attendees>capacity or p_attendees<p_adults::bigint+p_children then raise exception 'Recorded visitor/event capacity must cover all attendees'; end if;
 end $$;
-revoke all on function public.bhk_assert_occasion(text,text,integer,integer,integer) from public;
+revoke all on function public.bhk_assert_occasion(text,text,integer,integer,integer) from public, anon, authenticated;
 create function public.bhk_request_occasion(p_property text,p_occasion text,p_in date,p_out date,p_adults integer,p_children integer,p_attendees integer,p_details text)
 returns uuid language plpgsql security definer set search_path=public as $$
 declare owner uuid; result uuid;
@@ -90,7 +90,7 @@ begin
   return result||jsonb_build_object('occasionRequestId',request.id,'occasion',request.occasion,'hostConditions',request.host_conditions);
 end $$;
 revoke all on function public.bhk_request_occasion(text,text,date,date,integer,integer,integer,text),
-  public.bhk_decide_occasion(uuid,boolean,text),public.bhk_revoke_occasion(uuid),public.bhk_prepare_occasion_booking(uuid,uuid,text,text,text) from public;
+  public.bhk_decide_occasion(uuid,boolean,text),public.bhk_revoke_occasion(uuid),public.bhk_prepare_occasion_booking(uuid,uuid,text,text,text) from public, anon, authenticated;
 grant execute on function public.bhk_request_occasion(text,text,date,date,integer,integer,integer,text),
   public.bhk_decide_occasion(uuid,boolean,text),public.bhk_revoke_occasion(uuid) to authenticated;
 grant execute on function public.bhk_prepare_occasion_booking(uuid,uuid,text,text,text) to service_role;

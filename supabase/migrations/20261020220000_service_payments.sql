@@ -189,7 +189,7 @@ end $$;
 revoke all on function public.bhk_service_payment_transition_guard(),public.bhk_cancelled_service_refund(),
   public.bhk_claim_service_order(uuid,uuid),public.bhk_bind_service_order(uuid,text),public.bhk_queue_service_refunds(uuid,text),
   public.bhk_capture_service_payment(text,text,bigint,text,text,timestamptz),public.bhk_claim_service_refund(uuid),
-  public.bhk_record_service_refund(uuid,text,text,bigint,text) from public;
+  public.bhk_record_service_refund(uuid,text,text,bigint,text) from public, anon, authenticated;
 grant execute on function public.bhk_claim_service_order(uuid,uuid),public.bhk_bind_service_order(uuid,text),
   public.bhk_capture_service_payment(text,text,bigint,text,text,timestamptz),public.bhk_claim_service_refund(uuid),
   public.bhk_record_service_refund(uuid,text,text,bigint,text) to service_role;
@@ -207,7 +207,7 @@ begin
   end loop;
   return expired;
 end $$;
-revoke all on function public.bhk_expire_service_checkouts(integer) from public;
+revoke all on function public.bhk_expire_service_checkouts(integer) from public, anon, authenticated;
 grant execute on function public.bhk_expire_service_checkouts(integer) to service_role;
 create table public.bhk_service_payouts(
   id uuid primary key default gen_random_uuid(),
@@ -297,7 +297,7 @@ begin
 end $$;
 revoke all on function public.bhk_assert_service_payout(uuid,uuid,bigint),public.bhk_request_service_payout(uuid),
   public.bhk_approve_service_payout(uuid,bigint,text,text,text),public.bhk_claim_service_payout(uuid,text),
-  public.bhk_record_service_payout(uuid,text,text,bigint,text) from public;
+  public.bhk_record_service_payout(uuid,text,text,bigint,text) from public, anon, authenticated;
 grant execute on function public.bhk_request_service_payout(uuid),public.bhk_approve_service_payout(uuid,bigint,text,text,text) to authenticated;
 grant execute on function public.bhk_claim_service_payout(uuid,text),public.bhk_record_service_payout(uuid,text,text,bigint,text) to service_role;
 commit;
