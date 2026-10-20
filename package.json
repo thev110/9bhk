@@ -6,7 +6,7 @@
     "url": "https://www.linkedin.com/in/rathnavel-karthi-114991135/"
   },
   "engines": {
-    "node": ">=22.15"
+    "node": ">=22.15 <25"
   },
   "scripts": {
     "dev": "next dev",
