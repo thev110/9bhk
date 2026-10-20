@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { EditorialShell, PageHero, Section } from "@/components/seo/page-frame";
+import { CollectionEmptyState } from "@/components/seo/collection-empty";
 import { PropertyGrid } from "@/components/seo/property-card";
 import { LinkTile } from "@/components/seo/link-tile";
 import { EditorialCta } from "@/components/seo/site-header";
@@ -27,7 +27,10 @@ export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const properties = await getIndexableProperties();
-  return generateLocationsIndexMetadata(locationSummaries(properties));
+  const summaries = locationSummaries(properties);
+  // Linked from the header and footer, so it answers 200 even when empty, but stays noindex until there is inventory.
+  if (!summaries.length) return { title: "Destinations coming soon", robots: { index: false, follow: true } };
+  return generateLocationsIndexMetadata(summaries);
 }
 
 export default async function LocationsPage() {
@@ -36,7 +39,13 @@ export default async function LocationsPage() {
   const publishable = publishableLocations(properties);
   const crumbs = HomeCrumbs();
 
-  if (!summaries.length) notFound();
+  if (!summaries.length) {
+    return (
+      <EditorialShell current="/locations">
+        <CollectionEmptyState titleKey="collection.emptyTitle.locations" />
+      </EditorialShell>
+    );
+  }
 
   const byKind = {
     coast: summaries.filter((summary) => summary.entry.kind === "coast"),
