@@ -6,6 +6,7 @@ import { getServerCatalog } from "@/lib/server/catalog";
 import { publishableLocations } from "@/lib/seo/locations";
 
 import { CreatorAttribution } from "@/components/creator-attribution";
+import { TwelveToolsBadge } from "@/components/seo/twelve-tools-badge";
 
 /**
  * Footer information architecture.
@@ -117,8 +118,8 @@ export async function SiteFooter() {
         <p className="seo-footer-legal">
           © {new Date().getFullYear()} {SITE.displayName}. All rights reserved.
         </p>
-        <p className="seo-footer-legal">
-          <a href="https://twelve.tools" target="_blank" rel="noopener">Featured on Twelve Tools</a>
+        <p className="seo-footer-legal" data-twelve-tools>
+          <TwelveToolsBadge />
         </p>
         <CreatorAttribution variant="footer" />
       </div>
