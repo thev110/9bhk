@@ -50,7 +50,7 @@ function ReviewSheet({ booking, onClose }: { booking: Booking | null; onClose: (
   return <BaseSheet open={Boolean(booking)} onOpenChange={value => { if (!value) onClose(); }} title="Review your stay"><div className="stack">
     <label className="field">Rating<select className="ctrl" value={rating} onChange={e => setRating(e.target.value)}>{[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} stars</option>)}</select></label>
     <label className="field">Your experience<textarea className="ctrl" minLength={10} maxLength={4000} value={body} onChange={e => setBody(e.target.value)} /></label>
-    <button className="btn" disabled={busy || body.trim().length < 10} onClick={async () => { if (!booking || busy) return; setBusy(true); try { await submitStayReview(booking.id, booking.propertyId, Number(rating), body); showToast("Review submitted for verification."); setBody(""); onClose(); } catch (reason) { showToast(reason instanceof Error ? reason.message : "Could not submit review."); } finally { setBusy(false); } }}>Submit review</button>
+    <button className="btn" disabled={busy || body.trim().length < 10} onClick={async () => { if (!booking || busy) return; setBusy(true); try { await submitStayReview(booking.id, booking.propertyId, Number(rating), body); showToast("Review submitted for staff approval."); setBody(""); onClose(); } catch (reason) { showToast(reason instanceof Error ? reason.message : "Could not submit review."); } finally { setBusy(false); } }}>Submit review</button>
   </div></BaseSheet>;
 }
 

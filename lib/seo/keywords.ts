@@ -49,9 +49,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "very_high",
         competitorsTargeted: ["Airbnb", "WhatsApp Brokers", "Justdial"],
         competitorGap:
-          "Brokers circulate unverified photos and demand non-refundable UPI advances. 9bhk lists whole homes with host-supplied specs and takes payment only through Razorpay checkout.",
+          "Brokers circulate unsourced photos and demand non-refundable UPI advances. 9bhk lists whole homes with host-supplied specs and takes payment only through Razorpay checkout.",
         targetRoute: "/beach-houses/ecr",
-        targetTitle: "ECR Beach Houses with Private Pool — Verified Whole Estates | 9bhk",
+        targetTitle: "ECR Beach Houses with Private Pool — Whole Estates | 9bhk",
         schema: "VacationRental",
         priority: 10,
       },
@@ -61,7 +61,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "very_high",
         competitorsTargeted: ["Airbnb", "MakeMyTrip", "Local Brokers"],
         competitorGap:
-          "OTAs list fragmented rooms or homestays with hidden checkout fees. 9bhk strictly lists 3+ BHK whole houses with 10% flat transparent fee.",
+          "OTAs list fragmented rooms or homestays with hidden checkout fees. 9bhk strictly lists 3+ BHK whole houses. No platform fee during launch. Any future fee will be shown clearly before you book.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "Beach House for Rent in ECR — Whole Private Stays | 9bhk",
         schema: "VacationRental",
@@ -73,7 +73,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["StayVista", "SaffronStays"],
         competitorGap:
-          "Luxury villa aggregators charge 25% markups and impose 2-night minimums. 9bhk offers verified luxury beach estates with direct owner specs.",
+          "Luxury villa aggregators add markups and impose 2-night minimums. 9bhk lists luxury beach estates with host-provided specs.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "Luxury Beach Houses in ECR Chennai — Private Whole Villas | 9bhk",
         schema: "VacationRental",
@@ -85,7 +85,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["Airbnb", "WhatsApp Brokers"],
         competitorGap:
-          "Families fear party houses with unauthorized caretakers. 9bhk enforces verified host rules, family-friendly security, and verified sound curfews.",
+          "Families fear party houses with unauthorized caretakers. 9bhk publishes each host's house rules, security notes and sound curfew as host-provided details.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "Private Beach Houses in ECR for Families — Gated Stays | 9bhk",
         schema: "VacationRental",
@@ -121,7 +121,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "medium",
         competitorsTargeted: ["Local Brokers"],
         competitorGap:
-          "Closest beach stretch to South Chennai; high demand for quick weekend gateways with verified power backup.",
+          "Closest beach stretch to South Chennai; high demand for quick weekend gateways with power backup.",
         targetRoute: "/beach-houses/ecr",
         targetTitle: "Injambakkam ECR Beach Houses with Pool — 9bhk",
         schema: "VacationRental",
@@ -135,7 +135,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         competitorGap:
           "OTAs claim 'sea view' when properties are 500m inland. 9bhk publishes exact meter distance to high-tide line.",
         targetRoute: "/beach-houses/ecr",
-        targetTitle: "Direct Beachfront Villas in ECR — Verified Sand Access | 9bhk",
+        targetTitle: "Direct Beachfront Villas in ECR — Sand Access | 9bhk",
         schema: "VacationRental",
         priority: 9,
       },
@@ -155,7 +155,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "very_high",
         competitorsTargeted: ["Instagram Brokers", "Justdial", "OLX"],
         competitorGap:
-          "Highest volume query in Tamil Nadu. Flooded with outdated listings and broken pools. 9bhk verifies pool maintenance and electrical loads.",
+          "Highest volume query in Tamil Nadu. Flooded with outdated listings and broken pools. 9bhk asks hosts to state pool upkeep and electrical load on the listing.",
         targetRoute: "/farmhouses/chennai",
         targetTitle: "Farmhouse in Chennai for Rent with Swimming Pool — 9bhk",
         schema: "VacationRental",
@@ -179,7 +179,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["Event Organisers", "Local Brokers"],
         competitorGap:
-          "Parties get evicted due to sudden sound complaints. 9bhk explicitly publishes verified sound curfew hours and DJ electrical loads.",
+          "Parties get evicted due to sudden sound complaints. 9bhk publishes host-provided sound curfew hours and DJ electrical loads.",
         targetRoute: "/farmhouses",
         targetTitle: "Farmhouses in Chennai for Birthday Parties & Gatherings | 9bhk",
         schema: "FAQPage",
@@ -215,7 +215,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["Airbnb"],
         competitorGap:
-          "Finding genuinely pet-friendly gated lawns with secure perimeter fencing. 9bhk indexes verified pet-friendly estates.",
+          "Finding genuinely pet-friendly gated lawns with secure perimeter fencing. 9bhk shows each host's pet policy as host-provided detail.",
         targetRoute: "/farmhouses",
         targetTitle: "Pet-Friendly Farmhouses in Chennai with Private Lawn & Pool | 9bhk",
         schema: "VacationRental",
@@ -285,7 +285,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
     id: "group-events-offsites",
     name: "Corporate Offsites, Hackathons & Event Stays",
     description:
-      "High-value B2B and group gathering queries. Teams and families looking for venues with verified technical capacity (generator kW, parking, WiFi, catering space).",
+      "High-value B2B and group gathering queries. Teams and families looking for venues with stated technical capacity (generator kW, parking, WiFi, catering space).",
     primaryRoute: "/stays",
     primaryCompetitor: "Commercial Resorts & Event Brokers",
     keywords: [
@@ -331,9 +331,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "medium",
         competitorsTargeted: ["WhatsApp Brokers"],
         competitorGap:
-          "Coastal power cuts regularly ruin celebrations. 9bhk displays verified generator capacity in kW on every listing.",
+          "Coastal power cuts regularly ruin celebrations. 9bhk shows the host-provided generator capacity in kW where the host supplies it.",
         targetRoute: "/faq",
-        targetTitle: "Verified Power Backup & Generator Specs on 9bhk Stays",
+        targetTitle: "Power Backup & Generator Specs on 9bhk Stays",
         schema: "FAQPage",
         priority: 8,
       },
@@ -343,7 +343,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
     id: "creator-production-shoots",
     name: "Creator, Film Shoot & Fashion Lookbook Locations",
     description:
-      "Production houses, YouTube creators, fashion labels, and wedding photographers looking for verified private shoot locations.",
+      "Production houses, YouTube creators, fashion labels, and wedding photographers looking for private shoot locations.",
     primaryRoute: "/creators",
     primaryCompetitor: "Film Location Brokers & WhatsApp Agents",
     keywords: [
@@ -377,9 +377,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "medium",
         competitorsTargeted: ["Cinema Location Agents"],
         competitorGap:
-          "Film crews need verified sanctioned electrical load (kW) and generator support for heavy lighting rigs.",
+          "Film crews need a stated sanctioned electrical load (kW) and generator support for heavy lighting rigs.",
         targetRoute: "/creators",
-        targetTitle: "Farmhouses in Chennai for Film & Ad Shoots — Power Verified | 9bhk",
+        targetTitle: "Farmhouses in Chennai for Film & Ad Shoots — Power Specs Listed | 9bhk",
         schema: "Product",
         priority: 8,
       },
@@ -399,9 +399,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "very_high",
         competitorsTargeted: ["MagicBricks", "99acres", "Housing.com"],
         competitorGap:
-          "Portals are overrun with spam broker listings and stale rates. 9bhk publishes verified whole estates with asking price in Crores and land area.",
+          "Portals are overrun with spam broker listings and stale rates. 9bhk publishes whole estates with asking price in Crores and land area as provided by the owner.",
         targetRoute: "/buy",
-        targetTitle: "Beach Houses for Sale in ECR Chennai — Verified Luxury Estates | 9bhk",
+        targetTitle: "Beach Houses for Sale in ECR Chennai — Luxury Estates | 9bhk",
         schema: "Product",
         priority: 10,
       },
@@ -411,9 +411,9 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["99acres", "Local Realtors"],
         competitorGap:
-          "Ultra-luxury oceanfront villas directly presented with verified architectural details and ownership clearance.",
+          "Ultra-luxury oceanfront villas presented directly with host-provided architectural and ownership details.",
         targetRoute: "/buy",
-        targetTitle: "Luxury Villas for Sale in ECR — Verified Oceanfront Homes | 9bhk",
+        targetTitle: "Luxury Villas for Sale in ECR — Oceanfront Homes | 9bhk",
         schema: "Product",
         priority: 9,
       },
@@ -423,7 +423,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "high",
         competitorsTargeted: ["MagicBricks", "Local Brokers"],
         competitorGap:
-          "Curated agricultural estates and mango farms with clear title verification and verified groundwater records.",
+          "Curated agricultural estates and mango farms with title and groundwater details as provided by the owner.",
         targetRoute: "/buy",
         targetTitle: "Farmhouses for Sale Near Chennai — Acreage & Private Estates | 9bhk",
         schema: "Product",
@@ -445,7 +445,7 @@ export const KEYWORD_CLUSTERS: KeywordCluster[] = [
         volumeTier: "medium",
         competitorsTargeted: ["StayVista"],
         competitorGap:
-          "StayVista charges premium markups with limited local Chennai inventory. 9bhk offers direct local estates with 10% flat fee.",
+          "StayVista charges premium markups with limited local Chennai inventory. 9bhk offers direct local estates. No platform fee during launch. Any future fee will be shown clearly before you book.",
         targetRoute: "/about",
         targetTitle: "9bhk vs StayVista — Transparent Group Villa Booking in ECR",
         schema: "FAQPage",

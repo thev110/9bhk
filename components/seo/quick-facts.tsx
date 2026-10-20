@@ -1,3 +1,4 @@
+import { hasStaffVerification, HOST_PROVIDED_LABEL, VERIFIED_LABEL } from "@/lib/verification";
 import type { SeoProperty } from "@/lib/catalog-rows";
 import { hasBonfire, hasPetFriendly, hasPool, isBeachfront, plural } from "@/lib/seo/copy";
 import { locationFor } from "@/lib/seo/locations";
@@ -111,9 +112,12 @@ export function propertyFacts(property: SeoProperty): Fact[] {
     href: categoryFor(property).href,
   });
 
-  if (property.verification?.status === "verified") {
-    facts.push({ label: "Verification", value: property.verification.type ?? "Verified by 9bhk" });
-  }
+  // "Verified" only when a staff review is recorded; otherwise say so plainly.
+  facts.push(
+    hasStaffVerification(property)
+      ? { label: "Listing details", value: property.verification?.type ? `${VERIFIED_LABEL}: ${property.verification.type}` : VERIFIED_LABEL }
+      : { label: "Listing details", value: HOST_PROVIDED_LABEL },
+  );
 
   return facts;
 }

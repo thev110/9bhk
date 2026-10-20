@@ -72,7 +72,7 @@ export default async function CreditsPage() {
           </p>
           <p>
             Built as a full-stack Next.js application, it integrates Razorpay checkout and signed payment webhooks,
-            verified physical specs (electrical load kW, generator backup, and high-tide boundaries),
+            host-provided physical specs (electrical load kW, generator backup, and high-tide boundaries),
             and a strict three-bedroom group floor.
           </p>
         </div>

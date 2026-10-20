@@ -44,7 +44,7 @@ export const realtorKeys = {
   // ── Seller cross-sell ───────────────────────────────────────────────────
   "realtor.sellerPrompt": "Representing a villa or bungalow seller?",
   "realtor.sellerBody":
-    "List your client's property with verified title documentation, garage specs, and exclusive co-broking visibility.",
+    "List your client's property with host-provided title documents, garage specs, and exclusive co-broking visibility.",
   "realtor.listForSale": "List Property for Sale",
   "realtor.viewAllHoldings": "View All Holdings",
 

@@ -229,7 +229,7 @@ export function SearchScreen() {
 
       {results.length === 0 ? (
         <div className="empty">
-          <h3>{checkIn && checkOut && !availabilityReady ? "Availability is not verified" : t("search.emptyTitle")}</h3>
+          <h3>{checkIn && checkOut && !availabilityReady ? "Availability could not be checked" : t("search.emptyTitle")}</h3>
           <p>{checkIn && checkOut && !availabilityReady ? "Live availability has not been loaded. Clear the dates to browse listings, or retry when the marketplace is available." : t("search.emptyBody")}</p>
           <button
             className="btn sm mt"

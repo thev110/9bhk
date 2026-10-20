@@ -626,7 +626,7 @@ export default function RealtorPortalPage() {
               <div style={{ fontSize: 32, marginBottom: 8 }}>🏡</div>
               <h3 style={{ fontSize: 17, fontWeight: 700 }}>Your Broker Catalog is Empty</h3>
               <p className="muted" style={{ fontSize: 13, maxWidth: 460, margin: "6px auto 16px" }}>
-                Add your exclusive listings, or represent verified farmhouses and beachfront estates directly from the 9bhk luxury collection.
+                Add your exclusive listings, or represent farmhouses and beachfront estates directly from the 9bhk luxury collection.
               </p>
               <div className="row" style={{ justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
                 <button

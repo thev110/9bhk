@@ -3,12 +3,12 @@
 9bhk is a whole-property marketplace for private farmhouses, beach houses and villas. Public inventory requires at least three bedrooms and staff publication approval.
 
 ## Product facts
-- Hosts supply property specifications; recorded verification is labelled separately.
+- Property specifications are host-provided. A listing is labelled Verified only when a staff review of its evidence is recorded.
 - Reservations use server-priced, expiring date holds before Razorpay checkout.
 - Confirmed payment means the server reconciled a captured gateway payment.
 - Refund and payout requests show their recorded processing status. Checkout is not itself an escrow arrangement.
 - Quotes itemize stay, cleaning, configured taxes/service fees and any refundable deposit.
-- Verified reviews are tied to completed stays and require publication approval.
+- Reviews are tied to completed stays and require publication approval.
 - Group planning and messages require authenticated, scoped membership.
 
 ## Public resources

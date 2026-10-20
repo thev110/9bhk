@@ -15,12 +15,12 @@ export const taOnboarding = {
   // ── Role cards ──────────────────────────────────────────────────────────
   "onboarding.roleBuyer": "வாங்குபவர் அல்லது கடற்கரை விருந்தினர்",
   "onboarding.roleBuyerBody":
-    "சரிபார்க்கப்பட்ட நேரடி கடல்முக கடற்கரை வீடுகளையும் சேகரிப்புக் கார் வைல்டுகளையும் பெறுங்கள் அல்லது முன்பதிவு செய்யுங்கள்.",
+    "நீச்சல்குளம் கொண்ட முழு வில்லாக்களையும் பங்களாக்களையும் முன்பதிவு செய்யுங்கள், அல்லது ஒன்றை நேரடியாக வாங்குங்கள்.",
   "onboarding.roleRealtor": "உரிமம் பெற்ற ரியல்டர் / நகர்வோர்",
   // REVIEW: "co-broking lock" is brokerage jargon; "co-broking" transliterated
   // per Rule 1 rather than coin-joined into a Tamil compound.
   "onboarding.roleRealtorBody":
-    "பெயரின்றி சிறப்பு முறை, தனிப்பட்ட வாடிக்கையாளர் பட்டியல் மற்றும் 1.5%–2% கோ-புரோகிங் பூட்டு.",
+    "பெயரின்றி வழங்கும் முறை, தனிப்பட்ட வாடிக்கையாளர் பட்டியல் மற்றும் கோ-புரோகிங் பங்கீடு.",
   "onboarding.roleSeller": "நில உரிமையாளர் அல்லது விற்பவர்",
   "onboarding.roleSellerBody":
     "கோடி மதிப்பில் விற்பனைக்காகவோ தேர்ந்தெடுக்கப்பட்ட தங்குமிரங்களுக்காகவோ நேரடி கடல்முக நிலங்களையும் விலாக்களையும் பட்டியலிடுங்கள்.",
@@ -34,7 +34,7 @@ export const taOnboarding = {
   // ── Step 2 — credentials ────────────────────────────────────────────────
   "onboarding.credentialsPill": "சுயவிவரம் & மாண்டேட்டு அடையாளங்கள்",
   "onboarding.titleRealtor": "முகவர் & முகவர்க்குழு பதிவு",
-  "onboarding.titleSeller": "நில சரிபார்ப்பு விவரங்கள்",
+  "onboarding.titleSeller": "மதிப்பாய்வுக்கான சொத்து விவரங்கள்",
   "onboarding.titleBuyer": "உங்கள் தேடலைத் தனிப்பயனாக்குங்கள்",
 
   // ── Common fields ───────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ export const taOnboarding = {
   // REVIEW: "co-broking attribution" (crediting the other side of a deal) has
   // no Tamil term; transliterated per Rule 1, wording left literal.
   "onboarding.reraHelp":
-    "கோ-புரோகிங் பங்கீடு மற்றும் சரிபார்க்கப்பட்ட முகவர் குறியீட்டைச் செயல்படுத்துகிறது.",
+    "கோ-புரோகிங் பங்கீட்டைச் செயல்படுத்துகிறது. உங்கள் பதிவை ஊழியர்கள் மதிப்பாய்வு செய்த பிறகே RERA குறி தோன்றும்.",
   "onboarding.fieldAcquisitionRange": "வழக்கமான வாடிக்கையாளர் கொள்முதல் வரம்பு",
   "onboarding.budgetBoutique": "₹5 Cr – ₹15 Cr (பூட்டிக் மணற்பரப்புப் பகுதிகள்)",
   "onboarding.budgetSupercar": "₹15 Cr – ₹35 Cr (சூப்பர்கார் வைல்ட் நிலங்கள்)",

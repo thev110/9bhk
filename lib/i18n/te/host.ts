@@ -213,7 +213,7 @@ export const teHost = {
   "host.errDocTooLarge": "ఆ ఫైల్ చాలా పెద్దది",
   "host.errDocType": "ఆ ఫైల్ రకం మద్దతు లేదు",
   "host.documentsTitle": "పత్రాలు",
-  "host.documentsBody": "ఈ జాబితాను రివ్యూ చేయడానికి అవసరమైన పత్రాలను అప్‌లోడ్ చేయండి.",
+  "host.documentsBody": "ఈ జాబితాను సిబ్బంది సమీక్షించడానికి అవసరమైన పత్రాలను అప్‌లోడ్ చేయండి.",
   "host.docNone": "ఫైల్ ఎంచుకోలేదు",
   "host.docReplace": "ఫైల్ మార్చు",
   "host.docUpload": "ఫైల్ ఎంచుకోండి",

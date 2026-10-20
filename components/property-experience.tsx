@@ -29,6 +29,7 @@ import { guidesForListing } from "@/lib/content/guides";
 import { listVerifiedReviews } from "@/lib/supabase/community";
 import { bookingQuery } from "@/lib/search-state";
 import { track } from "@/lib/seo/analytics";
+import { hasStaffVerification } from "@/lib/verification";
 
 /**
  * Interactive half of the property page.
@@ -114,7 +115,7 @@ export function PropertyExperience({
   // event spec, and the page never invents one.
   const celebration = property.celebration;
   const photos = property.photos?.length ? property.photos : [property.image];
-  const verified = property.verification?.status === "verified";
+  const verified = hasStaffVerification(property);
 
   async function handleRequestViewing(e: React.FormEvent) {
     e.preventDefault();
@@ -260,6 +261,9 @@ export function PropertyExperience({
           <p className="p-loc">{property.settingName}</p>
           <div className="row wrap mt" style={{ marginTop: 8, gap: 6 }}>
             <SampleBadge property={property} />
+            <span className={verified ? "pill ok" : "pill muted"} data-listing-verification={verified ? "staff" : "host"}>
+              {verified ? t("detail.staffVerified") : t("detail.hostProvided")}
+            </span>
             <Rating rating={property.rating} reviews={property.reviews} />
             {property.guestFavourite ? <span className="pill ok">{t("property.guestFavourite")}</span> : null}
             <span className="pill forest">
@@ -279,7 +283,7 @@ export function PropertyExperience({
               <span className="p-sale-tag" style={{ margin: 0, textTransform: "uppercase", fontSize: 12, letterSpacing: ".08em" }}>
                 {t("detail.acquisitionOpportunity")}
               </span>
-              <span className="pill forest" style={{ fontSize: 11 }}>{verified ? "Verification recorded" : "Owner-supplied details"}</span>
+              <span className="pill forest" style={{ fontSize: 11 }}>{verified ? t("detail.staffVerified") : t("detail.hostProvided")}</span>
             </div>
             <div className="between mt" style={{ alignItems: "baseline" }}>
               <div>
@@ -503,9 +507,9 @@ export function PropertyExperience({
         </div>
 
         {reviews.length > 0 ? (
-          <section aria-label="Reviews from verified stays" className="stack">
-            <h3 className="sec-title">Reviews from verified stays</h3>
-            {reviews.map((review) => <article className="card" key={review.id}><strong>{review.rating}/5 · Verified stay</strong><p className="mt">{review.body}</p></article>)}
+          <section aria-label="Reviews from completed stays" className="stack">
+            <h3 className="sec-title">Reviews from completed stays</h3>
+            {reviews.map((review) => <article className="card" key={review.id}><strong>{review.rating}/5 · Completed stay</strong><p className="mt">{review.body}</p></article>)}
           </section>
         ) : null}
 

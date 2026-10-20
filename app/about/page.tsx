@@ -71,7 +71,7 @@ export default async function AboutPage() {
           <p>
             Renting a private farmhouse or seaside villa in South India has historically been an
             unorganized, high-risk ordeal. For decades, groups planning a weekend retreat along the
-            ECR, Chennai coast, or Pondicherry had to rely on informal brokers, unverified Instagram
+            ECR, Chennai coast, or Pondicherry had to rely on informal brokers, anonymous Instagram
             pages, and direct UPI transfers with zero contract protection or refund guarantees.
           </p>
           <p>
@@ -81,7 +81,7 @@ export default async function AboutPage() {
           </p>
           <p>
             Meanwhile, global OTAs treat multi-acre estates like hotel rooms: they obscure property
-            specs, ban legitimate group celebration queries, and tack on 18% to 25% surprise fees
+            specs, ban legitimate group celebration queries, and tack on surprise fees
             at the checkout screen. 9bhk was founded to eliminate this friction entirely.
           </p>
         </div>
@@ -100,7 +100,7 @@ export default async function AboutPage() {
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 02 · Functional Integrity</div>
-            <h3>Direct, Verifiable Owner Specifications</h3>
+            <h3>Direct, Host-provided Specifications</h3>
             <p>
               We declare the technical metrics other sites omit: electrical load in kW, on-site
               generator capacity, sound curfews, vehicle parking slots, and exact high-tide coastal
@@ -147,7 +147,7 @@ export default async function AboutPage() {
             </li>
             <li>
               <strong>Filmmakers &amp; Creators:</strong> Commercial lookbooks, video campaigns, and
-              brand shoots requiring production-ready electrical loads and verified permits.
+              brand shoots requiring production-ready electrical loads and the permits a shoot needs.
             </li>
           </ul>
         </div>
@@ -241,7 +241,7 @@ export default async function AboutPage() {
       <Section title="Contact" id="contact">
         <div className="seo-copy">
           <p>
-            The verified contact channel today is email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+            The contact channel today is email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
             Use it for a booking question, a listing enquiry, or to report a problem with a
             published listing.
           </p>

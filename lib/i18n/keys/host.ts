@@ -219,7 +219,7 @@ export const hostKeys = {
   "host.errDocTooLarge": "That file is too large to upload",
   "host.errDocType": "That file type is not supported",
   "host.documentsTitle": "Documents",
-  "host.documentsBody": "Upload the documents a reviewer needs to verify this listing.",
+  "host.documentsBody": "Upload the documents staff need to review this listing.",
   "host.docNone": "No file chosen",
   "host.docReplace": "Replace file",
   "host.docUpload": "Choose file",

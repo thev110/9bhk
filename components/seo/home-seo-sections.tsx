@@ -175,7 +175,7 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
             <div className="home-seo-card-badge">02 · Host-declared Specs</div>
             <h3>The specification is the host&apos;s own</h3>
             <p>
-              Capacity, bedrooms, amenities, generator capacity, and beach frontage are supplied by the host. Verification is shown only when a review has been recorded.
+              Capacity, bedrooms, amenities, generator capacity, and beach frontage are host-provided. A listing is marked Verified only when a staff review of its evidence is recorded.
             </p>
           </div>
           <div className="home-seo-card">

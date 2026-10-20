@@ -63,7 +63,7 @@ export type OrderRequest = {
   amountRupees: number;
   /** Idempotency-friendly reference. Use the booking code. */
   receipt: string;
-  /** Defaults to the 10% platform fee the product advertises. */
+  /** Platform commission. Defaults to 0: no platform fee during launch. */
   commissionRate?: number;
   /** Razorpay Route linked account for the host, if they are onboarded yet. */
   hostAccountId?: string;
@@ -85,7 +85,7 @@ export type OrderPayload = {
 export function buildOrderPayload(request: OrderRequest): OrderPayload {
   const { amountPaise, hostAmountPaise } = splitOrder(
     request.amountRupees,
-    request.commissionRate ?? 0.10,
+    request.commissionRate ?? 0,
   );
   const payload: OrderPayload = {
     amount: amountPaise,

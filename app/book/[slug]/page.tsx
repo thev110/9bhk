@@ -7,6 +7,7 @@ import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { useCatalog } from "@/lib/catalog";
 import { SAMPLE_LISTING_LABEL } from "@/lib/properties";
+import { useT } from "@/lib/i18n";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { isPastDate, monthMatrix, occupiedNights } from "@/lib/availability";
@@ -22,6 +23,7 @@ import type { SplitShare } from "@/lib/split";
 export default function BookPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
+  const t = useT();
   const { properties } = useCatalog();
   const { user, bookings, reloadAccount, showToast, ready, sessionChecked, occupancies, reloadAvailability } = useStore();
   const property = useMemo(() => {
@@ -356,6 +358,7 @@ export default function BookPage() {
               <span className="num"><NumberFlow value={totals.total} prefix="₹" /></span>
             </div>
           </div>
+          {totals.platformFee === 0 ? <p className="muted" data-no-platform-fee>{t("pricing.noPlatformFee")}</p> : null}
           <p className="muted">Estimated price. Your final quote includes date-specific rates and is saved with a 30-minute reservation hold before checkout.</p>
           <div className="row">
             <button className="btn outline" type="button" onClick={() => setStep(1)}>
