@@ -6,17 +6,18 @@ import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { useStore } from "@/lib/store";
-import { signInWithGoogle } from "@/lib/supabase/browser";
+import { safeNextPath } from "@/lib/account";
+import { requireSupabase, signInWithGoogle } from "@/lib/supabase/browser";
 import { useT } from "@/lib/i18n";
 
 function afterAuth(): string {
   const next = new URLSearchParams(window.location.search).get("next") || "/";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  return safeNextPath(next);
 }
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signIn, markIntro, showToast } = useStore();
+  const { reloadAccount, showToast } = useStore();
   const t = useT();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -30,19 +31,17 @@ export default function SignupPage() {
     setAuthSearch(window.location.search);
   }, []);
 
-  function create(nextName: string, nextEmail: string, nextPhone: string) {
+  async function create(nextName: string, nextEmail: string, nextPhone: string) {
     setBusy(true);
-    window.setTimeout(() => {
-      signIn({
-        name: nextName,
-        email: nextEmail,
-        phone: nextPhone,
-        city: "Chennai",
-      });
-      markIntro();
-      showToast(t("toast.accountCreated"));
-      router.push(afterAuth());
-    }, 500);
+    try {
+      const { data, error } = await requireSupabase().auth.signUp({ email: nextEmail, password,
+        options: { data: { full_name: nextName, phone: nextPhone },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(afterAuth())}` } });
+      if (error) throw error;
+      if (!data.session) { showToast("Check your email to confirm your account before signing in."); return; }
+      await reloadAccount(); showToast(t("toast.accountCreated")); router.push(afterAuth());
+    } catch (e) { setErrors({ auth: e instanceof Error ? e.message : "Account could not be created." }); }
+    finally { setBusy(false); }
   }
 
   function onSubmit(e: FormEvent) {
@@ -50,7 +49,7 @@ export default function SignupPage() {
     const next: Record<string, string> = {};
     if (name.trim().length < 2) next.name = t("auth.errName");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = t("auth.errEmail");
-    if (password.length < 4) next.password = t("auth.errPassword");
+    if (password.length < 8) next.password = "Use at least 8 characters.";
     if (phone && phone.replace(/\D/g, "").length < 10) next.phone = t("auth.phoneHelp");
     setErrors(next);
     if (Object.keys(next).length) return;
@@ -70,14 +69,14 @@ export default function SignupPage() {
             <h2 className="auth-title">{t("auth.createAccount")}</h2>
             <p className="muted">{t("auth.signupTagline")}</p>
           </div>
+          {errors.auth ? <p role="alert" className="help">{errors.auth}</p> : null}
           <div className="stack mt-lg">
             <button
               className="btn block lg"
               type="button"
               disabled={busy}
               onClick={async () => {
-                const started = await signInWithGoogle(afterAuth());
-                if (!started) showToast(t("auth.googleDisabled"));
+                try { await signInWithGoogle(afterAuth()); } catch (e) { setErrors({ auth: e instanceof Error ? e.message : "Google sign-in failed." }); }
               }}
             >
               <GoogleMark />

@@ -1,35 +1,32 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import {
-  deleteClientFromDb,
-  loadAvailability,
-  loadRealtorClients,
-  persistBooking,
-  persistClient,
-  persistConfirmation,
-  persistCancellation,
-  persistLocale,
-  persistProfile,
-  persistSplitShares,
-  persistViewingRequest,
-  type AvailabilityRange,
-} from "@/lib/supabase/sync";
-import { signOutSupabase } from "@/lib/supabase/browser";
+import { deleteClientFromDb, loadAvailability, persistClient, persistCancellation, persistProfile,
+  persistSplitShares, persistViewingRequest, persistSaved, persistRealtorProperty,
+  deleteRealtorProperty, persistNotificationRead, type AvailabilityRange } from "@/lib/supabase/sync";
+import { requireSupabase, signOutSupabase } from "@/lib/supabase/browser";
+import { loadAccount } from "@/lib/supabase/account";
+import { accountCacheKey } from "@/lib/account";
 import type { Setting } from "@/lib/properties";
 import type { Occupancy } from "@/lib/availability";
-import { markPaid as markSharePaid, type SplitShare } from "@/lib/split";
+import { type SplitShare } from "@/lib/split";
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/lib/i18n/types";
-import { dictionaries } from "@/lib/i18n/dictionaries";
-import { translate } from "@/lib/i18n/t";
-import type { DictKey } from "@/lib/i18n/en";
 
 export type BookingStatus = "confirmed" | "awaiting" | "completed" | "cancelled";
 
 export type Booking = {
   id: string;
   code: string;
+  guestId?: string;
+  hostId?: string;
+  orderId?: string;
+  holdExpiresAt?: string;
+  paymentStatus?: string;
+  refundStatus?: string;
+  createdAt?: string;
+  cancellationDeadline?: string;
+  quote?: Record<string, number>;
   propertyId: string;
   propertyName?: string;
   checkIn: string;
@@ -50,6 +47,7 @@ export type Booking = {
 export type UserRole = "buyer" | "realtor" | "seller" | "guest" | "admin";
 
 export type User = {
+  id?: string;
   name: string;
   email: string;
   phone: string;
@@ -70,9 +68,12 @@ export type AppNote = {
   body: string;
   href: string;
   when: string;
+  read?: boolean;
+  readAt?: string;
 };
 
 export type ListingDraft = {
+  propertyId?: string;
   name: string;
   description: string;
   type: string;
@@ -127,6 +128,7 @@ export type RealtorClient = {
 };
 
 export type RealtorProperty = {
+  sourcePropertyId?: string;
   id: string;
   name: string;
   location: string;
@@ -168,11 +170,12 @@ type Persisted = {
   brokerSubscribed?: boolean;
   brokerSubscriptionPaymentId?: string;
   brokerSubscribedAt?: string;
+  brokerSubscriptionExpiresAt?: string;
   realtorProperties?: RealtorProperty[];
   locale: Locale;
 };
 
-const STORAGE_KEY = "9bhk-state";
+const STORAGE_KEY = "9bhk-preferences-v2";
 
 export const defaultUser: User = {
   name: "Guest Explorer",
@@ -211,6 +214,9 @@ type Store = Persisted & {
   availability: AvailabilityRange[];
   availabilityReady: boolean;
   reloadAvailability: () => void;
+  reloadAccount: () => Promise<void>;
+  clearAccount: () => void;
+  readNotification: (id: string) => Promise<void>;
   /**
    * Database availability and local bookings merged, which is the only thing a
    * calendar should render. DB rows come first so a stay booked on another
@@ -222,30 +228,31 @@ type Store = Persisted & {
   setPresentationMode: (active: boolean) => void;
   showToast: (message: string) => void;
   setCity: (city: string) => void;
-  toggleSaved: (id: string) => void;
+  toggleSaved: (id: string) => Promise<void>;
   isSaved: (id: string) => boolean;
-  signIn: (user: User) => void;
-  signOut: () => void;
-  updateUser: (patch: Partial<User>) => void;
-  addBooking: (booking: Booking) => void;
+  signIn: (user: User) => Promise<void>;
+  signOut: () => Promise<void>;
+  updateUser: (patch: Partial<User>) => Promise<void>;
+  addBooking: (booking: Booking) => Promise<void>;
   setDraft: (draft: ListingDraft | null) => void;
   markIntro: () => void;
   markSessionChecked: () => void;
-  confirmBooking: (id: string) => void;
-  cancelBooking: (id: string) => void;
+  confirmBooking: (id: string) => Promise<void>;
+  cancelBooking: (id: string) => Promise<void>;
   clearBookings: () => void;
-  addClient: (client: RealtorClient) => void;
-  removeClient: (id: string) => void;
+  addClient: (client: RealtorClient) => Promise<void>;
+  removeClient: (id: string) => Promise<void>;
   brokerSubscribed: boolean;
   brokerSubscriptionPaymentId?: string;
   brokerSubscribedAt?: string;
+  brokerSubscriptionExpiresAt?: string;
   setBrokerSubscribed: (active: boolean, paymentId?: string) => void;
   realtorProperties: RealtorProperty[];
-  addRealtorProperty: (prop: RealtorProperty) => void;
-  removeRealtorProperty: (id: string) => void;
+  addRealtorProperty: (prop: RealtorProperty) => Promise<void>;
+  removeRealtorProperty: (id: string) => Promise<void>;
   setLocale: (locale: Locale) => void;
-  setSplit: (bookingId: string, shares: SplitShare[]) => void;
-  markSplitPaid: (bookingId: string, shareId: string) => void;
+  setSplit: (bookingId: string, shares: SplitShare[]) => Promise<void>;
+  markSplitPaid: (bookingId: string, shareId: string) => Promise<void>;
   addViewingRequest: (req: {
     propertyId: string;
     propertyName: string;
@@ -257,325 +264,150 @@ type Store = Persisted & {
 };
 
 const Ctx = createContext<Store | null>(null);
+const privateEmpty = { user: null, signedIn: false, saved: [], bookings: [], notes: [], clients: [], draft: null,
+  realtorProperties: [], brokerSubscribed: false, brokerSubscriptionPaymentId: undefined,
+  brokerSubscribedAt: undefined, brokerSubscriptionExpiresAt: undefined, presentationMode: false };
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<Persisted>({
-    city: "Chennai",
-    saved: [],
-    user: null,
-    bookings: [],
-    draft: null,
-    seenIntro: true,
-    signedIn: false,
-    notes: [],
-    clients: [],
-    presentationMode: false,
-    brokerSubscribed: false,
-    brokerSubscriptionPaymentId: undefined,
-    brokerSubscribedAt: undefined,
-    realtorProperties: [],
-    locale: DEFAULT_LOCALE,
-  });
+  const [state, setState] = useState<Persisted>({ ...privateEmpty, city: "Chennai", seenIntro: true, locale: DEFAULT_LOCALE });
   const [ready, setReady] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [toast, setToast] = useState("");
   const [availability, setAvailability] = useState<AvailabilityRange[]>([]);
   const [availabilityReady, setAvailabilityReady] = useState(false);
   const [availabilityTick, setAvailabilityTick] = useState(0);
+  const accountEpoch = useRef(0);
+  const currentId = useRef<string | null>(null);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Persisted;
-        // Purge legacy mock seed bookings and unconfirmed local test reservations so they don't lock out the calendar
-        const realBookings = (parsed.bookings || []).filter(
-          (b) =>
-            b.id !== "b1" &&
-            b.id !== "b2" &&
-            b.id !== "b3" &&
-            b.guestName !== "Aarav Kumar" &&
-            !b.guestEmail?.includes("aarav") &&
-            b.guestEmail !== "priya.s@example.com" &&
-            !(b.status === "awaiting" && (b.guestEmail === "guest@9bhk.app" || !b.paymentRef))
-        );
-        // Purge legacy mock seed clients
-        const realClients = (parsed.clients || []).filter(
-          (c) => c.id !== "c-101" && !c.name?.includes("Vikramaditya")
-        );
-        // Purge legacy mock seed realtor properties
-        const realRealtorProps = (parsed.realtorProperties || []).filter(
-          (p) =>
-            !["rp-1", "rp-2", "rp-3"].includes(p.id) &&
-            !p.name?.includes("Coromandel Coastal Pavilion") &&
-            !p.name?.includes("Mahabalipuram Sand Dune Villa") &&
-            !p.name?.includes("Poes Garden Luxury Executive Suite")
-        );
-        setState((curr) => ({
-          city: parsed.city || "Chennai",
-          saved: parsed.saved || [],
-          user: parsed.signedIn ? parsed.user ?? null : null,
-          bookings: realBookings,
-          draft: parsed.draft ?? null,
-          seenIntro: true,
-          signedIn: parsed.signedIn === true,
-          notes: parsed.notes ?? [],
-          clients: realClients,
-          presentationMode: parsed.presentationMode ?? false,
-          brokerSubscribed: Boolean(parsed.brokerSubscribed),
-          brokerSubscriptionPaymentId: parsed.brokerSubscriptionPaymentId,
-          brokerSubscribedAt: parsed.brokerSubscribedAt,
-          realtorProperties: realRealtorProps,
-          locale: LOCALES.includes(parsed.locale) ? (parsed.locale as Locale) : DEFAULT_LOCALE,
-        }));
-      }
-    } catch {
-      /* ignore */
-    }
+      // Legacy combined cache contains unverified identities and private records. Never restore it.
+      localStorage.removeItem("9bhk-state");
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      setState(s => ({ ...s, city: typeof parsed.city === "string" ? parsed.city : s.city,
+        locale: LOCALES.includes(parsed.locale) ? parsed.locale : s.locale }));
+    } catch { /* Preferences are optional. */ }
     setReady(true);
   }, []);
-
-  // Sync realtor client mandates from Supabase for authenticated brokers
-  useEffect(() => {
-    if (!ready || !state.signedIn) return;
-    let cancelled = false;
-    void loadRealtorClients().then((loaded) => {
-      if (cancelled) return;
-      if (loaded && loaded.length > 0) {
-        setState((s) => ({ ...s, clients: loaded }));
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, state.signedIn]);
-
   useEffect(() => {
     if (!ready) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state, ready]);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ city: state.city, locale: state.locale })); }
+    catch { /* Browsing works when storage is unavailable. */ }
+  }, [ready, state.city, state.locale]);
 
-  // The calendar has to reflect real bookings, not just the ones this device
-  // made. Local storage alone cannot know a weekend someone else took, so read
-  // live occupancy from the database once local state is up, and re-read it
-  // when the session settles — a host sees different rows signed in than out.
-  useEffect(() => {
-    if (!ready) return;
-    let cancelled = false;
-    void loadAvailability().then((rows) => {
-      if (cancelled) return;
-      setAvailability(rows);
-      setAvailabilityReady(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, sessionChecked, state.signedIn, availabilityTick]);
-
-  const showToast = useCallback((message: string) => {
-    setToast(message);
-    sonnerToast(message);
-    window.setTimeout(() => setToast(""), 2200);
+  const clearAccount = useCallback(() => {
+    accountEpoch.current += 1;
+    if (currentId.current) try { localStorage.removeItem(accountCacheKey(currentId.current)); } catch {}
+    currentId.current = null;
+    setState(s => ({ ...s, ...privateEmpty }));
   }, []);
-
-  const api = useMemo<Store>(() => {
-    // Notes are generated in the store rather than a component, so translate
-    // against the active catalog directly instead of going through useT().
-    const tr = (key: DictKey, vars?: Record<string, string | number>) =>
-      translate(dictionaries[state.locale] ?? dictionaries[DEFAULT_LOCALE], key, vars);
-
-    return {
-      ...state,
-      ready,
-      sessionChecked,
-      availability,
-      availabilityReady,
-      reloadAvailability: () => setAvailabilityTick((n) => n + 1),
-      occupancies: [
-        ...availability,
-        ...state.bookings
-          .filter((booking) => booking.status === "confirmed")
-          .map((booking) => ({
-            propertyId: booking.propertyId,
-            checkIn: booking.checkIn,
-            checkOut: booking.checkOut,
-            status: booking.status,
-          })),
-      ],
-      markSessionChecked: () => setSessionChecked(true),
-      toast,
-      showToast,
-      setCity: (city) => setState((s) => ({ ...s, city })),
-      setLocale: (locale) => {
-        setState((s) => ({
-          ...s,
-          locale,
-          // Mirror onto the signed-in user so persistProfile carries it forward
-          user: s.user ? { ...s.user, locale } : s.user,
-        }));
-        if (typeof window !== "undefined") void persistLocale(locale);
-      },
-      toggleSaved: (id) =>
-        setState((s) => ({
-          ...s,
-          saved: s.saved.includes(id) ? s.saved.filter((x) => x !== id) : [...s.saved, id],
-        })),
-      isSaved: (id) => state.saved.includes(id),
-      signIn: (user) => {
-        setState((s) => ({ ...s, user, signedIn: true }));
-        void persistProfile(user);
-      },
-      signOut: () => {
-        void signOutSupabase();
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            parsed.user = null;
-            parsed.signedIn = false;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-          }
-        } catch {
-          /* ignore */
-        }
-        setState((s) => ({ ...s, user: null, signedIn: false }));
-      },
-      updateUser: (patch) =>
-        setState((s) => {
-          const user = s.user ? { ...s.user, ...patch } : { ...defaultUser, ...patch };
-          void persistProfile(user);
-          return { ...s, user };
-        }),
-      addBooking: (booking) => {
-        void persistBooking(booking);
-        setState((s) => ({
-          ...s,
-          bookings: [booking, ...s.bookings],
-          notes: [
-            {
-              id: `note-${booking.id}`,
-              title: tr("note.paymentSentTitle"),
-              body: tr("note.paymentSentBody", {
-                property: booking.propertyName || tr("note.yourFarmhouse"),
-              }),
-              href: "/trips",
-              when: tr("note.justNow"),
-            },
-            ...s.notes,
-          ],
-        }));
-      },
-      setSplit: (bookingId, shares) => {
-        // Persist before the local update so each share exists as a real row an
-        // invited guest's payment can settle against.
-        const booking = state.bookings.find((item) => item.id === bookingId);
-        if (booking) void persistSplitShares(booking.code, shares);
-        setState((s) => ({
-          ...s,
-          bookings: s.bookings.map((item) =>
-            item.id === bookingId ? { ...item, split: shares } : item,
-          ),
-        }));
-      },
-      markSplitPaid: (bookingId, shareId) => {
-        const booking = state.bookings.find((item) => item.id === bookingId);
-        if (!booking?.split) return;
-        const next = markSharePaid(booking.split, shareId, new Date().toISOString().slice(0, 10));
-        void persistSplitShares(booking.code, next);
-        setState((s) => ({
-          ...s,
-          bookings: s.bookings.map((item) =>
-            item.id === bookingId ? { ...item, split: next } : item,
-          ),
-        }));
-      },
-      setDraft: (draft) => setState((s) => ({ ...s, draft })),
-      markIntro: () => setState((s) => ({ ...s, seenIntro: true })),
-      confirmBooking: (id) =>
-        setState((s) => {
-          const booking = s.bookings.find((item) => item.id === id);
-          if (!booking) return s;
-          void persistConfirmation(booking);
-          return {
-            ...s,
-            bookings: s.bookings.map((item) => (item.id === id ? { ...item, status: "confirmed" } : item)),
-            notes: [
-              {
-                id: `confirmed-${id}`,
-                title: tr("note.stayBookedTitle"),
-                body: tr("note.stayBookedBody", {
-                  property: booking.propertyName || tr("note.yourFarmhouse"),
-                }),
-                href: "/trips",
-                when: tr("note.justNow"),
-              },
-              ...s.notes,
-            ],
-          };
-        }),
-      cancelBooking: (id) =>
-        setState((s) => {
-          const booking = s.bookings.find((item) => item.id === id);
-          if (!booking) return s;
-          void persistCancellation(booking);
-          return {
-            ...s,
-            bookings: s.bookings.map((item) => (item.id === id ? { ...item, status: "cancelled" } : item)),
-          };
-        }),
-      clearBookings: () => setState((s) => ({ ...s, bookings: [] })),
-      presentationMode: Boolean(state.presentationMode),
-      setPresentationMode: (active) => setState((s) => ({ ...s, presentationMode: active })),
-      brokerSubscribed: Boolean(state.brokerSubscribed || state.user?.verifiedBroker),
-      brokerSubscriptionPaymentId: state.brokerSubscriptionPaymentId,
-      brokerSubscribedAt: state.brokerSubscribedAt,
-      setBrokerSubscribed: (active, paymentId) =>
-        setState((s) => ({
-          ...s,
-          brokerSubscribed: active,
-          brokerSubscriptionPaymentId: paymentId ?? s.brokerSubscriptionPaymentId,
-          brokerSubscribedAt: active ? (s.brokerSubscribedAt || new Date().toISOString()) : undefined,
-          user: s.user ? { ...s.user, verifiedBroker: active } : s.user,
-        })),
-      clients: state.clients || [],
-      realtorProperties: state.realtorProperties || [],
-      addRealtorProperty: (prop) =>
-        setState((s) => ({
-          ...s,
-          realtorProperties: [prop, ...(s.realtorProperties || [])],
-        })),
-      removeRealtorProperty: (id) =>
-        setState((s) => ({
-          ...s,
-          realtorProperties: (s.realtorProperties || []).filter((p) => p.id !== id),
-        })),
-      addClient: (client) => {
-        void persistClient(client);
-        setState((s) => ({
-          ...s,
-          clients: [client, ...s.clients],
-        }));
-      },
-      removeClient: (id) => {
-        void deleteClientFromDb(id);
-        setState((s) => ({
-          ...s,
-          clients: s.clients.filter((c) => c.id !== id),
-        }));
-      },
-      addViewingRequest: async (req) => {
-        await persistViewingRequest(req);
-      },
-    };
-  }, [state, ready, sessionChecked, toast, showToast, availability, availabilityReady]);
-
+  const reloadAccount = useCallback(async () => {
+    const epoch = ++accountEpoch.current;
+    let account;
+    try { account = await loadAccount(); }
+    catch (e) { if (epoch === accountEpoch.current) clearAccount(); throw e; }
+    if (epoch !== accountEpoch.current) return;
+    if (!account) { clearAccount(); return; }
+    const id = account.user.id!;
+    if (currentId.current && currentId.current !== id) {
+      try { localStorage.removeItem(accountCacheKey(currentId.current)); } catch {}
+    }
+    const changedAccount = currentId.current !== id;
+    currentId.current = id;
+    // Backend is authoritative. Only an owner's unfinished local draft is cached, never sessions/payments.
+    let draft: ListingDraft | null = null;
+    if (changedAccount) try { draft = JSON.parse(localStorage.getItem(accountCacheKey(id)) || "{}").draft ?? null; } catch {}
+    setState(s => ({ ...s, ...(changedAccount ? privateEmpty : {}), ...account, signedIn: true,
+      city: account.user.city, locale: account.user.locale || s.locale, draft: changedAccount ? draft : s.draft }));
+  }, [clearAccount]);
+  const reloadAvailability = useCallback(() => setAvailabilityTick(n => n + 1), []);
+  const markSessionChecked = useCallback(() => setSessionChecked(true), []);
+  const markIntro = useCallback(() => setState(s => ({ ...s, seenIntro: true })), []);
+  useEffect(() => {
+    if (!ready) return;
+    let cancelled = false;
+    setAvailabilityReady(false);
+    void loadAvailability().then(rows => { if (!cancelled) { setAvailability(rows); setAvailabilityReady(true); } })
+      .catch(() => { if (!cancelled) { setAvailability([]); setAvailabilityReady(false); } });
+    return () => { cancelled = true; };
+  }, [ready, sessionChecked, availabilityTick]);
+  useEffect(() => {
+    if (!state.brokerSubscriptionExpiresAt) return;
+    const remaining = Date.parse(state.brokerSubscriptionExpiresAt) - Date.now();
+    if (remaining <= 0) { setState(s => ({ ...s, brokerSubscribed: false })); return; }
+    const timer = window.setInterval(() => {
+      if (Date.parse(state.brokerSubscriptionExpiresAt!) <= Date.now()) setState(s => ({ ...s, brokerSubscribed: false }));
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [state.brokerSubscriptionExpiresAt]);
+  const showToast = useCallback((message: string) => {
+    setToast(message); sonnerToast(message); window.setTimeout(() => setToast(""), 2200);
+  }, []);
+  const api = useMemo<Store>(() => ({
+    ...state, ready, sessionChecked, availability, availabilityReady, reloadAvailability, reloadAccount,
+    clearAccount, markSessionChecked, markIntro, toast, showToast,
+    occupancies: availability,
+    setCity: city => setState(s => ({ ...s, city })),
+    setLocale: locale => {
+      if (!state.user) { setState(s => ({ ...s, locale })); return; }
+      void persistProfile({ ...state.user, locale }).then(() => reloadAccount()).catch(e => showToast(e.message));
+    },
+    toggleSaved: async id => {
+      if (!state.user) throw new Error("Please sign in to save properties.");
+      await persistSaved(id, !state.saved.includes(id));
+      await reloadAccount();
+    },
+    isSaved: id => state.saved.includes(id),
+    signIn: async () => { await reloadAccount(); },
+    signOut: async () => { await signOutSupabase(); clearAccount(); },
+    updateUser: async patch => {
+      if (!state.user) throw new Error("Please sign in to update your profile.");
+      const requestedEmail = patch.email?.trim();
+      if (requestedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestedEmail)) throw new Error("Please enter a valid email address.");
+      await persistProfile({ ...state.user, ...patch });
+      if (requestedEmail && requestedEmail !== state.user.email) {
+        const { error } = await requireSupabase().auth.updateUser({ email: requestedEmail });
+        if (error) throw error;
+        showToast("Check your email to confirm the email address change.");
+      }
+      await reloadAccount();
+    },
+    addBooking: async () => { throw new Error("Create a reservation through secure checkout."); },
+    confirmBooking: async () => { throw new Error("Payment must be verified by the server."); },
+    markSplitPaid: async () => { throw new Error("A share is paid only after gateway verification."); },
+    cancelBooking: async id => {
+      const booking = state.bookings.find(b => b.id === id);
+      if (!booking) throw new Error("Booking not found.");
+      await persistCancellation(booking); await reloadAccount(); reloadAvailability();
+    },
+    setSplit: async (id, shares) => {
+      const booking = state.bookings.find(b => b.id === id);
+      if (!booking) throw new Error("Booking not found.");
+      await persistSplitShares(booking.code, shares); await reloadAccount();
+    },
+    setDraft: draft => {
+      setState(s => ({ ...s, draft }));
+      if (currentId.current) try { localStorage.setItem(accountCacheKey(currentId.current), JSON.stringify({ draft })); } catch {}
+    },
+    clearBookings: () => setState(s => ({ ...s, bookings: [] })),
+    presentationMode: Boolean(state.presentationMode),
+    setPresentationMode: active => setState(s => ({ ...s, presentationMode: active })),
+    brokerSubscribed: Boolean(state.brokerSubscribed && state.brokerSubscriptionExpiresAt && Date.parse(state.brokerSubscriptionExpiresAt) > Date.now()),
+    setBrokerSubscribed: () => { void reloadAccount().catch(e => showToast(e.message)); },
+    realtorProperties: state.realtorProperties || [],
+    addRealtorProperty: async prop => { await persistRealtorProperty(prop); await reloadAccount(); },
+    removeRealtorProperty: async id => { await deleteRealtorProperty(id); await reloadAccount(); },
+    addClient: async client => { await persistClient(client); await reloadAccount(); },
+    removeClient: async id => { await deleteClientFromDb(id); await reloadAccount(); },
+    addViewingRequest: async req => { await persistViewingRequest(req); },
+    readNotification: async id => { await persistNotificationRead(id); await reloadAccount(); },
+  }), [state, ready, sessionChecked, availability, availabilityReady, reloadAvailability, reloadAccount,
+    clearAccount, markSessionChecked, markIntro, toast, showToast]);
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }
-
 export function useStore(): Store {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useStore must be used inside StoreProvider");
   return ctx;
 }
-
 export { emptyDraft };

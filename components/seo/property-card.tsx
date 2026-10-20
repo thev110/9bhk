@@ -4,7 +4,7 @@ import type { SeoProperty } from "@/lib/catalog-rows";
 import { hasPool, isBeachfront, inr, plural } from "@/lib/seo/copy";
 import { locationFor } from "@/lib/seo/locations";
 import { categoryFor } from "@/lib/seo/taxonomy";
-import { formatInrCrores } from "@/lib/properties";
+import { formatInrCrores, SAMPLE_LISTING_LABEL } from "@/lib/properties";
 import { Icon } from "@/components/icon";
 
 /**
@@ -71,6 +71,12 @@ export function PropertyCard({
         </h3>
 
         <p className="seo-card-type">{property.type}</p>
+
+        {property.sample ? (
+          <p className="pill warn" data-sample-listing>
+            {SAMPLE_LISTING_LABEL}
+          </p>
+        ) : null}
 
         {property.highlights ? <p className="seo-card-blurb">{property.highlights}</p> : null}
 

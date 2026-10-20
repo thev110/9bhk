@@ -6,18 +6,19 @@ import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { GoogleMark, PasswordField } from "@/components/auth-fields";
 import { OtpField } from "@/components/otp-field";
-import { defaultUser, useStore } from "@/lib/store";
-import { signInWithGoogle } from "@/lib/supabase/browser";
+import { useStore } from "@/lib/store";
+import { safeNextPath } from "@/lib/account";
+import { requireSupabase, signInWithGoogle } from "@/lib/supabase/browser";
 import { useT } from "@/lib/i18n";
 
 function afterAuth(): string {
   const next = new URLSearchParams(window.location.search).get("next") || "/";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  return safeNextPath(next);
 }
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, markIntro, showToast } = useStore();
+  const { reloadAccount, showToast } = useStore();
   const t = useT();
   const [authMode, setAuthMode] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
@@ -30,63 +31,69 @@ export default function LoginPage() {
   const [phoneError, setPhoneError] = useState("");
   const [busy, setBusy] = useState(false);
   const [authSearch, setAuthSearch] = useState("");
+  const [recovering, setRecovering] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
     setAuthSearch(window.location.search);
+    const params = new URLSearchParams(window.location.search);
+    setRecovering(params.get("recovery") === "1");
+    setAuthError(params.get("error") || "");
   }, []);
 
-  function enter(next: { name: string; email: string; phone: string; city: string }) {
-    setBusy(true);
-    window.setTimeout(() => {
-      signIn(next);
-      markIntro();
-      showToast(t("toast.signedIn"));
-      router.push(afterAuth());
-    }, 400);
+  function normalizedPhone() {
+    const digits = phone.replace(/\D/g, "");
+    return digits.length === 10 ? `+91${digits}` : `+${digits}`;
   }
-
-  function sendOtp() {
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (cleanPhone.length < 10) {
-      setPhoneError(t("auth.errPhone"));
-      return;
-    }
+  async function runAuth(task: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true); setAuthError("");
+    try { await task(); }
+    catch (e) { setAuthError(e instanceof Error ? e.message : "Authentication failed. Please try again."); }
+    finally { setBusy(false); }
+  }
+  async function finish() {
+    await reloadAccount(); showToast(t("toast.signedIn")); router.push(afterAuth());
+  }
+  async function sendOtp() {
+    if (phone.replace(/\D/g, "").length < 10) { setPhoneError(t("auth.errPhone")); return; }
     setPhoneError("");
-    setBusy(true);
-    window.setTimeout(() => {
-      setBusy(false);
-      setOtpSent(true);
-      showToast(t("auth.otpSent"));
-    }, 600);
-  }
-
-  function verifyOtp() {
-    if (otp.length < 6) {
-      showToast(t("auth.errOtpShort"));
-      return;
-    }
-    const cleanPhone = phone.trim();
-    enter({
-      name: `Guest ${cleanPhone.slice(-4)}`,
-      email: `${cleanPhone.replace(/\D/g, "")}@phone.9bhk.app`,
-      phone: cleanPhone,
-      city: "Chennai",
+    await runAuth(async () => {
+      const { error } = await requireSupabase().auth.signInWithOtp({ phone: normalizedPhone() });
+      if (error) throw error;
+      setOtpSent(true); showToast(t("auth.otpSent"));
     });
   }
-
-  function withEmail(e: FormEvent) {
+  async function verifyOtp(code = otp) {
+    if (!/^\d{6}$/.test(code)) { setAuthError(t("auth.errOtpShort")); return; }
+    await runAuth(async () => {
+      const { error } = await requireSupabase().auth.verifyOtp({ phone: normalizedPhone(), token: code, type: "sms" });
+      if (error) throw error;
+      await finish();
+    });
+  }
+  async function resetPassword() {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailError(t("auth.errEmail")); return; }
+    await runAuth(async () => {
+      const { error } = await requireSupabase().auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/login?recovery=1")}`,
+      });
+      if (error) throw error;
+      showToast(t("auth.resetSent"));
+    });
+  }
+  async function withEmail(e: FormEvent) {
     e.preventDefault();
-    const badEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const badPassword = password.length < 4;
+    const badEmail = !recovering && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const badPassword = password.length < (recovering ? 8 : 1);
     setEmailError(badEmail ? t("auth.errEmail") : "");
-    setPasswordError(badPassword ? t("auth.errPassword") : "");
+    setPasswordError(badPassword ? "Please enter a valid password (at least 8 characters for a new password)." : "");
     if (badEmail || badPassword) return;
-    const derivedName = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-    enter({
-      name: derivedName,
-      email: email.trim().toLowerCase(),
-      phone: "",
-      city: "Chennai",
+    await runAuth(async () => {
+      const auth = requireSupabase().auth;
+      const result = recovering ? await auth.updateUser({ password }) : await auth.signInWithPassword({ email: email.trim(), password });
+      if (result.error) throw result.error;
+      await finish();
     });
   }
 
@@ -103,14 +110,15 @@ export default function LoginPage() {
             <h2 className="auth-title">{t("auth.signInToApp")}</h2>
             <p className="muted">{t("auth.tagline")}</p>
           </div>
+          {authError ? <p role="alert" className="help">{authError}</p> : null}
+          {recovering ? <p className="help">Enter your new password to finish account recovery.</p> : null}
           <div className="stack mt-lg">
             <button
               className="btn block lg"
               type="button"
               disabled={busy}
               onClick={async () => {
-                const started = await signInWithGoogle(afterAuth());
-                if (!started) showToast(t("auth.googleDisabled"));
+                await runAuth(async () => { await signInWithGoogle(afterAuth()); });
               }}
             >
               <GoogleMark />
@@ -161,12 +169,12 @@ export default function LoginPage() {
                   error={passwordError}
                 />
                 <div className="row" style={{ justifyContent: "flex-end" }}>
-                  <button className="lnk" type="button" onClick={() => showToast(t("auth.resetSent"))}>
+                  <button className="lnk" type="button" onClick={resetPassword}>
                     {t("auth.forgotPassword")}
                   </button>
                 </div>
                 <button className="btn block lg outline" type="submit" disabled={busy}>
-                  {busy ? t("auth.signingIn") : t("auth.signInEmail")}
+                  {busy ? t("auth.signingIn") : recovering ? "Save new password" : t("auth.signInEmail")}
                 </button>
               </form>
             ) : (
@@ -194,9 +202,9 @@ export default function LoginPage() {
                   <div className="stack" style={{ alignItems: "center", textAlign: "center" }}>
                     <p className="tiny muted">{t("auth.otpPrompt", { phone })}</p>
                     <div className="pad">
-                      <OtpField value={otp} onChange={setOtp} onComplete={verifyOtp} />
+                      <OtpField value={otp} onChange={setOtp} onComplete={(code) => void verifyOtp(code)} />
                     </div>
-                    <button className="btn block lg" type="button" onClick={verifyOtp} disabled={busy || otp.length < 6}>
+                    <button className="btn block lg" type="button" onClick={() => void verifyOtp()} disabled={busy || otp.length < 6}>
                       {busy ? t("auth.verifying") : t("auth.verifyAndSignIn")}
                     </button>
                     <button className="lnk" type="button" onClick={sendOtp} disabled={busy}>

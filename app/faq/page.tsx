@@ -58,7 +58,7 @@ export default async function FaqPage() {
 
       <QuickAnswer
         question="What is 9bhk and how does booking work?"
-        answer={`${SITE.displayName} is a marketplace for whole premium stays — farmhouses, beach houses, villas, and hill-station homes — booked for the entire house. You pick a listing and dates, the host confirms the request, and payment is protected in Razorpay escrow until check-in. Hosts receive payouts under a 15-day clearance window.`}
+        answer={`${SITE.displayName} is a marketplace for whole premium stays — farmhouses, beach houses, villas, and hill-station homes — booked for the entire house. You pick a listing and dates, the host confirms the request, and payment is processed through Razorpay checkout. Refund and host payout requests are recorded and reviewed separately; checkout does not itself establish an escrow arrangement.`}
         headingId="faq-quick-answer-heading"
       />
 

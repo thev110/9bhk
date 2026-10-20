@@ -13,7 +13,7 @@ import { staticCrumbs } from "@/lib/seo/breadcrumbs";
 export const metadata: Metadata = buildMetadata({
   title: "Refund policy",
   description:
-    "When a 9bhk.app stay can be refunded: full refund up to 7 days before check-in, 50% up to 48 hours before check-in, and no refund within 48 hours of check-in.",
+    "How to request cancellation and track refund review and payment processing for a 9bhk reservation.",
   path: "/legal/refunds",
 });
 
@@ -24,13 +24,13 @@ export const metadata: Metadata = buildMetadata({
 export default function RefundsPage() {
   return (
     <LegalBody doc="refunds" backHref="/legal/privacy" crumbs={staticCrumbs("Refund policy", "/legal/refunds")}>
-      <p>Payments are secured via Razorpay escrow and held until check-in. Payouts to hosts are processed under a 15-day clearance window.</p>
+      <p>You can submit cancellation requests before the recorded check-in time. Started and completed stays require support review. The trip shows the refund request&apos;s current status. Cancelling a reservation does not itself mean money has been returned.</p>
       <ul className="stack sm" style={{ paddingLeft: 18 }}>
-        <li>Free cancellation up to 7 days before check-in. Full refund processed automatically to the original payment method.</li>
-        <li>50% refund up to 48 hours before check-in.</li>
-        <li>No refund within 48 hours of check-in.</li>
+        <li>Captured payments associated with a cancelled reservation are recorded for refund review.</li>
+        <li>The recorded request amount is subject to review of the applicable reservation terms; it is not a completed or guaranteed refund.</li>
+        <li>Contact support to confirm the applicable cancellation terms before booking.</li>
       </ul>
-      <p>If a booking request expires or is declined by the host, the payment pre-authorization or charge is refunded automatically. For questions, write to <a href="mailto:hello@9bhk.app">hello@9bhk.app</a>.</p>
+      <p>Eligible refund requests are recorded for processing through the original payment method. A payment captured after its reservation has expired requires reconciliation and a refund request; an expired hold is not a completed refund. For questions, write to <a href="mailto:hello@9bhk.app">hello@9bhk.app</a>.</p>
     </LegalBody>
   );
 }

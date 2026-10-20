@@ -72,7 +72,7 @@ export function SplitInvite({
 
       // The deployment has no gateway keys. Say so plainly rather than showing
       // a checkout that cannot complete.
-      if (!result.configured) {
+      if (!response.ok || !result.configured) {
         setState("unavailable");
         return;
       }
@@ -94,9 +94,10 @@ export function SplitInvite({
         // Client-side confirmation is cosmetic; the webhook is what settles the
         // share, so this only reports that the payment was handed off.
         handler: () => setState("received"),
+        modal: { ondismiss: () => setState("idle") },
       });
+      checkout.on?.("payment.failed", () => setState("unavailable"));
       checkout.open();
-      setState("idle");
     } catch {
       setState("unavailable");
     }
@@ -139,11 +140,11 @@ export function SplitInvite({
 
         {state === "received" ? (
           <div className="card">
-            <p style={{ fontWeight: 700 }}>{t("split.paymentReceived")}</p>
+            <p style={{ fontWeight: 700 }}>Payment submitted. The organiser can check captured funding in their trips. Confirmation requires every share before the hold expires.</p>
           </div>
         ) : null}
 
-        <button className="btn block" type="button" onClick={pay} disabled={state === "working"}>
+        <button className="btn block" type="button" onClick={pay} disabled={state === "working" || state === "received"}>
           {state === "working" ? t("split.paying") : t("split.payShare")}
         </button>
         <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.5 }}>

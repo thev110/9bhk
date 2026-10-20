@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { CITIES, formatBytes, inr } from "@/lib/format";
-import { MIN_BEDROOMS, PROPERTIES, SETTINGS, formatInrCrores, type Setting } from "@/lib/properties";
+import { MIN_BEDROOMS, SETTINGS, formatInrCrores, type Setting } from "@/lib/properties";
 import { emptyDraft, useStore, type ListingDraft } from "@/lib/store";
 import { useCatalog } from "@/lib/catalog";
-import { saveProperty, uploadPropertyPhotos } from "@/lib/supabase/properties";
+import { loadListingDraft, saveProperty, submitPropertyForReview, uploadPropertyPhotos } from "@/lib/supabase/properties";
 import {
   DOCUMENT_ACCEPT_ATTR,
   DOCUMENT_KINDS,
@@ -42,7 +42,6 @@ const GARAGE_OPTIONS = [
   { id: "ev_pavilion", qualifier: "host.qualifierDcFastCharge" },
   { id: "teak_portico", qualifier: "host.qualifierPergola" },
 ] as const satisfies readonly { id: string; qualifier: DictKey }[];
-const PHOTOS = PROPERTIES.slice(0, 6);
 
 /**
  * Document slot -> label. Deliberately the same keys the admin console uses, so
@@ -89,15 +88,27 @@ export default function ListingWizard() {
   const [form, setForm] = useState<ListingDraft>(draft ?? emptyDraft());
   const [done, setDone] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   // Documents are staged as plain Files and uploaded after the listing row
   // exists, because both the storage path and the index row are keyed by its id.
   const [docFiles, setDocFiles] = useState<Partial<Record<DocumentKind, File>>>({});
+  useEffect(() => {
+    const propertyId = new URLSearchParams(window.location.search).get("property");
+    if (!propertyId) return;
+    let active = true;
+    setSaving(true);
+    void loadListingDraft(propertyId).then(saved => { if (active) { setForm(saved); setDraft(saved); } })
+      .catch(reason => { if (active) showToast(reason.message || "Could not load your draft."); })
+      .finally(() => { if (active) setSaving(false); });
+    return () => { active = false; };
+  }, [showToast]);
 
   function patch(partial: Partial<ListingDraft>) {
     setForm((f) => ({ ...f, ...partial }));
   }
 
   async function next() {
+    if (saving || uploading) return;
     if (step === 0 && form.name.trim().length < 3) {
       showToast(t("host.errNameShort"));
       return;
@@ -113,17 +124,26 @@ export default function ListingWizard() {
         showToast(t("host.errMinBedrooms", { n: MIN_BEDROOMS }));
         return;
       }
+      if (!form.propertyId && DOCUMENT_KINDS.some(kind => !docFiles[kind])) {
+        showToast("Upload ownership proof, tax receipt and host ID before submitting.");
+        return;
+      }
+      setSaving(true);
       try {
         const propertyId = await saveProperty(form);
-        // Attach the paperwork to the listing that now exists. A failed upload
-        // must not undo a saved listing, so it is reported rather than thrown.
+        const saved = { ...form, propertyId };
+        setForm(saved);
+        setDraft(saved);
         const failed = await uploadStagedDocuments(propertyId);
+        if (failed) throw new Error(t("host.errDocsNotUploaded", { n: failed }));
+        await submitPropertyForReview(propertyId);
         setDraft(null);
         reload();
         setDone(true);
-        if (failed) showToast(t("host.errDocsNotUploaded", { n: failed }));
       } catch (error) {
         showToast(error instanceof Error ? error.message : t("host.errSaveFailed"));
+      } finally {
+        setSaving(false);
       }
       return;
     }
@@ -167,7 +187,7 @@ export default function ListingWizard() {
   }
 
   async function addPhotos(list: FileList | null) {
-    const files = [...(list ?? [])].filter((file) => file.type.startsWith("image/"));
+    const files = [...(list ?? [])];
     if (!files.length) return;
     setUploading(true);
     try {
@@ -515,16 +535,6 @@ export default function ListingWizard() {
                 ))}
               </div>
             ) : null}
-            <div className="gal" style={{ padding: 0 }}>
-              {PHOTOS.map((photo) => {
-                const on = form.photos.includes(photo.image);
-                return (
-                  <button key={photo.id} type="button" onClick={() => patch({ photos: on ? form.photos.filter((p) => p !== photo.image) : [...form.photos, photo.image] })} style={{ border: on ? "2px solid var(--primary)" : "2px solid transparent", padding: 0, background: "none" }}>
-                    <img src={photo.image} alt={photo.alt} loading="lazy" decoding="async" width={200} height={200} style={{ aspectRatio: "1", objectFit: "cover", width: "100%" }} />
-                  </button>
-                );
-              })}
-            </div>
             <p className="muted">
               {t("host.photosAdded", { n: form.photos.length })}
               {form.photos.length ? ` · ${t("host.coverFirstShot")}` : "."}
@@ -681,7 +691,7 @@ export default function ListingWizard() {
               {t("action.back")}
             </button>
           ) : null}
-          <button className="btn grow" type="button" onClick={next} disabled={uploading}>
+          <button className="btn grow" type="button" onClick={next} disabled={uploading || saving}>
             {step === 9 ? t("host.submitForReview") : t("action.continue")}
           </button>
         </div>

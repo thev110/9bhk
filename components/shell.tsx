@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Icon } from "./icon";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -19,17 +20,25 @@ export function FavButton({
   const { isSaved, toggleSaved, showToast } = useStore();
   const t = useT();
   const on = isSaved(id);
+  const [saving, setSaving] = useState(false);
   return (
     <button
       className={`fav${small ? " sm" : ""}${on ? " is-fav" : ""}`}
       type="button"
+      disabled={saving}
       aria-pressed={on}
       aria-label={t(on ? "a11y.removeName" : "a11y.saveName", { name })}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleSaved(id);
-        showToast(t(on ? "toast.removed" : "toast.saved", { name }));
+        if (saving) return;
+        setSaving(true);
+        try {
+          await toggleSaved(id);
+          showToast(t(on ? "toast.removed" : "toast.saved", { name }));
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : "Could not save this property.");
+        } finally { setSaving(false); }
       }}
     >
       <Icon name="heart" className="ico h-line" />

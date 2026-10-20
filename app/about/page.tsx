@@ -58,9 +58,9 @@ export default async function AboutPage() {
         title="Reclaiming authentic gathering in private whole estates"
         lede={
           <p>
-            Not a hotel, and not an apartment-sharing directory. 9bhk is an escrow-protected
+            Not a hotel, and not an apartment-sharing directory. 9bhk is a whole-property
             marketplace built for families, teams, and friend circles to reserve an entire private
-            farmhouse, beach house, or villa — with verified functional specs, transparent pricing,
+            farmhouse, beach house, or villa — with host-declared specs, transparent pricing,
             and total privacy.
           </p>
         }
@@ -71,7 +71,7 @@ export default async function AboutPage() {
           <p>
             Renting a private farmhouse or seaside villa in South India has historically been an
             unorganized, high-risk ordeal. For decades, groups planning a weekend retreat along the
-            ECR, Chennai coast, or Pondicherry had to rely on informal brokers, unverified Instagram
+            ECR, Chennai coast, or Pondicherry had to rely on informal brokers, anonymous Instagram
             pages, and direct UPI transfers with zero contract protection or refund guarantees.
           </p>
           <p>
@@ -81,7 +81,7 @@ export default async function AboutPage() {
           </p>
           <p>
             Meanwhile, global OTAs treat multi-acre estates like hotel rooms: they obscure property
-            specs, ban legitimate group celebration queries, and tack on 18% to 25% surprise fees
+            specs, ban legitimate group celebration queries, and tack on surprise fees
             at the checkout screen. 9bhk was founded to eliminate this friction entirely.
           </p>
         </div>
@@ -100,7 +100,7 @@ export default async function AboutPage() {
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 02 · Functional Integrity</div>
-            <h3>Direct, Verifiable Owner Specifications</h3>
+            <h3>Direct, Host-provided Specifications</h3>
             <p>
               We declare the technical metrics other sites omit: electrical load in kW, on-site
               generator capacity, sound curfews, vehicle parking slots, and exact high-tide coastal
@@ -109,18 +109,18 @@ export default async function AboutPage() {
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 03 · Institutional Trust</div>
-            <h3>Direct Razorpay Escrow Protection</h3>
+            <h3>Payment Records and Support</h3>
             <p>
-              Your payment is safeguarded in escrow via Razorpay until your arrival. Hosts receive
-              predictable settlements through a 15-day clearance ledger, eliminating fraud for guests
-              and arbitrary chargebacks for owners.
+              Razorpay processes checkout payments. Trips show captured payment and refund request
+              status. Host payout requests are reviewed separately; this is not a promise of escrow
+              or guaranteed dispute outcomes.
             </p>
           </div>
           <div className="home-seo-card">
             <div className="home-seo-card-badge">Difference 04 · Transparent Economics</div>
-            <h3>Flat 10% Platform Fee, Zero Checkout Traps</h3>
+            <h3>An Itemized Reservation Quote</h3>
             <p>
-              The nightly rate, cleaning fee, and our 10% service fee are itemized upfront. There are
+              The stay, cleaning fee, configured tax and service fees, and any refundable deposit are itemized upfront. There are
               no surprise resort levies, conversion fees, or hidden markups at checkout.
             </p>
           </div>
@@ -147,7 +147,7 @@ export default async function AboutPage() {
             </li>
             <li>
               <strong>Filmmakers &amp; Creators:</strong> Commercial lookbooks, video campaigns, and
-              brand shoots requiring production-ready electrical loads and verified permits.
+              brand shoots requiring production-ready electrical loads and the permits a shoot needs.
             </li>
           </ul>
         </div>
@@ -176,7 +176,7 @@ export default async function AboutPage() {
           </p>
           <p>
             For estate owners, we unlock predictable monetization for multi-crore idle assets without
-            sacrificing property care. For travelers, we deliver absolute booking security, verified
+            sacrificing property care. For travelers, we deliver booking records, host-declared
             amenities, and seamless split payments.
           </p>
         </div>
@@ -232,7 +232,7 @@ export default async function AboutPage() {
         <div className="seo-copy">
           <p>
             Coverage follows inventory, not ambition. 9bhk currently operates bookable houses across{" "}
-            {destinations.map((summary) => summary.entry.name).join(", ")}, with verified coastal
+            {destinations.map((summary) => summary.entry.name).join(", ")}, with host-declared coastal
             and countryside inventory expanding deliberately.
           </p>
         </div>
@@ -241,7 +241,7 @@ export default async function AboutPage() {
       <Section title="Contact" id="contact">
         <div className="seo-copy">
           <p>
-            The verified contact channel today is email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+            The contact channel today is email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
             Use it for a booking question, a listing enquiry, or to report a problem with a
             published listing.
           </p>

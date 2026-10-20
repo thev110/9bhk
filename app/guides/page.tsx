@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { EditorialShell, PageHero, Section } from "@/components/seo/page-frame";
 import { GuideCard } from "@/components/seo/guide-blocks";
@@ -75,7 +76,7 @@ export default async function GuidesIndexPage() {
       <Section
         title="Guides by destination"
         id="by-destination"
-        aside={<a href="/locations">All destinations</a>}
+        aside={<Link href="/locations">All destinations</Link>}
       >
         <ul className="seo-links">
           {destinations.map((summary) => {

@@ -71,8 +71,8 @@ export default async function CreditsPage() {
             high-risk, fragmented vacation rental market across the Chennai and ECR coastline.
           </p>
           <p>
-            Built as a full-stack Next.js application, it integrates Razorpay escrow webhooks,
-            verified physical specs (electrical load kW, generator backup, and high-tide boundaries),
+            Built as a full-stack Next.js application, it integrates Razorpay checkout and signed payment webhooks,
+            host-provided physical specs (electrical load kW, generator backup, and high-tide boundaries),
             and a strict three-bedroom group floor.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default async function CreditsPage() {
         links={[
           { href: "/about", label: "About 9bhk", note: "Mission and platform standards" },
           { href: "/guides/building-9bhk-rathnavel-karthi", label: "Builder's Blog", note: "The story behind building 9bhk" },
-          { href: "/developers", label: "Technical Architecture", note: "Next.js, Razorpay escrow & tokens" },
+          { href: "/developers", label: "Technical Architecture", note: "Next.js, Razorpay checkout & tokens" },
           { href: "/faq", label: "FAQ", note: "Platform answers" },
         ]}
       />

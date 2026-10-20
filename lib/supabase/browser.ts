@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { safeNextPath } from "@/lib/account";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function hasSupabase(): boolean {
@@ -15,13 +16,14 @@ export function browserSupabase(): SupabaseClient | null {
 
 export async function signInWithGoogle(nextPath = "/"): Promise<boolean> {
   const supabase = browserSupabase();
-  if (!supabase) return false;
-  const next = nextPath.startsWith("/") ? nextPath : "/";
+  if (!supabase) throw new Error("Authentication is not configured. Please contact support.");
+  const next = safeNextPath(nextPath);
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
   });
-  return !error;
+  if (error) throw error;
+  return true;
 }
 
 /**
@@ -39,10 +41,21 @@ export async function accessToken(): Promise<string | null> {
 export async function signOutSupabase(): Promise<void> {
   const supabase = browserSupabase();
   if (!supabase) return;
-  try {
-    await supabase.auth.signOut();
-  } catch (err) {
-    console.error("Supabase signOut error", err);
-  }
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 }
 
+export function requireSupabase(): SupabaseClient {
+  const client = browserSupabase();
+  if (!client) throw new Error("Account services are not configured. Please contact support.");
+  return client;
+}
+
+export async function accountRequest<T = unknown>(path: string, body: unknown = {}): Promise<T> {
+  const token = await accessToken();
+  if (!token) throw new Error("Please sign in to continue.");
+  const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+  return result;
+}

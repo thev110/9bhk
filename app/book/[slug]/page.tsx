@@ -6,56 +6,29 @@ import { useParams, useRouter } from "next/navigation";
 import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { useCatalog } from "@/lib/catalog";
+import { SAMPLE_LISTING_LABEL } from "@/lib/properties";
+import { useT } from "@/lib/i18n";
 import { formatRange, inr, isoDate, nightsBetween, quote } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { isPastDate, monthMatrix, occupiedNights } from "@/lib/availability";
 import { useCalendarStart } from "@/lib/use-calendar";
 import NumberFlow from "@number-flow/react";
 import { RazorpayCheckout, RazorpayPaymentSuccess } from "@/components/RazorpayCheckout";
+import { accountRequest } from "@/lib/supabase/browser";
+import { bookingQuery, validIsoDay } from "@/lib/search-state";
+import { nightsInRange } from "@/lib/availability";
+import { SplitPayPanel } from "@/components/split-pay";
+import type { SplitShare } from "@/lib/split";
 
 export default function BookPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
+  const t = useT();
   const { properties } = useCatalog();
-  const { user, addBooking, showToast, ready, sessionChecked, occupancies, reloadAvailability, realtorProperties } = useStore();
+  const { user, bookings, reloadAccount, showToast, ready, sessionChecked, occupancies, reloadAvailability } = useStore();
   const property = useMemo(() => {
-    const existing = properties.find((item) => item.id === params.slug);
-    if (existing) return existing;
-    const rp = (realtorProperties || []).find((item) => item.id === params.slug);
-    if (!rp) return undefined;
-    return {
-      id: rp.id,
-      name: rp.name,
-      tagline: `${rp.bedrooms} BHK in ${rp.location}`,
-      location: rp.location,
-      city: rp.city,
-      type: "Farmhouse",
-      setting: "seaside" as const,
-      settingName: rp.location,
-      settingDetail: "Private Broker Mandate",
-      bedrooms: rp.bedrooms,
-      beds: Math.max(rp.bedrooms, 2),
-      bathrooms: rp.bathrooms,
-      guests: rp.guests,
-      price: rp.nightlyRate || 25000,
-      cleaning: 2500,
-      deposit: 10000,
-      minStay: 1,
-      photos: ["/photos/ecr-sanctuary-1.jpg"],
-      amenities: [
-        rp.pool ? "Pool" : "Lawn",
-        "AC",
-        "Power backup",
-        "Parking",
-        "Wi-Fi",
-      ],
-      highlights: `${rp.bedrooms} BHK · Sleeps ${rp.guests}`,
-      description: rp.notes || `Private luxury ${rp.bedrooms} BHK estate in ${rp.location}.`,
-      isForSale: Boolean(rp.forSale),
-      salePrice: rp.salePriceCr ? rp.salePriceCr * 10000000 : undefined,
-    } as any;
-  }, [properties, realtorProperties, params.slug]);
-  const upiId = user?.upiId || "9bhk@okhdfcbank";
+    return properties.find((item) => item.id === params.slug);
+  }, [properties, params.slug]);
 
   useEffect(() => {
     reloadAvailability();
@@ -63,7 +36,11 @@ export default function BookPage() {
 
   useEffect(() => {
     if (!ready || !sessionChecked || user) return;
-    router.replace(`/login?next=${encodeURIComponent(`/book/${params.slug}`)}`);
+    const sourceQuery = new URLSearchParams(window.location.search);
+    const returnQuery = new URLSearchParams(bookingQuery(sourceQuery));
+    if (/^9B-[a-f0-9]{32}$/.test(sourceQuery.get("bookingCode") ?? "")) returnQuery.set("bookingCode", sourceQuery.get("bookingCode")!);
+    const query = returnQuery.toString();
+    router.replace(`/login?next=${encodeURIComponent(`/book/${params.slug}${query ? `?${query}` : ""}`)}`);
   }, [ready, sessionChecked, user, router, params.slug]);
   const [step, setStep] = useState(0);
   // Opens on the current month, resolved after mount so the server pass and
@@ -77,6 +54,27 @@ export default function BookPage() {
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [preparing, setPreparing] = useState(false);
+  const [hold, setHold] = useState<{ bookingId: string; bookingCode: string; total: number; holdExpiresAt: string; quote: { stay: number; cleaning: number; tax: number; platformFee: number; deposit: number; total: number; taxRate: number } } | null>(null);
+  const [split, setSplit] = useState<SplitShare[]>([]);
+  useEffect(() => {
+    if (hold || !ready || !sessionChecked || !user) return;
+    const code = new URLSearchParams(window.location.search).get("bookingCode");
+    if (!code) return;
+    const booking = bookings.find(b => b.code === code && b.propertyId === params.slug && b.guestId === user.id);
+    if (!booking || booking.status !== "awaiting" || !booking.holdExpiresAt || Date.parse(booking.holdExpiresAt) <= Date.now() || !booking.quote) return;
+    setCheckIn(booking.checkIn); setCheckOut(booking.checkOut); setAdults(booking.adults); setChildren(booking.children);
+    setName(booking.guestName); setEmail(booking.guestEmail); setPhone(booking.guestPhone);
+    setHold({ bookingId: booking.id, bookingCode: booking.code, total: booking.total, holdExpiresAt: booking.holdExpiresAt, quote: booking.quote as NonNullable<typeof hold>["quote"] });
+    setSplit(booking.split ?? []); setStep(3);
+  }, [bookings, ready, sessionChecked, user, hold, params.slug]);
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const start = query.get("checkIn") ?? "", end = query.get("checkOut") ?? "";
+    if (validIsoDay(start) && validIsoDay(end) && end > start) { setCheckIn(start); setCheckOut(end); }
+    const guests = Number(query.get("guests"));
+    if (Number.isInteger(guests) && guests > 0 && guests <= 100) setAdults(guests);
+  }, []);
   const [done, setDone] = useState<{
     code: string;
     total: number;
@@ -94,7 +92,7 @@ export default function BookPage() {
 
   const minStay = property?.minStay ?? 2;
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0;
-  const totals = property && nights >= minStay ? quote(property.price, property.cleaning, nights) : null;
+  const totals = hold?.quote ?? (property && nights >= minStay ? quote(property.price, property.cleaning, nights, { deposit: property.deposit, taxRate: property.taxRate, platformFeeRate: property.platformFeeRate }) : null);
   const days = useMemo(() => (cursor ? monthMatrix(cursor) : []), [cursor]);
 
   // Live occupancy: the host's own blocked nights plus every booking that has
@@ -104,6 +102,22 @@ export default function BookPage() {
     () => (property ? occupiedNights(property, occupancies) : new Set<string>()),
     [property, occupancies],
   );
+
+  if (property?.sample) {
+    return (
+      <Shell>
+        <PageBar title={property.name} backHref={`/property/${property.id}`} />
+        <div className="empty" data-sample-listing>
+          <span className="pill warn">{SAMPLE_LISTING_LABEL}</span>
+          <h3>This is a sample listing.</h3>
+          <p className="muted">It shows what a 9bhk listing looks like. There is no host behind it, so dates can&apos;t be held and no payment can be taken.</p>
+          <Link className="btn" href="/">
+            Back to explore
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
 
   if (!property) {
     return (
@@ -131,7 +145,8 @@ export default function BookPage() {
   }
 
   function pick(date: string) {
-    if (occupied.has(date)) return;
+    const choosingCheckout = checkIn && !checkOut && date > checkIn;
+    if (!choosingCheckout && occupied.has(date)) return;
     if (today && isPastDate(date, today)) return;
     if (!checkIn || (checkIn && checkOut)) {
       setCheckIn(date);
@@ -143,6 +158,7 @@ export default function BookPage() {
       return;
     }
     const span = nightsBetween(checkIn, date);
+    if (nightsInRange({ checkIn, checkOut: date }).some(night => occupied.has(night))) { showToast("Your stay includes an unavailable night."); return; }
     if (span < minStay) {
       showToast(minStay === 1 ? "Minimum stay is 1 night." : `Minimum stay is ${minStay} nights.`);
       return;
@@ -164,6 +180,8 @@ export default function BookPage() {
       showToast(`Pick a check-in and check-out. Minimum stay is ${minStay} night${minStay > 1 ? "s" : ""}.`);
       return;
     }
+    if (nightsInRange({ checkIn, checkOut }).some(night => occupied.has(night)) || (today && checkIn < today)) { showToast("These dates are unavailable. Please choose again."); return; }
+    if (adults + children > property!.guests) setAdults(Math.max(1, property!.guests - children));
     setStep(1);
   }
 
@@ -176,37 +194,23 @@ export default function BookPage() {
     return Object.keys(next).length === 0;
   }
 
-  function handleRazorpaySuccess(result: RazorpayPaymentSuccess) {
-    if (!property || !totals || !checkIn || !checkOut) return;
-    const propertyId = property.id;
-    const propertyName = property.name;
-    const code = `9B-${Math.floor(40000 + Math.random() * 5000)}`;
-
-    addBooking({
-      id: code,
-      code,
-      propertyId,
-      propertyName,
-      checkIn,
-      checkOut,
-      adults,
-      children,
-      total: totals.total,
-      status: "confirmed",
-      guestName: name.trim(),
-      guestEmail: email.trim(),
-      guestPhone: phone.trim(),
-      upiId,
-      paymentRef: result.paymentId,
-    });
-
-    showToast("Payment verified! Booking confirmed.");
-    setDone({
-      code,
-      total: totals.total,
-      status: "confirmed",
-      paymentRef: result.paymentId,
-    });
+  async function prepareHold() {
+    if (!validateGuest() || !property || !checkIn || !checkOut || preparing) return;
+    setPreparing(true);
+    try {
+      const result = await accountRequest<NonNullable<typeof hold>>("/api/bookings/prepare", { propertyId: property.id, checkIn, checkOut, adults, children, guestName: name, guestEmail: email, guestPhone: phone });
+      setHold(result); await reloadAccount();
+      showToast("Dates held for 30 minutes. Review the final quote before payment.");
+    } catch (error) { showToast(error instanceof Error ? error.message : "Reservation could not be held."); }
+    finally { setPreparing(false); }
+  }
+  async function handleRazorpaySuccess(result: RazorpayPaymentSuccess) {
+    await reloadAccount();
+    if (result.status !== "confirmed" || !result.bookingCode || result.total === undefined) {
+      showToast("Payment recorded for review. Open your trips for reservation and refund status."); router.push("/trips"); return;
+    }
+    showToast("Captured payment saved. Booking confirmed.");
+    setDone({ code: result.bookingCode, total: result.total, status: "confirmed", paymentRef: result.paymentId });
     setStep(4);
   }
 
@@ -267,7 +271,7 @@ export default function BookPage() {
                   key={iso + d.getMonth()}
                   className={dayClass(iso, inMonth)}
                   type="button"
-                  disabled={!inMonth || occupied.has(iso)}
+                  disabled={!inMonth || (occupied.has(iso) && !(checkIn && !checkOut && iso > checkIn && !nightsInRange({ checkIn, checkOut: iso }).some(night => occupied.has(night))))}
                   onClick={() => pick(iso)}
                 >
                   {d.getDate()}
@@ -341,25 +345,27 @@ export default function BookPage() {
               <span className="num"><NumberFlow value={totals.cleaning} prefix="₹" /></span>
             </div>
             <div className="sumline">
-              <span className="k">Taxes (12%)</span>
+              <span className="k">Taxes (configured rate)</span>
               <span className="num"><NumberFlow value={totals.tax} prefix="₹" /></span>
             </div>
             <div className="sumline">
-              <span className="k">Discount</span>
-              <span className="num">−₹0</span>
+              <span className="k">Platform fee</span>
+              <span className="num">{inr(totals.platformFee)}</span>
             </div>
+            <div className="sumline"><span className="k">Refundable security deposit</span><span>{inr(totals.deposit)}</span></div>
             <div className="sumline total">
               <span className="k">Total</span>
               <span className="num"><NumberFlow value={totals.total} prefix="₹" /></span>
             </div>
           </div>
-          <p className="muted">Pay the host on UPI, then send the stay for confirmation. Nothing is charged inside the app.</p>
+          {totals.platformFee === 0 ? <p className="muted" data-no-platform-fee>{t("pricing.noPlatformFee")}</p> : null}
+          <p className="muted">Estimated price. Your final quote includes date-specific rates and is saved with a 30-minute reservation hold before checkout.</p>
           <div className="row">
             <button className="btn outline" type="button" onClick={() => setStep(1)}>
               Back
             </button>
             <button className="btn grow" type="button" onClick={() => setStep(3)}>
-            Continue to UPI
+            Continue to guest details
             </button>
           </div>
         </div>
@@ -368,9 +374,11 @@ export default function BookPage() {
       {step === 3 && totals ? (
         <div className="pad mt stack">
           <p className="muted">The host and gateway use these details to confirm and receipt your reservation.</p>
-          <Field label="Full name" error={errors.name} value={name} onChange={setName} />
-          <Field label="Email" error={errors.email} value={email} onChange={setEmail} type="email" />
-          <Field label="Mobile number" error={errors.phone} value={phone} onChange={setPhone} />
+          {hold ? <p>Reservation #{hold.bookingCode}. Complete funding by {new Date(hold.holdExpiresAt).toLocaleTimeString("en-IN")}.</p> : <>
+            <Field label="Full name" error={errors.name} value={name} onChange={setName} />
+            <Field label="Email" error={errors.email} value={email} onChange={setEmail} type="email" />
+            <Field label="Mobile number" error={errors.phone} value={phone} onChange={setPhone} />
+          </>}
 
           <div className="card mt">
             <div className="sumline">
@@ -388,8 +396,10 @@ export default function BookPage() {
             </div>
           </div>
 
-          <RazorpayCheckout
+          {hold ? <div className="card"><div className="sumline"><span>Stay</span><span>{inr(hold.quote.stay)}</span></div><div className="sumline"><span>Cleaning</span><span>{inr(hold.quote.cleaning)}</span></div><div className="sumline"><span>Platform fee</span><span>{inr(hold.quote.platformFee)}</span></div><div className="sumline"><span>Tax ({hold.quote.taxRate * 100}%)</span><span>{inr(hold.quote.tax)}</span></div><div className="sumline"><span>Refundable deposit</span><span>{inr(hold.quote.deposit)}</span></div></div> : <button className="btn block" type="button" disabled={preparing} onClick={() => void prepareHold()}>{preparing ? "Reserving dates…" : "Hold dates and get final quote"}</button>}
+          {hold && split.length === 0 ? <RazorpayCheckout
             amount={totals.total}
+            bookingId={hold.bookingId}
             propertyName={property.name}
             guestName={name}
             guestEmail={email}
@@ -405,11 +415,19 @@ export default function BookPage() {
             onError={(err) => showToast(err.message || "Payment could not be completed.")}
             buttonText={`Pay ${inr(totals.total)} via Razorpay`}
             className="btn accent block"
-          />
+          /> : null}
+          {hold ? <SplitPayPanel total={hold.total} code={hold.bookingCode} organiser={name} checkIn={checkIn!} shares={split} onCreate={(shares) => { setSplit(shares); void reloadAccount(); }} onError={() => showToast("Group funding could not be updated. Check the hold and try again.")} /> : null}
+          {split.length ? <Link className="btn outline block" href="/trips">Track group funding in trips</Link> : null}
 
           <div className="row mt">
-            <button className="btn outline" type="button" onClick={() => setStep(2)}>
-              Back
+            <button className="btn outline" type="button" onClick={async () => {
+              if (hold) {
+                try { await accountRequest(`/api/bookings/${encodeURIComponent(hold.bookingCode)}/cancel`); setHold(null); setSplit([]); await reloadAccount(); }
+                catch (error) { showToast(error instanceof Error ? error.message : "Could not release the hold."); return; }
+              }
+              setStep(2);
+            }}>
+              {hold ? "Cancel hold and edit" : "Back"}
             </button>
           </div>
         </div>

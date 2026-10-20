@@ -15,12 +15,12 @@ export const teOnboarding = {
   // ── Role cards ──────────────────────────────────────────────────────────
   "onboarding.roleBuyer": "కొనుగోరు లేదా తీర అతిథి",
   "onboarding.roleBuyerBody":
-    "ధృవీకరించబడిన ప్రత్యక్ష సముద్రతీర ఇళ్లు మరియు కలెక్టర్ వాల్ట్‌లను సేకరించండి లేదా రిజర్వ్ చేయండి.",
+    "పూల్‌తో ఉన్న పూర్తి విల్లాలు, బంగళాలను బుక్ చేయండి, లేదా నేరుగా కొనండి.",
   "onboarding.roleRealtor": "లైసెన్స్ పొందిన రియల్టర్ / బ్రోకర్",
   // REVIEW: "co-broking lock" is brokerage jargon; "co-broking" transliterated
   // per Rule 1 rather than coin-joined into a Telugu compound.
   "onboarding.roleRealtorBody":
-    "బ్రాండ్‌రహిత ప్రెజెంటేషన్ మోడ్, గోప్య కస్టమర్ జాబితా మరియు 1.5%–2% కో-బ్రోకింగ్ లాక్.",
+    "బ్రాండ్‌రహిత ప్రెజెంటేషన్ మోడ్, గోప్య కస్టమర్ జాబితా మరియు కో-బ్రోకింగ్ ఆపాదన.",
   "onboarding.roleSeller": "భూమి యజమాని లేదా అమ్మేవారు",
   "onboarding.roleSellerBody":
     "కోట్ల ప్రమాణంలో అమ్మకానికి లేదా ఎంచుకున్న సంప్రదాయ విరామాలకు ప్రత్యక్ష సముద్రతీర భూములు మరియు విల్లాలను జాబితా చేయండి.",
@@ -34,7 +34,7 @@ export const teOnboarding = {
   // ── Step 2 — credentials ────────────────────────────────────────────────
   "onboarding.credentialsPill": "ప్రొఫైల్ & మ్యాండేట్ వివరాలు",
   "onboarding.titleRealtor": "ఏజెంట్ & ఏజెన్సీ నమోదు",
-  "onboarding.titleSeller": "భూమి ధృవీకరణ వివరాలు",
+  "onboarding.titleSeller": "సమీక్ష కోసం ఆస్తి వివరాలు",
   "onboarding.titleBuyer": "మీ వెతకింపును వ్యక్తిగతీకరించండి",
 
   // ── Common fields ───────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ export const teOnboarding = {
   // REVIEW: "co-broking attribution" (crediting the other side of a deal) has
   // no Telugu term; transliterated per Rule 1, wording left literal.
   "onboarding.reraHelp":
-    "కో-బ్రోకింగ్ లక్షణం మరియు ధృవీకరించిన ఏజెంట్ చెక్‌మార్క్‌ను సక్రియం చేస్తుంది.",
+    "కో-బ్రోకింగ్ ఆపాదనను సక్రియం చేస్తుంది. సిబ్బంది మీ నమోదును సమీక్షించిన తర్వాతే RERA బ్యాడ్జ్ కనిపిస్తుంది.",
   "onboarding.fieldAcquisitionRange": "సాధారణ కస్టమర్ సంపాదన పరిధి",
   "onboarding.budgetBoutique": "₹5 Cr – ₹15 Cr (బోటిక్ ఇసుకు ప్రాంతాలు)",
   "onboarding.budgetSupercar": "₹15 Cr – ₹35 Cr (సూపర్ కార్ వాల్ట్ భూములు)",

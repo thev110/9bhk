@@ -25,7 +25,7 @@ import { mergeCatalog, publishedOnly, type Row, type SeoProperty } from "@/lib/c
  * previews in Search Console).
  */
 
-const REVALIDATE_SECONDS = 3600;
+const REVALIDATE_SECONDS = 60;
 
 /** Cached Supabase client. Created once per server process. */
 let client: SupabaseClient | null | undefined;
@@ -59,10 +59,11 @@ async function fetchRows(): Promise<Row[] | null> {
   if (!supabase) return null;
   try {
     const { data, error } = await supabase
-      .from("bhk_properties")
+      .from("bhk_public_properties")
       .select("*")
       .eq("status", "published")
-      .limit(500);
+      .limit(500)
+      .abortSignal(AbortSignal.timeout(8000));
     if (error) return null;
     return (data as Row[] | null) ?? null;
   } catch {
@@ -79,7 +80,8 @@ export async function getServerCatalog(): Promise<SeoProperty[]> {
   if (cache && now - cache.at < REVALIDATE_SECONDS * 1000) return cache.value;
 
   const rows = await fetchRows();
-  const value = publishedOnly(mergeCatalog(rows));
+  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const value = publishedOnly(mergeCatalog(rows, configured ? [] : undefined));
   cache = { at: now, value };
   return value;
 }

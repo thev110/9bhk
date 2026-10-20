@@ -21,11 +21,13 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
   return Math.round((end.getTime() - start.getTime()) / 86400000);
 }
 
-export function quote(nightly: number, cleaning: number, nights: number) {
+export function quote(nightly: number, cleaning: number, nights: number, options: { deposit?: number; taxRate?: number; platformFeeRate?: number } = {}) {
   const stay = nightly * nights;
-  const beforeTax = stay + cleaning;
-  const tax = Math.round(beforeTax * 0.12);
-  return { stay, cleaning, tax, discount: 0, total: beforeTax + tax };
+  const platformFee = Math.round(stay * (options.platformFeeRate ?? 0));
+  const beforeTax = stay + cleaning + platformFee;
+  const tax = Math.round(beforeTax * (options.taxRate ?? 0.12));
+  const deposit = options.deposit ?? 0;
+  return { stay, cleaning, tax, platformFee, deposit, discount: 0, total: beforeTax + tax + deposit };
 }
 
 export function formatRange(checkIn: string, checkOut: string, tag = "en-IN"): string {

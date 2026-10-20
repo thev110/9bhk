@@ -102,8 +102,8 @@ export async function verifySplitToken(
 
   try {
     const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(body))) as SplitTokenPayload;
-    if (!payload.bookingCode || typeof payload.amount !== "number") return null;
-    if (typeof payload.exp !== "number" || payload.exp < nowSeconds) return null;
+    if (!payload.bookingCode || !Number.isSafeInteger(payload.amount) || payload.amount <= 0 || !Number.isInteger(payload.slot) || payload.slot < 0 || typeof payload.memberName !== "string") return null;
+    if (typeof payload.exp !== "number" || payload.exp <= nowSeconds) return null;
     return payload;
   } catch {
     return null;

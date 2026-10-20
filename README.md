@@ -1,35 +1,29 @@
 # 9bhk.app
 
-> Exclusive whole-estate marketplace for luxury farmhouses, beach houses, and private villas across Chennai, ECR, Mahabalipuram, and Pondicherry.
+Whole-property marketplace for private farmhouses, beach houses and villas.
 
-## Creator
-**Rathnavel Karthi**  
-Independent Product Builder & Developer  
-Chennai, Tamil Nadu, India  
-LinkedIn: [https://www.linkedin.com/in/rathnavel-karthi-114991135/](https://www.linkedin.com/in/rathnavel-karthi-114991135/)
+Built with Next.js 15 App Router, React, Supabase auth/PostgreSQL and Razorpay checkout.
+Public listings require three bedrooms and staff approval. Server-priced reservation
+holds precede checkout; confirmation follows captured-payment reconciliation.
 
----
+## Local development
 
-## Core Product Standards
+Use Node.js 24 or later. Copy .env.example to ignored .env.local and supply fresh,
+approved credentials. With no backend configured, public pages show preview inventory;
+authentication and reservations fail closed.
 
-- **3-Bedroom Floor**: Every listing has at least three bedrooms, reserved exclusively for group stays.
-- **Razorpay Escrow Integration**: Payments held until check-in with a 15-day clearance window for hosts.
-- **Physical Verification**: Declared electrical load (kW), on-site generator capacity, sound curfews, and verified beach frontage.
-- **Realtor & Broker Rail**: Dedicated broker portal with client roster management, branded presentation mode, calendar booking links, and a ₹500/month workspace subscription.
+Run npm ci and npm run dev. When the implementation phase is ready for validation,
+run npm run validate. The tests execute local PostgreSQL migrations with modeled
+Supabase roles; they never use live payment credentials.
 
----
+Read IMPLEMENTATION_PROGRESS.md and PAYMENTS_SETUP.md before deployment. The
+expanded guest, broker and seller backend is local and unvalidated. Refund, host
+and service-provider payout dispatch adapters require explicit staff review and
+disabled-by-default provider configuration. A request is never displayed as a
+completed transfer merely because the dispatch API was called; no escrow is promised.
 
-## Architecture & Tech Stack
+The existing UI is the accepted visual baseline. The Stitch workflow is retired.
+New feature controls still need integration and verification before their
+end-to-end requirements can be marked accepted.
 
-- **Framework**: Next.js 15 (React 19, App Router, Server Components)
-- **Styling**: Vanilla CSS Design Tokens (OKLCH, responsive, zero-runtime utility bloat)
-- **Database & Auth**: Supabase PostgreSQL & Row Level Security
-- **Payments**: Razorpay Orders, Payment Links & Webhooks
-- **SEO & AEO**: Full JSON-LD schema graphs (`VacationRental`, `FAQPage`, `Product`, `Person`), `sitemap.xml`, and `llms.txt`
-
----
-
-## License & Attribution
-
-Created & Developed by Rathnavel Karthi.  
-© 2026 9bhk.app. All rights reserved.
+Created by Rathnavel Karthi. All rights reserved.

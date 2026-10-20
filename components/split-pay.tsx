@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { inr } from "@/lib/format";
 import { useT } from "@/lib/i18n";
-import { buildSplit, payoutState, splitProgress, type SplitShare } from "@/lib/split";
-import { todayIso } from "@/lib/availability";
+import { splitProgress, type SplitShare } from "@/lib/split";
 import { accessToken } from "@/lib/supabase/browser";
 
 /**
@@ -27,7 +26,6 @@ export function SplitPayPanel({
   checkIn,
   shares,
   onCreate,
-  onMarkPaid,
   onError,
 }: {
   total: number;
@@ -36,13 +34,29 @@ export function SplitPayPanel({
   checkIn: string;
   shares?: SplitShare[];
   onCreate: (shares: SplitShare[]) => void;
-  onMarkPaid: (share: SplitShare) => void;
+  onMarkPaid?: (share: SplitShare) => void;
   onError: () => void;
 }) {
   const t = useT();
   const [roster, setRoster] = useState("");
   const [invited, setInvited] = useState<number | null>(null);
   const [sending, setSending] = useState<number | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  async function createSplit() {
+    if (creating) return;
+    setCreating(true);
+    try {
+      const members = [organiser, ...roster.split(",").map(name => name.trim()).filter(Boolean)];
+      const token = await accessToken();
+      if (!token || members.length < 2) throw new Error("Add another guest");
+      const response = await fetch("/api/split/create", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ bookingCode: code, members }) });
+      const result = await response.json();
+      if (!response.ok || !Array.isArray(result.shares)) throw new Error(result.error);
+      onCreate(result.shares);
+    } catch { onError(); }
+    finally { setCreating(false); }
+  }
 
   if (!shares || shares.length === 0) {
     return (
@@ -63,14 +77,8 @@ export function SplitPayPanel({
         <button
           className="btn block mt"
           type="button"
-          onClick={() => {
-            const members = roster
-              .split(",")
-              .map((name) => name.trim())
-              .filter(Boolean);
-            if (!members.length) return;
-            onCreate(buildSplit(total, members, organiser));
-          }}
+          disabled={creating}
+          onClick={() => void createSplit()}
         >
           {t("split.title")}
         </button>
@@ -79,13 +87,7 @@ export function SplitPayPanel({
   }
 
   const progress = splitProgress(shares);
-  const payout = payoutState(shares, checkIn, todayIso());
-  const payoutCopy =
-    payout.reason === "ready"
-      ? t("split.payoutReady")
-      : payout.reason === "too-early"
-        ? t("split.payoutTooEarly")
-        : t("split.payoutUnfunded", { n: payout.outstandingCount });
+  const payoutCopy = "Payment status comes from captured gateway payments. The reservation is confirmed only when every share is funded before the hold expires. Host settlements require review after the stay.";
 
   async function sendInvite(slot: number) {
     setSending(slot);
@@ -101,7 +103,6 @@ export function SplitPayPanel({
         body: JSON.stringify({
           bookingCode: code,
           slot,
-          shares: shares?.map((share) => ({ name: share.name, amount: share.amount })) ?? [],
         }),
       });
       const result = (await response.json()) as { url?: string };
@@ -151,11 +152,7 @@ export function SplitPayPanel({
                   <span className="pill ok" style={{ fontSize: 10 }}>
                     {t("split.paid")}
                   </span>
-                ) : (
-                  <button className="btn ghost sm" type="button" onClick={() => onMarkPaid(share)}>
-                    {t("split.markPaid")}
-                  </button>
-                )}
+                ) : <span className="pill warn" style={{ fontSize: 10 }}>{t("split.pending")}</span>}
               </div>
             </div>
             {!share.paid ? (

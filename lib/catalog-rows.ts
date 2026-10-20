@@ -33,6 +33,11 @@ export type Row = {
   bathrooms: number;
   price: number;
   cleaning: number;
+  deposit?: number | null;
+  tax_rate?: number | null;
+  platform_fee_rate?: number | null;
+  verified_review_rating?: number | null;
+  verified_review_count?: number | null;
   amenities: string[] | null;
   vibes: string[] | null;
   image_urls: string[] | null;
@@ -80,10 +85,12 @@ export type Row = {
   seo_description?: string | null;
   canonical_url?: string | null;
   noindex?: boolean | null;
-  verification_status?: string | null;
-  verification_type?: string | null;
-  verification_date?: string | null;
-  verified_by?: string | null;
+  /** Staff review recorded (status 'verified' with reviewer and date). The reviewer's id is not exposed. */
+  is_verified?: boolean | null;
+  /** Review date, present only when `is_verified`. */
+  verified_at?: string | null;
+  /** `host_id is not null`, exposed by bhk_public_properties without the host's identity. */
+  bookable?: boolean | null;
 };
 
 /**
@@ -108,9 +115,7 @@ export type SeoProperty = Property &
     noindex: boolean;
     verification: {
       status: "verified" | "unverified";
-      type?: string;
       date?: string;
-      verifiedBy?: string;
     };
   }>;
 
@@ -126,14 +131,14 @@ const COASTAL_ZONES = new Set(["Direct Oceanfront", "Dune Edge Sanctuary", "Cove
 
 /** A listing is only publishable if the host has actually published it. */
 export function isPublished(row: Row): boolean {
-  return row.status === "published";
+  return row.status === "published" && row.bedrooms >= 3;
 }
 
 export function fromRow(row: Row): SeoProperty {
   const images = row.image_urls ?? [];
   const setting = (SETTINGS as string[]).includes(row.setting || "")
     ? (row.setting as Setting)
-    : "seaside";
+    : "countryside";
   const seaside = setting === "seaside";
   const garageType = row.garage_type as GarageType | undefined;
 
@@ -145,14 +150,19 @@ export function fromRow(row: Row): SeoProperty {
     setting,
     settingName: row.setting_name || row.location || row.city || "",
     settingDetail: row.setting_detail || row.highlights || "",
-    rating: Number(row.rating) || 0,
-    reviews: row.reviews || 0,
+    rating: Number(row.verified_review_rating) || 0,
+    reviews: Number(row.verified_review_count) || 0,
     guests: row.guests,
     bedrooms: row.bedrooms,
     beds: row.beds,
     bathrooms: row.bathrooms,
     price: row.price,
     cleaning: row.cleaning,
+    deposit: Number(row.deposit) || 0,
+    minStay: Number(row.min_stay) || 2,
+    taxRate: row.tax_rate == null ? 0.12 : Number(row.tax_rate),
+    platformFeeRate: Number(row.platform_fee_rate) || 0,
+    photos: images,
     highlights: row.highlights || "",
     searchLine: row.highlights || "",
     amenities: row.amenities ?? [],
@@ -161,7 +171,9 @@ export function fromRow(row: Row): SeoProperty {
     alt: row.alt || row.name,
     blurb: row.blurb || row.description || "",
     type: row.type || "Villa",
-    guestFavourite: row.guest_favourite,
+    guestFavourite: Number(row.verified_review_count) >= 5 && Number(row.verified_review_rating) >= 4.8,
+    // No host behind the row: a sample. Labelled in the UI, refused server-side.
+    sample: row.bookable === false,
     group:
       row.group_name === "featured" || row.group_name === "nearby" || row.group_name === "popular"
         ? row.group_name
@@ -176,7 +188,7 @@ export function fromRow(row: Row): SeoProperty {
             capacity: row.garage_capacity ?? 2,
             supercarFriendly: row.supercar_friendly ?? false,
             evChargingKw: row.ev_charging_kw ?? 0,
-            washdownStation: seaside ? row.washdown_station ?? true : false,
+            washdownStation: seaside ? row.washdown_station ?? false : false,
             description: seaside
               ? "Dedicated vehicle bay with salt-spray protection."
               : "Dedicated covered vehicle bay for the house.",
@@ -206,15 +218,12 @@ export function fromRow(row: Row): SeoProperty {
           coastalZone: COASTAL_ZONES.has(row.coastal_zone || "")
             ? (row.coastal_zone as CoastalZone)
             : undefined,
-          privateBeachAccess: row.private_beach_access ?? true,
-          tideDistanceMeters: row.tide_distance_meters ?? 40,
+          privateBeachAccess: row.private_beach_access ?? false,
+          tideDistanceMeters: row.tide_distance_meters ?? undefined,
         }
       : {}),
 
     /* ── SEO model columns. Present only when populated. ───────────────── */
-    ...(row.latitude != null ? { latitude: Number(row.latitude) } : {}),
-    ...(row.longitude != null ? { longitude: Number(row.longitude) } : {}),
-    ...(row.address ? { address: row.address } : {}),
     ...(row.check_in_time ? { checkInTime: row.check_in_time } : {}),
     ...(row.check_out_time ? { checkoutTime: row.check_out_time } : {}),
     ...(row.min_stay != null ? { minStay: Number(row.min_stay) } : {}),
@@ -224,13 +233,11 @@ export function fromRow(row: Row): SeoProperty {
     ...(row.seo_description ? { seoDescription: row.seo_description } : {}),
     ...(row.canonical_url ? { canonical: row.canonical_url } : {}),
     ...(row.noindex != null ? { noindex: Boolean(row.noindex) } : {}),
-    ...(row.verification_status
+    ...(row.is_verified != null
       ? {
           verification: {
-            status: row.verification_status === "verified" ? ("verified" as const) : ("unverified" as const),
-            ...(row.verification_type ? { type: row.verification_type } : {}),
-            ...(row.verification_date ? { date: row.verification_date } : {}),
-            ...(row.verified_by ? { verifiedBy: row.verified_by } : {}),
+            status: row.is_verified && row.verified_at ? ("verified" as const) : ("unverified" as const),
+            ...(row.is_verified && row.verified_at ? { date: row.verified_at } : {}),
           },
         }
       : {}),
@@ -242,14 +249,19 @@ export function fromRow(row: Row): SeoProperty {
  * browser catalog uses: database rows win, in-repo listings fill the gaps by
  * id. A property that exists in both is published once.
  */
-export function mergeCatalog(rows: Row[] | null | undefined, fallback: SeoProperty[] = PROPERTIES as SeoProperty[]): SeoProperty[] {
-  const fromDb = (rows ?? []).filter(isPublished).map(fromRow);
-  if (!fromDb.length) return fallback;
-  const ids = new Set(fromDb.map((item) => item.id));
-  return [...fromDb, ...fallback.filter((item) => !ids.has(item.id))];
+export function previewCatalog(): SeoProperty[] {
+  return PROPERTIES.filter((property) => property.bedrooms >= 3 && property.status !== "draft")
+    .map((property) => ({ ...property, rating: 0, reviews: 0, guestFavourite: false, sample: true, photos: [property.image] }));
+}
+
+export function mergeCatalog(rows: Row[] | null | undefined, fallback: SeoProperty[] = previewCatalog()): SeoProperty[] {
+  // A successful empty read is an empty marketplace. Never resurrect an
+  // unpublished/deleted seed listing by filling gaps in live inventory.
+  if (rows == null) return fallback;
+  return rows.filter(isPublished).map(fromRow);
 }
 
 /** Drops drafts so nothing unpublished reaches metadata, links or the sitemap. */
 export function publishedOnly(properties: SeoProperty[]): SeoProperty[] {
-  return properties.filter((property) => (property as { status?: string }).status !== "draft");
+  return properties.filter((property) => property.bedrooms >= 3 && property.status !== "draft");
 }

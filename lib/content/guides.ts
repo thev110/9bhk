@@ -91,7 +91,7 @@ export const GUIDES: Guide[] = [
       {
         question: "How far is the ECR from central Chennai?",
         answer:
-          "The ECR is the coastal highway running south out of Chennai toward Mahabalipuram, so the drive is entirely on highway rather than through city traffic. Exact travel times are shown on each destination page once they are verified.",
+          "The ECR is the coastal highway running south out of Chennai toward Mahabalipuram, so the drive is entirely on highway rather than through city traffic. Exact travel times are shown on each destination page once they have been measured.",
       },
       {
         question: "Should I book an ECR property with beach frontage?",
@@ -362,7 +362,7 @@ export const GUIDES: Guide[] = [
     title: "Building 9bhk: The Story Behind South India's Sovereign Estate Platform",
     h1: "Building 9bhk: The Story Behind South India's Sovereign Estate Platform",
     excerpt:
-      "Why independent builder Rathnavel Karthi engineered 9bhk from Chennai to solve unverified brokers, fake villa photos, and unprotected advance deposits.",
+      "Why independent builder Rathnavel Karthi engineered 9bhk from Chennai to solve informal brokers, fake villa photos, and unprotected advance deposits.",
     author: "Rathnavel Karthi",
     publishedAt: "2026-10-06",
     updatedAt: "2026-10-06",
@@ -374,12 +374,12 @@ export const GUIDES: Guide[] = [
       {
         question: "Who built 9bhk and why?",
         answer:
-          "9bhk was designed, architected, and built by Rathnavel Karthi, an independent product builder from Chennai, India, to provide transparent, escrow-backed booking for whole private estates.",
+          "9bhk was designed, architected, and built by Rathnavel Karthi, an independent product builder from Chennai, India, to make booking whole private estates more transparent.",
       },
       {
         question: "How does 9bhk protect payments?",
         answer:
-          "Guest payments are captured directly through Razorpay escrow and held until check-in. Hosts receive settlements under a 15-day clearance window.",
+          "Payment is processed through Razorpay checkout; refund and host payout requests are recorded and reviewed separately. Checkout does not itself establish an escrow arrangement.",
       },
       {
         question: "What is the three-bedroom floor?",
@@ -395,7 +395,7 @@ export const GUIDES: Guide[] = [
       { kind: "h2", text: "The problem with informal estate rentals" },
       {
         kind: "p",
-        text: "When groups arrived at properties, they frequently encountered unannounced caretakers, dirty pools, or electrical wiring that tripped the moment air conditioners and a sound setup ran simultaneously. Meanwhile, global OTAs slapped 20% fees on checkout while refusing to publish verified generator capacities or sound curfews.",
+        text: "When groups arrived at properties, they frequently encountered unannounced caretakers, dirty pools, or electrical wiring that tripped the moment air conditioners and a sound setup ran simultaneously. Meanwhile, global OTAs added fees at checkout while leaving out generator capacities and sound curfews.",
       },
       {
         kind: "factbox",
@@ -403,19 +403,19 @@ export const GUIDES: Guide[] = [
         items: [
           { label: "Creator", value: "Rathnavel Karthi (Chennai, India)" },
           { label: "Core Floor", value: "Minimum 3 bedrooms; whole house only" },
-          { label: "Trust Mechanism", value: "Razorpay escrow with 15-day host settlement" },
-          { label: "Verified Specs", value: "Sanctioned kW, backup generator, high-tide meters" },
-          { label: "Economics", value: "Flat 10% platform fee, zero hidden checkout fees" },
+          { label: "Payments", value: "Razorpay checkout; refunds and payouts reviewed separately" },
+          { label: "Host-provided specs", value: "Sanctioned kW, backup generator, high-tide meters" },
+          { label: "Economics", value: "No platform fee during launch. Any future fee will be shown clearly before you book." },
         ],
       },
       { kind: "h2", text: "Engineering for high-trust gatherings" },
       {
         kind: "p",
-        text: "I built 9bhk to institutionalize trust across South India's private estate economy. We verify real specifications directly with property owners, safeguard guest payments with Razorpay escrow until check-in, and provide hosts with transparent 15-day settlement clearance.",
+        text: "I built 9bhk to institutionalize trust across South India's private estate economy. We ask property owners for real specifications and label them as host-provided, process guest payments through Razorpay checkout, and record every refund and payout request with its status.",
       },
       {
         kind: "p",
-        text: "Whether you are a multi-generational family gathering for an anniversary, a company running an executive offsite, or a creative team shooting a brand campaign, you deserve the privacy of a whole estate and the certainty of verified contracts.",
+        text: "Whether you are a multi-generational family gathering for an anniversary, a company running an executive offsite, or a creative team shooting a brand campaign, you deserve the privacy of a whole estate and the certainty of written terms.",
       },
       {
         kind: "link",

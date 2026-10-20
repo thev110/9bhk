@@ -42,7 +42,7 @@ export default async function CreatorsPage() {
           <p>
             From dramatic beachfront infinity pools along the ECR to secluded orchard compounds in
             Chengalpattu, 9bhk connects lifestyle creators, fashion houses, film crews, and brands
-            with verified whole-house locations built for visual storytelling.
+            with whole-house locations and host-declared specifications.
           </p>
         }
       />
@@ -59,7 +59,7 @@ export default async function CreatorsPage() {
             <div className="home-seo-card-badge">01 · Hosted Stays</div>
             <h3>Architectural &amp; Lifestyle Creator Stays</h3>
             <p>
-              We sponsor experiential weekend residencies for verified travel photographers, interior
+              We sponsor experiential weekend residencies for travel photographers, interior
               designers, and lifestyle creators. Share the unhurried craft of private gathering with your
               audience while enjoying exclusive estate amenities.
             </p>
@@ -68,7 +68,7 @@ export default async function CreatorsPage() {
             <div className="home-seo-card-badge">02 · Commercial Shoots</div>
             <h3>Fashion Lookbooks, Music Videos &amp; Campaigns</h3>
             <p>
-              Book multi-acre private estates with verified power infrastructure (up to 40 kW sanctioned
+              Book multi-acre private estates with host-provided power specs (up to 40 kW sanctioned
               load), generator backups, dedicated green rooms, and caterer kitchens. Guaranteed privacy
               with zero tourist interruptions.
             </p>
@@ -77,8 +77,8 @@ export default async function CreatorsPage() {
             <div className="home-seo-card-badge">03 · Affiliate Partner</div>
             <h3>Creator Referral &amp; Booking Commission</h3>
             <p>
-              Curate and recommend your favorite 9bhk villas to your community. Earn standard
-              commissions on confirmed reservations with transparent real-time tracking.
+              Curate and recommend your favorite 9bhk villas to your community. Creator commissions
+              are on the way; we&apos;ll publish the terms before any referral earns one.
             </p>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default async function CreatorsPage() {
           </p>
           <ul>
             <li>
-              <strong>Verified electrical load:</strong> Sanctioned kW ratings and on-site diesel
+              <strong>Stated electrical load:</strong> Sanctioned kW ratings and on-site diesel
               generators that easily power heavy HMIs, arri fixtures, and lighting rigs.
             </li>
             <li>
@@ -143,7 +143,7 @@ export default async function CreatorsPage() {
         links={destinations.slice(0, 4).map((d) => ({
           href: `/locations/${d.entry.slug}`,
           label: `${d.entry.name} Private Stays`,
-          note: `${d.count} verified whole estates`,
+          note: `${d.count} whole estates`,
         }))}
       />
     </EditorialShell>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { NotFoundBody } from "@/components/not-found-body";
 
@@ -24,18 +25,18 @@ export default function NotFound() {
   return (
     <NotFoundBody>
       <nav aria-label="Suggested pages" className="pad stack sm" style={{ maxWidth: 420 }}>
-        <a className="btn outline" href="/stays">
+        <Link className="btn outline" href="/stays">
           Browse all stays
-        </a>
-        <a className="btn outline" href="/locations">
+        </Link>
+        <Link className="btn outline" href="/locations">
           Browse by destination
-        </a>
-        <a className="btn outline" href="/guides">
+        </Link>
+        <Link className="btn outline" href="/guides">
           Read the guides
-        </a>
-        <a className="btn outline" href="/contact">
+        </Link>
+        <Link className="btn outline" href="/contact">
           Tell us what you were looking for
-        </a>
+        </Link>
       </nav>
     </NotFoundBody>
   );

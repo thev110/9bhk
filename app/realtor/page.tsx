@@ -24,7 +24,7 @@ export default function RealtorPortalPage() {
     showToast,
     brokerSubscribed,
     brokerSubscriptionPaymentId,
-    setBrokerSubscribed,
+    reloadAccount,
     realtorProperties,
     addRealtorProperty,
     removeRealtorProperty,
@@ -115,8 +115,7 @@ export default function RealtorPortalPage() {
   function copyToClipboard(text: string, label: string) {
     if (!requireSubscription("share catalog links")) return;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      showToast(`Copied ${label} to clipboard`);
+      void navigator.clipboard.writeText(text).then(() => showToast(`Copied ${label} to clipboard`)).catch(() => showToast("Could not copy the link."));
     } else {
       showToast(`Link ready: ${text}`);
     }
@@ -128,22 +127,22 @@ export default function RealtorPortalPage() {
     window.open(url, "_blank");
   }
 
-  function handleSaveProfile(e: React.FormEvent) {
+  async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     const cleanAgency = tempAgencyName.trim();
     const cleanRera = tempReraNumber.trim();
-    setAgencyName(cleanAgency);
-    setReraNumber(cleanRera);
-    updateUser({
+    try { await updateUser({
       agencyName: cleanAgency,
       reraNumber: cleanRera,
       role: "realtor",
     });
+    setAgencyName(cleanAgency); setReraNumber(cleanRera);
+    } catch (e) { showToast(e instanceof Error ? e.message : "Profile was not saved."); return; }
     showToast("Broker profile updated successfully");
     setEditProfileModalOpen(false);
   }
 
-  function handleCreateClient(e: React.FormEvent) {
+  async function handleCreateClient(e: React.FormEvent) {
     e.preventDefault();
     if (!requireSubscription("onboard clients")) return;
     if (!clientName.trim() || !clientPhone.trim()) {
@@ -151,7 +150,7 @@ export default function RealtorPortalPage() {
       return;
     }
     const newClient: RealtorClient = {
-      id: `client-${Date.now().toString(36)}`,
+      id: crypto.randomUUID(),
       name: clientName.trim(),
       phone: clientPhone.trim(),
       email: clientEmail.trim() || undefined,
@@ -163,7 +162,7 @@ export default function RealtorPortalPage() {
       notes: notes.trim() || undefined,
       createdAt: new Date().toISOString().split("T")[0],
     };
-    addClient(newClient);
+    try { await addClient(newClient); } catch (e) { showToast(e instanceof Error ? e.message : "Client was not saved."); return; }
     showToast(t("realtor.toastClientOnboarded", { name: newClient.name }));
     setAddClientModalOpen(false);
     setClientName("");
@@ -172,7 +171,7 @@ export default function RealtorPortalPage() {
     setNotes("");
   }
 
-  function handleCreateProperty(e: React.FormEvent) {
+  async function handleCreateProperty(e: React.FormEvent) {
     e.preventDefault();
     if (!requireSubscription("add properties")) return;
     if (!propName.trim() || !propLocation.trim()) {
@@ -180,7 +179,7 @@ export default function RealtorPortalPage() {
       return;
     }
     const newProp: RealtorProperty = {
-      id: `rp-${Date.now().toString(36)}`,
+      id: crypto.randomUUID(),
       name: propName.trim(),
       location: propLocation.trim(),
       city: propCity,
@@ -195,12 +194,12 @@ export default function RealtorPortalPage() {
       notes: propNotes.trim() || undefined,
       createdAt: new Date().toISOString().split("T")[0],
     };
-    addRealtorProperty(newProp);
+    try { await addRealtorProperty(newProp); } catch (e) { showToast(e instanceof Error ? e.message : "Property was not saved."); return; }
     const eligible = isShowcaseEligible(newProp);
     showToast(
       eligible
-        ? `Added "${newProp.name}" — 3+ BHK eligible for 9bhk App Showcase!`
-        : `Added "${newProp.name}" to private catalog (<3 BHK: Private link only).`
+        ? `Added "${newProp.name}" to your private catalog. Public listings require approval.`
+        : `Added "${newProp.name}" to your private catalog.`
     );
     setAddPropertyModalOpen(false);
     setPropName("");
@@ -208,14 +207,15 @@ export default function RealtorPortalPage() {
     setPropNotes("");
   }
 
-  function handleImportFrom9bhk(p: Property) {
+  async function handleImportFrom9bhk(p: Property) {
     if (!requireSubscription("import 9bhk listings")) return;
-    if (propertyList.some((rp) => rp.id === p.id)) {
+    if (propertyList.some((rp) => rp.sourcePropertyId === p.id)) {
       showToast(`"${p.name}" is already in your catalog`);
       return;
     }
     const newProp: RealtorProperty = {
-      id: p.id,
+      id: crypto.randomUUID(),
+      sourcePropertyId: p.id,
       name: p.name,
       location: p.location,
       city: p.city,
@@ -230,7 +230,7 @@ export default function RealtorPortalPage() {
       notes: p.blurb || p.highlights,
       createdAt: new Date().toISOString().split("T")[0],
     };
-    addRealtorProperty(newProp);
+    try { await addRealtorProperty(newProp); } catch (e) { showToast(e instanceof Error ? e.message : "Property was not saved."); return; }
     showToast(`Added "${p.name}" to your broker catalog`);
     setPortfolioModalOpen(false);
   }
@@ -355,7 +355,7 @@ export default function RealtorPortalPage() {
             </p>
           </div>
           <div className="row" style={{ gap: 8 }}>
-            {reraNumber ? <span className="pill ok">{t("realtor.reraVerified")}</span> : null}
+            {user.verifiedBroker ? <span className="pill ok">{t("realtor.reraVerified")}</span> : reraNumber ? <span className="pill">Verification pending</span> : null}
             <button
               className="btn sm outline"
               type="button"
@@ -393,7 +393,7 @@ export default function RealtorPortalPage() {
                 <strong>Welcome, {user.name || "Partner"}! Set up your Broker Credentials</strong>
               </div>
               <p className="muted" style={{ fontSize: 12.5, marginTop: 4, margin: 0 }}>
-                Add your agency name and RERA registration number so your branded digital catalog and WhatsApp links display your credentials to clients.
+                Add your agency name and RERA registration number to complete your broker profile. Verification is reviewed separately by staff.
               </p>
             </div>
             <button
@@ -473,6 +473,7 @@ export default function RealtorPortalPage() {
                 </div>
               ) : (
                 <RazorpayCheckout
+                  kind="subscription"
                   amount={500}
                   propertyName="Broker Workspace Monthly Subscription"
                   bookingCode={`broker_${Date.now()}`}
@@ -481,9 +482,8 @@ export default function RealtorPortalPage() {
                   guestName={user.name || agencyName || "Broker"}
                   guestEmail={user.email || "broker@9bhk.app"}
                   guestPhone={user.phone || "+91 99999 99999"}
-                  onSuccess={(payment: RazorpayPaymentSuccess) => {
-                    setBrokerSubscribed(true, payment.paymentId);
-                    showToast(`Broker Workspace active! Payment ID: ${payment.paymentId}`);
+                  onSuccess={async (_payment: RazorpayPaymentSuccess) => {
+                    await reloadAccount(); showToast("Subscription payment verified. Your account has been refreshed.");
                   }}
                   onError={(err) => {
                     showToast(`Payment error: ${err.message}`);
@@ -504,7 +504,7 @@ export default function RealtorPortalPage() {
           </p>
           <p className="nb">{propertyList.length}</p>
           <p className="sub">
-            {propertyList.filter(isShowcaseEligible).length} App Showcase · {propertyList.filter((p) => !isShowcaseEligible(p)).length} Private
+            {propertyList.filter(p => p.sourcePropertyId && properties.some(item => item.id === p.sourcePropertyId)).length} Public listings · {propertyList.filter(p => !p.sourcePropertyId || !properties.some(item => item.id === p.sourcePropertyId)).length} Private
           </p>
         </div>
         <div className="stat">
@@ -560,7 +560,7 @@ export default function RealtorPortalPage() {
             <div>
               <h2>Your Digital Property Catalog</h2>
               <p className="muted" style={{ fontSize: 12 }}>
-                Organized listings you can share directly with clients instead of scattered WhatsApp images.
+                Your private catalog is available on your devices. Approved 9bhk listings have public client links.
               </p>
             </div>
             <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
@@ -609,7 +609,7 @@ export default function RealtorPortalPage() {
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span className="pill info" style={{ marginTop: 2 }}>3-BHK Rule</span>
               <p style={{ fontSize: 12.5, margin: 0, lineHeight: 1.5 }}>
-                <strong>How the 9bhk showcase works:</strong> You can organize any property in your private catalog. However, <strong>only properties with 3 BHK or more can be showcased in the public 9bhk app</strong> for rent or sale. Properties under 3 BHK are marked as <em>Private Link Only</em> and will never appear in public app search, but your direct booking links work for your clients.
+                <strong>How the 9bhk showcase works:</strong> You can organize any property in your private catalog. However, <strong>only properties with 3 BHK or more can be showcased in the public 9bhk app</strong> for rent or sale. Custom records remain private until a marketplace listing is submitted and approved. Imported approved listings have public client and booking links.
               </p>
             </div>
           </div>
@@ -626,7 +626,7 @@ export default function RealtorPortalPage() {
               <div style={{ fontSize: 32, marginBottom: 8 }}>🏡</div>
               <h3 style={{ fontSize: 17, fontWeight: 700 }}>Your Broker Catalog is Empty</h3>
               <p className="muted" style={{ fontSize: 13, maxWidth: 460, margin: "6px auto 16px" }}>
-                Add your exclusive listings, or represent verified farmhouses and beachfront estates directly from the 9bhk luxury collection.
+                Add your exclusive listings, or represent farmhouses and beachfront estates directly from the 9bhk luxury collection.
               </p>
               <div className="row" style={{ justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
                 <button
@@ -655,21 +655,20 @@ export default function RealtorPortalPage() {
             <div className="stack mt">
               {propertyList.map((prop) => {
                 const eligible = isShowcaseEligible(prop);
-                const isCatalogProperty = properties.some((p) => p.id === prop.id);
-                const propUrl = isCatalogProperty
-                  ? `${origin}/property/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`
-                  : `${origin}/book/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`;
-                const calendarBookingUrl = `${origin}/book/${prop.id}?broker=${encodeURIComponent(agencyName || "Broker")}`;
-                const shareText = `Hi! Here are the verified details for ${prop.name} (${prop.bedrooms} BHK in ${prop.location}):\n${propUrl}\n\nYou can also check the interactive calendar and schedule your dates here:\n${calendarBookingUrl}`;
+                const isCatalogProperty = Boolean(prop.sourcePropertyId && properties.some(p => p.id === prop.sourcePropertyId));
+                const propUrl = isCatalogProperty ? `${origin}/property/${prop.sourcePropertyId}` : "";
+                const calendarBookingUrl = isCatalogProperty ? `${origin}/book/${prop.sourcePropertyId}` : "";
+                const shareText = `Property: ${prop.name} (${prop.bedrooms} BHK in ${prop.location})\n${propUrl}`;
 
                 return (
                   <article key={prop.id} className="card" style={{ padding: 16 }}>
+                    {!isCatalogProperty ? <p className="help">Private to your broker account. Public sharing and booking require a reviewed marketplace listing.</p> : null}
                     <div className="between">
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <h3 style={{ fontSize: 16, fontWeight: 800 }}>{prop.name}</h3>
                           <span className={`pill ${eligible ? "ok" : "warn"}`} style={{ fontSize: 10.5 }}>
-                            {eligible ? "✓ 9bhk App Showcase (3+ BHK)" : "🔒 Private Link Only (<3 BHK)"}
+                            {isCatalogProperty ? "Approved public listing" : "Private broker record"}
                           </span>
                         </div>
                         <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
@@ -694,8 +693,8 @@ export default function RealtorPortalPage() {
 
                     <p className="tiny muted mt" style={{ margin: "8px 0 0", fontStyle: "italic" }}>
                       {eligible
-                        ? "Eligible to be shown publicly in the 9bhk marketplace for renting and sales."
-                        : "Fewer than 3 BHK: Excluded from public app search. Shared exclusively via your direct link."}
+                        ? "Meets the 3-bedroom minimum; marketplace publication still requires approval."
+                        : "Fewer than 3 bedrooms: private catalog only."}
                     </p>
 
                     {prop.notes ? (
@@ -721,6 +720,7 @@ export default function RealtorPortalPage() {
                         <button
                           className="btn outline sm"
                           type="button"
+                          disabled={!isCatalogProperty}
                           onClick={() => copyToClipboard(propUrl, `Catalog Link for ${prop.name}`)}
                           title="Copy clean presentation link for your client"
                         >
@@ -729,6 +729,7 @@ export default function RealtorPortalPage() {
                         <button
                           className="btn outline sm"
                           type="button"
+                          disabled={!isCatalogProperty}
                           onClick={() => copyToClipboard(calendarBookingUrl, `Calendar Booking Link for ${prop.name}`)}
                           title="Copy direct booking and calendar link"
                         >
@@ -738,6 +739,7 @@ export default function RealtorPortalPage() {
                           className="btn sm"
                           type="button"
                           style={{ background: "#25D366", color: "#fff", borderColor: "#25D366" }}
+                          disabled={!isCatalogProperty}
                           onClick={() => shareWhatsApp(shareText)}
                           title="Share catalog and calendar directly to WhatsApp"
                         >
@@ -749,9 +751,9 @@ export default function RealtorPortalPage() {
                         className="btn ghost sm"
                         type="button"
                         style={{ color: "var(--danger)" }}
-                        onClick={() => {
-                          removeRealtorProperty(prop.id);
-                          showToast(`Removed "${prop.name}" from broker catalog`);
+                        onClick={async () => {
+                          try { await removeRealtorProperty(prop.id); showToast(`Removed "${prop.name}" from broker catalog`); }
+                          catch (e) { showToast(e instanceof Error ? e.message : "Property was not removed."); }
                         }}
                       >
                         Delete
@@ -866,9 +868,9 @@ export default function RealtorPortalPage() {
                         className="btn ghost sm"
                         type="button"
                         style={{ color: "var(--danger)" }}
-                        onClick={() => {
-                          removeClient(client.id);
-                          showToast(t("realtor.toastClientRemoved", { name: client.name }));
+                        onClick={async () => {
+                          try { await removeClient(client.id); showToast(t("realtor.toastClientRemoved", { name: client.name })); }
+                          catch (e) { showToast(e instanceof Error ? e.message : "Client was not removed."); }
                         }}
                       >
                         {t("realtor.removeClient")}
@@ -908,7 +910,7 @@ export default function RealtorPortalPage() {
       >
         <form className="stack" onSubmit={handleSaveProfile}>
           <p className="muted" style={{ fontSize: 13 }}>
-            Configure your registered agency name and RERA license number. These will appear on client-facing catalogs and presentation links.
+            Configure your registered agency name and RERA license number. Verification is reviewed separately by staff.
           </p>
 
           <label className="field">
@@ -957,7 +959,7 @@ export default function RealtorPortalPage() {
           </p>
           <div className="stack" style={{ maxHeight: "60vh", overflowY: "auto", gap: 10 }}>
             {properties.map((p) => {
-              const alreadyAdded = propertyList.some((rp) => rp.id === p.id);
+              const alreadyAdded = propertyList.some((rp) => rp.sourcePropertyId === p.id);
               return (
                 <div
                   key={p.id}
@@ -1066,12 +1068,12 @@ export default function RealtorPortalPage() {
             }}
           >
             <strong>
-              {propBedrooms >= 3 ? "✓ 3+ BHK: Eligible for 9bhk App Showcase" : "🔒 < 3 BHK: Private Link Only"}
+              {propBedrooms >= 3 ? "3+ bedrooms: publication requires approval" : "Under 3 bedrooms: private catalog only"}
             </strong>
             <p className="muted" style={{ fontSize: 12, marginTop: 4, margin: 0 }}>
               {propBedrooms >= 3
-                ? "This property meets the 9bhk 3-BHK floor and will be showcased publicly on the 9bhk app catalog for renting and sales."
-                : "Properties under 3 BHK cannot be showcased in the public 9bhk marketplace (9bhk strictly enforces a 3-BHK group floor). However, it will be saved in your private broker catalog and you can share its private link and calendar directly with your clients."}
+                ? "This record will be saved privately. Submit a marketplace listing for review before public sharing or bookings."
+                : "Properties under 3 BHK cannot be showcased in the public 9bhk marketplace (9bhk strictly enforces a 3-BHK group floor). However, it will be saved in your private broker catalog and public sharing requires an approved marketplace listing."}
             </p>
           </div>
 

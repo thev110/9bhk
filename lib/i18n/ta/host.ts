@@ -30,14 +30,12 @@ export const taHost = {
   "host.yourProperties": "உங்கள் சொத்துகள்",
 
   // ── Host dashboard stats ───────────────────────────────────────────────
-  "host.statAcrossFarmhouses": "3 ஃபார்ம்ஹவுஸ்களில்",
   "host.statLast30": "கடந்த 30 நாட்கள்",
-  "host.statNextCheckin": "அடுத்த செல்லுவது 3 நாட்களில்",
   "host.statOccupancy": "ஆக்கிரமிப்பு",
   "host.statThisMonth": "இந்த மாதம்",
   "host.statUpcoming": "வரவிருக்கும் தங்குமைகள்",
+  "host.noBookingsYet": "இன்னும் முன்பதிவுகள் இல்லை",
   "host.statViews": "காட்சிகள்",
-  "host.statViewsDelta": "கடந்த மாதத்துடன் ஒப்பிட +18%",
 
   // ── Listing wizard — progress chrome ───────────────────────────────────
   "host.backToHosting": "ஹோஸ்டிங்கிற்குத் திரும்பு",
@@ -189,18 +187,13 @@ export const taHost = {
   "host.breakdown": "விவரவுச்சி",
   "host.cleaningFeesCollected": "சுத்திகரைக் கட்டணங்கள் வசூர்க்கப்பட்டன",
   "host.downloadStatement": "கூற்றுப் பதிவைப் பதிவிறக்கு",
-  "host.earningsDisclaimer": "தொகைகள் உங்கள் கட்டண வழங்கியிடமிருந்து வருகின்றன — இது புரோடைஃப் டேட்டாவின் வடிவத்தை மட்டுமே காட்டுகிறது, உண்மையான கணக்கீடு அல்ல.",
-  "host.earningsSummary": "3 ஃபார்ம்ஹவுஸ்களில் · 14 இரவுகள் முன்பதிவு · ▲ 18%",
   "host.grossBookings": "மொத்த முன்பதிவுகள்",
-  "host.lastPayout": "கடைசி வருவாய் 28 ஜூன் 2026",
   "host.netEarnings": "நிகர வருவாய்",
   "host.netEarningsPeriod": "நிகர வருவாய் · ஜூன் 2026",
   "host.paidOut": "செலுத்தப்பட்டது",
   "host.payoutAccount": "வருவாய் கணக்கு",
-  "host.payoutArrives": "5 ஜூலை 2026 அன்று வரும்",
   "host.payouts": "வருவாய்கள்",
   "host.pendingPayout": "நிலுவையிலுள்ள வருவாய்",
-  "host.platformFees": "தளக் கட்டணங்கள் (10%)",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "host.toastStayConfirmed": "தங்குமை உறுதிப்படுத்தப்பட்டது. விருந்தினர் அறிவிப்புகளில் பார்க்கலாம்.",
@@ -214,7 +207,7 @@ export const taHost = {
   "host.errDocTooLarge": "அந்தக் கோப்பு மிகப் பெரியது",
   "host.errDocType": "அந்தக் கோப்பு வகை ஆதரிக்கப்படவில்லை",
   "host.documentsTitle": "ஆவணங்கள்",
-  "host.documentsBody": "இந்தப் பட்டியலைச் சரிபார்க்க ஒரு பரிசோதகர் தேவையான ஆவணங்களைப் பதிவேற்றுங்கள்.",
+  "host.documentsBody": "இந்தப் பட்டியலை ஊழியர்கள் மதிப்பாய்வு செய்யத் தேவையான ஆவணங்களைப் பதிவேற்றுங்கள்.",
   "host.docNone": "கோப்பு தேர்ந்தெடுக்கப்படவில்லை",
   "host.docReplace": "கோப்பை மாற்று",
   "host.docUpload": "கோப்பைத் தேர்ந்தெடு",

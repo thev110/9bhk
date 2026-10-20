@@ -34,14 +34,12 @@ export const hostKeys = {
   "host.yourProperties": "Your properties",
 
   // ── Host dashboard stats ───────────────────────────────────────────────
-  "host.statAcrossFarmhouses": "across 3 farmhouses",
   "host.statLast30": "last 30 days",
-  "host.statNextCheckin": "next check-in in 3 days",
   "host.statOccupancy": "Occupancy",
   "host.statThisMonth": "This month",
   "host.statUpcoming": "Upcoming stays",
+  "host.noBookingsYet": "No bookings yet",
   "host.statViews": "Views",
-  "host.statViewsDelta": "+18% vs last month",
 
   // ── Listing wizard — progress chrome ───────────────────────────────────
   "host.backToHosting": "Back to hosting",
@@ -195,18 +193,13 @@ export const hostKeys = {
   "host.breakdown": "Breakdown",
   "host.cleaningFeesCollected": "Cleaning fees collected",
   "host.downloadStatement": "Download statement",
-  "host.earningsDisclaimer": "Amounts come from your payment provider — the prototype shows the shape of the data, not real accounting.",
-  "host.earningsSummary": "Across 3 farmhouses · 14 nights booked · ▲ 18%",
   "host.grossBookings": "Gross bookings",
-  "host.lastPayout": "last payout 28 Jun 2026",
   "host.netEarnings": "Net earnings",
   "host.netEarningsPeriod": "Net earnings · June 2026",
   "host.paidOut": "Paid out",
   "host.payoutAccount": "Payout account",
-  "host.payoutArrives": "arrives 5 Jul 2026",
   "host.payouts": "Payouts",
   "host.pendingPayout": "Pending payout",
-  "host.platformFees": "Platform fees (10%)",
 
   // ── Toasts ─────────────────────────────────────────────────────────────
   "host.toastStayConfirmed": "Stay confirmed. The guest can see it in notifications.",
@@ -220,7 +213,7 @@ export const hostKeys = {
   "host.errDocTooLarge": "That file is too large to upload",
   "host.errDocType": "That file type is not supported",
   "host.documentsTitle": "Documents",
-  "host.documentsBody": "Upload the documents a reviewer needs to verify this listing.",
+  "host.documentsBody": "Upload the documents staff need to review this listing.",
   "host.docNone": "No file chosen",
   "host.docReplace": "Replace file",
   "host.docUpload": "Choose file",

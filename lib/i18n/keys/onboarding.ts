@@ -20,7 +20,7 @@ export const onboardingKeys = {
   "onboarding.roleBuyer": "Group Booker or Buyer",
   "onboarding.roleBuyerBody": "Reserve whole villas and bungalows with pools, or buy one outright.",
   "onboarding.roleRealtor": "Licensed Realtor / Broker",
-  "onboarding.roleRealtorBody": "Unbranded presentation mode, private client roster, and 1.5%–2% co-broking lock.",
+  "onboarding.roleRealtorBody": "Unbranded presentation mode, private client roster, and co-broking attribution.",
   "onboarding.roleSeller": "Property Owner or Seller",
   "onboarding.roleSellerBody": "List your villa, bungalow or pool house for sale or for curated group stays.",
 
@@ -33,7 +33,7 @@ export const onboardingKeys = {
   // ── Step 2 — credentials ────────────────────────────────────────────────
   "onboarding.credentialsPill": "Profile & Mandate Credentials",
   "onboarding.titleRealtor": "Agent & Agency Registration",
-  "onboarding.titleSeller": "Property Verification Details",
+  "onboarding.titleSeller": "Property Details for Review",
   "onboarding.titleBuyer": "Personalize Your Search",
 
   // ── Common fields ───────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ export const onboardingKeys = {
   "onboarding.fieldAgency": "Agency / Firm Name",
   "onboarding.agencyPlaceholder": "e.g. Bayview Private Advisory",
   "onboarding.fieldRera": "RERA License ID / Certificate",
-  "onboarding.reraHelp": "Enables co-broking attribution and verified agent checkmark.",
+  "onboarding.reraHelp": "Enables co-broking attribution. A RERA badge appears only after staff review your registration.",
   "onboarding.fieldAcquisitionRange": "Typical Client Acquisition Range",
   "onboarding.budgetBoutique": "₹5 Cr – ₹15 Cr (Boutique hill & city homes)",
   "onboarding.budgetSupercar": "₹15 Cr – ₹35 Cr (Large villas with collector garages)",
