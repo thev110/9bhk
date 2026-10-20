@@ -115,7 +115,7 @@ export function propertyFacts(property: SeoProperty): Fact[] {
   // "Verified" only when a staff review is recorded; otherwise say so plainly.
   facts.push(
     hasStaffVerification(property)
-      ? { label: "Listing details", value: property.verification?.type ? `${VERIFIED_LABEL}: ${property.verification.type}` : VERIFIED_LABEL }
+      ? { label: "Listing details", value: property.verification?.date ? `${VERIFIED_LABEL} (staff review, ${property.verification.date})` : VERIFIED_LABEL }
       : { label: "Listing details", value: HOST_PROVIDED_LABEL },
   );
 

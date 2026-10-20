@@ -59,3 +59,11 @@ test("host-less rows and preview listings are marked as samples; hosted rows are
   assert.equal(fromRow(row({ bookable: true })).sample, false);
   assert.ok(previewCatalog().every(property => property.sample === true));
 });
+
+test("verification maps from is_verified/verified_at and never carries a reviewer id", () => {
+  const verified = fromRow(row({ is_verified: true, verified_at: "2026-10-01", verified_by: "staff-uid" }));
+  assert.deepEqual(verified.verification, { status: "verified", date: "2026-10-01" });
+  assert.equal(JSON.stringify(verified).includes("staff-uid"), false);
+  assert.deepEqual(fromRow(row({ is_verified: false, verified_at: null })).verification, { status: "unverified" });
+  assert.equal(fromRow(row()).verification, undefined);
+});

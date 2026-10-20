@@ -36,12 +36,11 @@ test("marketing copy never claims 'verified' on its own", () => {
   for (const file of files) assert.doesNotMatch(fs.readFileSync(file, "utf8"), /verif/i, file);
 });
 
-test("Verified requires a recorded staff review (status, reviewer and date)", () => {
+test("Verified requires a recorded staff review (is_verified with a date)", () => {
   assert.equal(hasStaffVerification({}), false);
   assert.equal(hasStaffVerification({ verification: { status: "unverified" } }), false);
   assert.equal(hasStaffVerification({ verification: { status: "verified" } }), false);
-  assert.equal(hasStaffVerification({ verification: { status: "verified", date: "2026-10-01" } }), false);
-  assert.equal(hasStaffVerification({ verification: { status: "verified", date: "2026-10-01", verifiedBy: "00000000-0000-0000-0000-000000000001" } }), true);
+  assert.equal(hasStaffVerification({ verification: { status: "verified", date: "2026-10-01" } }), true);
 });
 
 test("no placeholder metrics (deltas, fake counts, fake payout dates, seed ratings)", () => {

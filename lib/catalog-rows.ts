@@ -85,10 +85,10 @@ export type Row = {
   seo_description?: string | null;
   canonical_url?: string | null;
   noindex?: boolean | null;
-  verification_status?: string | null;
-  verification_type?: string | null;
-  verification_date?: string | null;
-  verified_by?: string | null;
+  /** Staff review recorded (status 'verified' with reviewer and date). The reviewer's id is not exposed. */
+  is_verified?: boolean | null;
+  /** Review date, present only when `is_verified`. */
+  verified_at?: string | null;
   /** `host_id is not null`, exposed by bhk_public_properties without the host's identity. */
   bookable?: boolean | null;
 };
@@ -115,9 +115,7 @@ export type SeoProperty = Property &
     noindex: boolean;
     verification: {
       status: "verified" | "unverified";
-      type?: string;
       date?: string;
-      verifiedBy?: string;
     };
   }>;
 
@@ -235,13 +233,11 @@ export function fromRow(row: Row): SeoProperty {
     ...(row.seo_description ? { seoDescription: row.seo_description } : {}),
     ...(row.canonical_url ? { canonical: row.canonical_url } : {}),
     ...(row.noindex != null ? { noindex: Boolean(row.noindex) } : {}),
-    ...(row.verification_status
+    ...(row.is_verified != null
       ? {
           verification: {
-            status: row.verification_status === "verified" ? ("verified" as const) : ("unverified" as const),
-            ...(row.verification_type ? { type: row.verification_type } : {}),
-            ...(row.verification_date ? { date: row.verification_date } : {}),
-            ...(row.verified_by ? { verifiedBy: row.verified_by } : {}),
+            status: row.is_verified && row.verified_at ? ("verified" as const) : ("unverified" as const),
+            ...(row.is_verified && row.verified_at ? { date: row.verified_at } : {}),
           },
         }
       : {}),
