@@ -4,7 +4,7 @@ Prepared: 13 October 2026. Execution resumed: 20 October 2026. Status audited: 2
 
 ## Phase status at the current worktree
 
-The plan contains **14 phases (0–13), not 12**. **0 of 14 phases meet their stated completion criteria.** Code has been written toward phases 0–12; phase 13 has no release-validation evidence. This count uses each phase's **Done when** condition, not the presence of a migration, helper or API route. The latest combined changes are local and uncommitted; no staging migrations or provider transactions were run.
+The plan contains **14 phases (0–13), not 12**. **0 of 14 phases have documented evidence meeting their stated completion criteria.** Code has been written toward phases 0–12; phase 13 has no release-validation evidence. This count uses each phase's **Done when** condition, not the presence of a migration, helper or API route. The latest combined changes were pushed to `origin/codex/audit-fixes` as `4ffafa3`; they are not merged to `main`. No staging migrations or provider transactions were run as part of this work.
 
 | Phase | Current state | Main gap before it can be called complete |
 |---|---|---|
@@ -41,7 +41,7 @@ The authoritative scope checklist is [the expansion requirements](.planning/feat
 
 ## 2. Starting point
 
-Read [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) before execution. The current worktree is on `codex/audit-fixes`; baseline repairs are committed and feature expansion is local and uncommitted. Existing foundations include:
+Read [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) before execution. The current worktree is on `codex/audit-fixes`; baseline repairs and feature expansion are committed on that branch. Existing foundations include:
 
 - Supabase authentication, account hydration and access controls.
 - Server-priced reservation holds, captured-payment reconciliation and split funding.

@@ -83,4 +83,5 @@ Completed local checks on 13 October 2026:
 - The independent review child failed due to the account usage limit. It did not
   produce a final review sign-off. No replacement reviewer was started.
 
-Changes are local and uncommitted. Main and production have not been updated.
+Historical note: these baseline changes were later committed on `codex/audit-fixes`.
+The expanded branch was pushed to GitHub; `main` and production have not received it.

@@ -17,7 +17,7 @@ run npm run validate. The tests execute local PostgreSQL migrations with modeled
 Supabase roles; they never use live payment credentials.
 
 Read IMPLEMENTATION_PROGRESS.md and PAYMENTS_SETUP.md before deployment. The
-expanded guest, broker and seller backend is local and unvalidated. Refund, host
+expanded guest, broker and seller backend is on `codex/audit-fixes` and unvalidated. Refund, host
 and service-provider payout dispatch adapters require explicit staff review and
 disabled-by-default provider configuration. A request is never displayed as a
 completed transfer merely because the dispatch API was called; no escrow is promised.

@@ -1,6 +1,6 @@
 # Feature implementation progress — 20 October 2026
 
-Branch: `codex/audit-fixes`. Baseline repairs are committed as `994c7dc`; this expansion is local and uncommitted.
+Branch: `codex/audit-fixes`. Baseline repairs are committed as `994c7dc`; this expansion was pushed as `4ffafa3`. It is not merged into `main`.
 
 The user requested implementation first, with testing afterward, and later retired the Stitch process because the existing UI is complete. The work below implements backend contracts, database permissions, persistence helpers and API routes for the planned scope. The visual baseline is accepted by the user; new feature workflows still require connection to the current pages. This is **not** a claim that all user-facing features or release acceptance criteria are complete.
 
