@@ -321,6 +321,7 @@ export function HomeSeoSections({ properties }: { properties: SeoProperty[] }) {
           </ul>
           <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid color-mix(in oklch, var(--fg) 10%, transparent)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, fontSize: 12.5 }}>
             <span className="muted">© {new Date().getFullYear()} {SITE.displayName}. All rights reserved.</span>
+            <a href="https://twelve.tools" target="_blank" rel="noopener">Featured on Twelve Tools</a>
             <CreatorAttribution variant="footer" />
           </div>
         </div>
