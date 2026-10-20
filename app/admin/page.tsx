@@ -13,7 +13,15 @@ import { useCatalog } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
 import type { DictKey } from "@/lib/i18n/en";
 
-type Row = Record<string, any>;
+type PropertyRow = { id: string; name: string; status: string; host_id: string | null; price: number; bedrooms: number; location: string | null; verification_status: string | null; image_urls: string[] | null };
+type ProfileRow = { id: string; full_name: string | null; email: string | null; phone: string | null; created_at: string; role: string | null; verified_broker: boolean | null };
+type BookingRow = { id: string; code: string; property_name: string; guest_name: string; guest_email: string | null; guest_phone: string | null; check_in: string; check_out: string; total: number; status: string; payment_status: string; refund_status: string; payment_ref: string | null };
+type StayReviewRow = { id: string; booking_id: string; property_id: string; rating: number; body: string; verified_stay: boolean; published: boolean; created_at: string };
+type TicketRow = { id: string; booking_id: string | null; subject: string; body: string; status: string; created_at: string };
+type PayoutRow = { id: string; host_id: string; amount: number; status: string; created_at: string };
+type RefundRow = { id: string; booking_id: string; amount: number; status: string; created_at: string };
+type AuditRow = { id: string; actor_id: string | null; entity_type: string; entity_id: string; action: string; created_at: string };
+type RowUpdate = Record<string, string | number | boolean | null>;
 const TABS = ["Overview", "Properties", "Reviews", "Users", "Bookings", "Verification"] as const;
 const TAB_LABELS: Record<typeof TABS[number], DictKey> = { Overview: "admin.tabOverview", Properties: "admin.tabProperties", Reviews: "admin.tabReviews", Users: "admin.tabUsers", Bookings: "admin.tabBookings", Verification: "admin.tabVerification" };
 const USAGE_EVENTS = ["property_view", "search", "filter", "wishlist", "inquiry", "booking_start", "booking_complete", "guide_view", "location_page_view"] as const;
@@ -23,20 +31,20 @@ export default function AdminPage() {
   const { reload: reloadCatalog } = useCatalog();
   const t = useT();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
-  const [properties, setProperties] = useState<Row[]>([]);
-  const [users, setUsers] = useState<Row[]>([]);
-  const [bookings, setBookings] = useState<Row[]>([]);
+  const [properties, setProperties] = useState<PropertyRow[]>([]);
+  const [users, setUsers] = useState<ProfileRow[]>([]);
+  const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [queue, setQueue] = useState<ReviewListing[]>([]);
-  const [reviews, setReviews] = useState<Row[]>([]);
-  const [tickets, setTickets] = useState<Row[]>([]);
-  const [payouts, setPayouts] = useState<Row[]>([]);
-  const [refunds, setRefunds] = useState<Row[]>([]);
-  const [audit, setAudit] = useState<Row[]>([]);
+  const [reviews, setReviews] = useState<StayReviewRow[]>([]);
+  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [payouts, setPayouts] = useState<PayoutRow[]>([]);
+  const [refunds, setRefunds] = useState<RefundRow[]>([]);
+  const [audit, setAudit] = useState<AuditRow[]>([]);
   const [usage, setUsage] = useState<Array<{ event: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [selected, setSelected] = useState<Row | null>(null);
+  const [selected, setSelected] = useState<BookingRow | null>(null);
   const [priceId, setPriceId] = useState<string | null>(null);
   const [price, setPrice] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -76,7 +84,7 @@ export default function AdminPage() {
     catch (reason) { showToast(reason instanceof Error ? reason.message : "Could not save changes."); }
     finally { setBusy(false); }
   }
-  async function updateRow(table: string, id: string, values: Row) {
+  async function updateRow(table: string, id: string, values: RowUpdate) {
     const db = browserSupabase(); if (!db) throw new Error("Services unavailable.");
     const result = await db.from(table).update(values).eq("id", id).select("id").single();
     if (result.error) throw result.error;

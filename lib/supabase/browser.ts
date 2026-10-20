@@ -51,7 +51,7 @@ export function requireSupabase(): SupabaseClient {
   return client;
 }
 
-export async function accountRequest(path: string, body: unknown = {}): Promise<any> {
+export async function accountRequest<T = unknown>(path: string, body: unknown = {}): Promise<T> {
   const token = await accessToken();
   if (!token) throw new Error("Please sign in to continue.");
   const response = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });

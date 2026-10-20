@@ -188,7 +188,7 @@ export default function ProfilePage() {
               <select
                 className="ctrl"
                 value={form.role || "buyer"}
-                onChange={(e) => setForm({ ...form, role: e.target.value as any })}
+                onChange={(e) => setForm({ ...form, role: e.target.value as NonNullable<typeof form.role> })}
               >
                 <option value="buyer">{t("role.buyerLong")}</option>
                 <option value="realtor">{t("role.realtorLong")}</option>

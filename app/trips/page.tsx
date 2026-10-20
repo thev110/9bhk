@@ -12,6 +12,12 @@ import { useT } from "@/lib/i18n";
 import { useLocale } from "@/lib/i18n/use-t";
 import { createSupportTicket, listBookingMessages, operationRequest, sendBookingMessage, submitStayReview, type BookingMessage } from "@/lib/supabase/community";
 
+/** The canonical booking row returned by /api/bookings/[code]/receipt. */
+type ReceiptBookingRow = {
+  code: string; property_name: string; guest_name: string; check_in: string; check_out: string; total: number | string;
+  quote: Booking["quote"]; payment_status: Booking["paymentStatus"]; refund_status: Booking["refundStatus"];
+};
+
 export default function TripsPage() {
   const { bookings, user, reloadAccount, showToast } = useStore();
   const { properties } = useCatalog();
@@ -82,7 +88,7 @@ function TripSheet({ booking, onClose }: { booking: Booking; onClose: () => void
       {["confirmed", "completed"].includes(booking.status) && booking.paymentStatus === "paid" && <button className="btn outline" disabled={busy} onClick={() => perform(async () => { setArrival(await operationRequest(`/api/bookings/${encodeURIComponent(booking.code)}/arrival`)); })}>Show arrival details</button>}
       {arrival && <div className="card"><h3>Arrival details</h3><p>{arrival.address || "The host has not provided an address. Contact your host."}</p><p>Check-in: {arrival.checkInTime} · Check-out: {arrival.checkOutTime}</p>{Array.isArray(arrival.houseRules) && arrival.houseRules.map((rule, i) => <p key={i}>{rule}</p>)}</div>}
       {captured && <button className="btn outline" onClick={() => perform(async () => {
-        const canonical = await operationRequest<{ booking: Record<string, any>; payments: ReceiptPayment[] }>(`/api/bookings/${encodeURIComponent(booking.code)}/receipt`);
+        const canonical = await operationRequest<{ booking: ReceiptBookingRow; payments: ReceiptPayment[] }>(`/api/bookings/${encodeURIComponent(booking.code)}/receipt`);
         const row = canonical.booking;
         const receipt = paymentReceipt({ ...booking, code: row.code, propertyName: row.property_name, guestName: row.guest_name,
           checkIn: row.check_in, checkOut: row.check_out, total: Number(row.total), quote: row.quote,

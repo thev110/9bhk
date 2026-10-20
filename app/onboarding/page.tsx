@@ -293,7 +293,7 @@ export default function OnboardingPage() {
                     <select
                       className="ctrl"
                       value={buyerIntent}
-                      onChange={(e) => setBuyerIntent(e.target.value as any)}
+                      onChange={(e) => setBuyerIntent(e.target.value as "buy" | "rent" | "both")}
                     >
                       <option value="both">{t("onboarding.intentBoth")}</option>
                       <option value="buy">{t("onboarding.intentBuy")}</option>

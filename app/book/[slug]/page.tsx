@@ -198,7 +198,7 @@ export default function BookPage() {
     if (!validateGuest() || !property || !checkIn || !checkOut || preparing) return;
     setPreparing(true);
     try {
-      const result = await accountRequest("/api/bookings/prepare", { propertyId: property.id, checkIn, checkOut, adults, children, guestName: name, guestEmail: email, guestPhone: phone });
+      const result = await accountRequest<NonNullable<typeof hold>>("/api/bookings/prepare", { propertyId: property.id, checkIn, checkOut, adults, children, guestName: name, guestEmail: email, guestPhone: phone });
       setHold(result); await reloadAccount();
       showToast("Dates held for 30 minutes. Review the final quote before payment.");
     } catch (error) { showToast(error instanceof Error ? error.message : "Reservation could not be held."); }

@@ -4,6 +4,8 @@ import type { Booking, User, AppNote, RealtorClient, RealtorProperty } from "@/l
 import type { Locale } from "@/lib/i18n/types";
 import { LOCALES } from "@/lib/i18n/types";
 
+type ShareRow = { id: string; booking_id: string; member_name: string; amount: number | string; paid: boolean; paid_at: string | null };
+
 export async function loadAccount() {
   const client = requireSupabase();
   const { data: auth, error } = await client.auth.getUser();
@@ -29,7 +31,7 @@ export async function loadAccount() {
     verifiedBroker: Boolean(profile.verified_broker), commissionRate: Number(profile.commission_rate),
     locale: LOCALES.includes(profile.locale) ? profile.locale as Locale : "en" };
   const bookingRows = result[1].data || [];
-  let shareRows: any[] = [];
+  let shareRows: ShareRow[] = [];
   if (bookingRows.length) {
     const shares = await client.from("bhk_split_shares").select("*").in("booking_id", bookingRows.map(b => b.id)).order("slot");
     if (shares.error) throw shares.error;
@@ -43,7 +45,7 @@ export async function loadAccount() {
     upiId: b.upi_id, paymentRef: b.payment_ref, orderId: b.order_id,
     holdExpiresAt: b.hold_expires_at, paymentStatus: b.payment_status, refundStatus: b.refund_status,
     createdAt: b.created_at, cancellationDeadline: b.cancellation_deadline, quote: b.quote,
-    split: shareRows.filter(s => s.booking_id === b.id).map(s => ({ id: s.id, name: s.member_name, amount: Number(s.amount), paid: s.paid, paidAt: s.paid_at })),
+    split: shareRows.filter(s => s.booking_id === b.id).map(s => ({ id: s.id, name: s.member_name, amount: Number(s.amount), paid: s.paid, paidAt: s.paid_at ?? undefined })),
   }));
   const notes: AppNote[] = (result[2].data || []).map(n => ({ id: n.id, title: n.title, body: n.body, href: n.href || "/trips", when: n.created_at, read: Boolean(n.read_at), readAt: n.read_at || undefined }));
   const clients: RealtorClient[] = (result[4].data || []).map(c => ({ id: c.id, name: c.name, phone: c.phone, email: c.email, budgetMinCr: Number(c.budget_min_cr), budgetMaxCr: Number(c.budget_max_cr), preferredStretch: c.preferred_stretch, garageNeed: c.garage_need, confidential: c.confidential, notes: c.notes, createdAt: c.created_at }));
