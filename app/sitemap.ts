@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getIndexableProperties } from "@/lib/server/catalog";
 import { CATEGORIES, categoryFor, inCategory } from "@/lib/seo/taxonomy";
-import { categoryLocationSummaries, publishableLocations } from "@/lib/seo/locations";
+import { categoryLocationSummaries, locationSummaries, publishableLocations } from "@/lib/seo/locations";
 import { CONTENT } from "@/lib/content/guides";
 import { absoluteUrl, PRIVATE_ROUTE_PREFIXES } from "@/lib/seo/site";
 
@@ -45,7 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   /* Core surfaces. */
   entries.push({ path: "/", changeFrequency: "daily", priority: 1 });
   entries.push({ path: "/stays", changeFrequency: "daily", priority: 0.9 });
-  entries.push({ path: "/locations", changeFrequency: "weekly", priority: 0.6 });
+  // /locations renders a noindex empty state until some destination has inventory.
+  if (locationSummaries(properties).length) entries.push({ path: "/locations", changeFrequency: "weekly", priority: 0.6 });
   entries.push({ path: "/guides", changeFrequency: "weekly", priority: 0.6 });
   entries.push({ path: "/faq", changeFrequency: "monthly", priority: 0.5 });
   entries.push({ path: "/about", changeFrequency: "monthly", priority: 0.4 });
