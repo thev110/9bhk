@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { PortalShell } from "@/components/portal-shell";
-import { PortalAuthCard } from "@/components/portal-auth-card";
 import { useStore, type RealtorClient, type RealtorProperty, isShowcaseEligible } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { BaseSheet } from "@/components/base-sheet";
@@ -14,6 +13,7 @@ import { formatInrCrores, type Property } from "@/lib/properties";
 import { RazorpayCheckout, type RazorpayPaymentSuccess } from "@/components/RazorpayCheckout";
 import { KycLockerCard } from "@/components/kyc-locker-card";
 import { RealtorTieUpDesk } from "@/components/realtor-tieup-desk";
+import { RealtorLandingPage } from "@/components/realtor-landing-page";
 
 export default function RealtorPortalPage() {
   const {
@@ -39,6 +39,7 @@ export default function RealtorPortalPage() {
   const { properties } = useCatalog();
 
   const [activeTab, setActiveTab] = useState<"catalog" | "clients" | "tieups" | "kyc">("catalog");
+  const [viewMode, setViewMode] = useState<"landing" | "workspace">("landing");
   const [realtorKycVerified, setRealtorKycVerified] = useState(false);
   const [addClientModalOpen, setAddClientModalOpen] = useState(false);
   const [addPropertyModalOpen, setAddPropertyModalOpen] = useState(false);
@@ -232,22 +233,6 @@ export default function RealtorPortalPage() {
     setPortfolioModalOpen(false);
   }
 
-  if (!ready || !sessionChecked) {
-    return (
-      <PortalShell
-        portal="realtor"
-        title={t("realtor.portalTitle")}
-        subtitle="realtor.9bhk.app · Loading Broker Session"
-        navItems={[]}
-        activeNav="catalog"
-      >
-        <div className="pad center mt" style={{ padding: "80px 20px", textAlign: "center" }}>
-          <p className="muted">Verifying broker credentials...</p>
-        </div>
-      </PortalShell>
-    );
-  }
-
   const realtorNavItems = [
     {
       id: "catalog",
@@ -276,89 +261,28 @@ export default function RealtorPortalPage() {
       badge: realtorKycVerified ? "OK" : "Req",
       onClick: () => setActiveTab("kyc"),
     },
+    {
+      id: "landing",
+      label: "Realtor Landing",
+      icon: "globe",
+      onClick: () => setViewMode("landing"),
+    },
   ];
 
-  if (!user) {
+  if (!ready || !sessionChecked || !user || viewMode === "landing") {
     return (
-      <PortalShell
-        portal="realtor"
-        title="RERA Realtor & Co-Broking Terminal"
-        subtitle="Dedicated B2B brokerage platform for 3+ BHK villas, farmhouses, and coastal estates across ECR, OMR & South India."
-        navItems={[]}
-        activeNav="catalog"
-        statusBadge={<span className="pill forest">B2B Broker Network</span>}
-      >
-        <div className="portal-hero-grid">
-          <div className="stack" style={{ gap: 16 }}>
-            <div className="card stack" style={{ padding: 24 }}>
-              <div className="row wrap" style={{ gap: 8 }}>
-                <span className="pill forest">realtor.9bhk.app</span>
-                <span className="pill">RERA + PAN Verified Brokers Only</span>
-                <span className="pill">Basis-Point (bps) Split Ledger</span>
-              </div>
-              <h2
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 30,
-                  fontWeight: 600,
-                  lineHeight: 1.15,
-                  margin: "6px 0 4px",
-                  letterSpacing: "-.02em",
-                }}
-              >
-                Close 3+ BHK Coastal &amp; Estate Mandates With Verified Co-Brokers
-              </h2>
-              <p className="muted" style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
-                Built exclusively for licensed real estate advisors, wealth managers, and channel partners. Manage high-net-worth buyer mandates, share white-label 3+ BHK digital catalogs, and execute transparent Realtor-to-Realtor tie-ups.
-              </p>
-
-              <div className="portal-feature-grid" style={{ marginTop: 10 }}>
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="estate" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>3+ BHK Showcase Catalog</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Onboard your own 3+ BHK villas &amp; farmhouses or present 9bhk&apos;s verified inventory in Client Presentation Mode.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="handshake" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Realtor-to-Realtor Tie-Ups</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Propose and lock co-broking splits in integer basis points (e.g., 200 bps) with full lead-sovereignty protection.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="users" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Client Mandate CRM</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Register UHNW buyer requirements, supercar garage needs, and schedule accompanied private walkthroughs.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="badge-check" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Mandatory RERA KYC Locker</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Every realtor account is verified via State RERA Certificate, Broker PAN, and Agency GST/Letterhead proof.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <PortalAuthCard portal="realtor" defaultNext="/realtor" />
-        </div>
-      </PortalShell>
+      <RealtorLandingPage
+        signedInUser={ready && sessionChecked ? user : null}
+        onEnterWorkspace={() => setViewMode("workspace")}
+        onSignOut={async () => {
+          try {
+            await signOut();
+            showToast(t("toast.signedOut"));
+          } catch (e) {
+            showToast(e instanceof Error ? e.message : "Could not sign out.");
+          }
+        }}
+      />
     );
   }
 
@@ -392,6 +316,13 @@ export default function RealtorPortalPage() {
       }
       headerActions={
         <div className="row wrap" style={{ gap: 8 }}>
+          <button
+            className="btn sm outline"
+            type="button"
+            onClick={() => setViewMode("landing")}
+          >
+            ← Realtor Landing Page
+          </button>
           <button
             className="btn sm outline"
             type="button"

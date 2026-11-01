@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icon";
 import { PortalShell } from "@/components/portal-shell";
-import { PortalAuthCard } from "@/components/portal-auth-card";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { inr } from "@/lib/format";
 import { loadHostBookings, loadHostProperties, type HostProperty } from "@/lib/supabase/properties";
 import { KycLockerCard } from "@/components/kyc-locker-card";
 import { OwnerOperationsDesk } from "@/components/owner-operations-desk";
+import { OwnersLandingPage } from "@/components/owners-landing-page";
 
 export default function HostPage() {
   const { draft, user, updateUser, signOut, showToast } = useStore();
@@ -24,6 +24,7 @@ export default function HostPage() {
   const [saving, setSaving] = useState(false);
   const [sellerKycVerified, setSellerKycVerified] = useState(false);
   const [activeSection, setActiveSection] = useState<"estates" | "vault" | "kyc">("estates");
+  const [viewMode, setViewMode] = useState<"landing" | "workspace">("landing");
 
   useEffect(() => {
     if (user?.upiId && !upi) {
@@ -108,89 +109,28 @@ export default function HostPage() {
       badge: sellerKycVerified ? "OK" : "Req",
       onClick: () => setActiveSection("kyc"),
     },
+    {
+      id: "landing",
+      label: "Owners Landing",
+      icon: "globe",
+      onClick: () => setViewMode("landing"),
+    },
   ];
 
-  if (!user) {
+  if (!user || viewMode === "landing") {
     return (
-      <PortalShell
-        portal="owners"
-        title="9bhk Property Owners & Estate Sellers Vault"
-        subtitle="Dedicated portal for owners of 3+ BHK villas, farmhouses, and coastal estates to host stays, manage legal vaults, and accept acquisition offers."
-        navItems={[]}
-        activeNav="estates"
-        statusBadge={<span className="pill forest">3+ BHK Whole-Property Owners</span>}
-      >
-        <div className="portal-hero-grid">
-          <div className="stack" style={{ gap: 16 }}>
-            <div className="card stack" style={{ padding: 24 }}>
-              <div className="row wrap" style={{ gap: 8 }}>
-                <span className="pill forest">owners.9bhk.app</span>
-                <span className="pill">Title Deed &amp; EC Verified</span>
-                <span className="pill">Stays + Freehold Sale</span>
-              </div>
-              <h2
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 30,
-                  fontWeight: 600,
-                  lineHeight: 1.15,
-                  margin: "6px 0 4px",
-                  letterSpacing: "-.02em",
-                }}
-              >
-                Monetize &amp; Sell Your 3+ BHK Estate With Complete Privacy
-              </h2>
-              <p className="muted" style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
-                Whether you own an ECR beachfront villa, an OMR pool bungalow, or a hillside coffee estate, `owners.9bhk.app` gives you one intuitive command desk for high-value group stays, RERA broker mandates, and formal acquisition offers.
-              </p>
-
-              <div className="portal-feature-grid" style={{ marginTop: 10 }}>
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="estate" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>List 3+ BHK Stays or Sale</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Publish your whole-property villa (minimum 3 bedrooms) for private group stays, freehold acquisition, or Trial-Stay-to-Buy.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="vault" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Watermarked Legal Document Vault</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Store Mother Deeds, Patta/Chitta, EC, and FMB sketches in a watermarked vault accessible only to KYC-verified buyers you approve.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="gavel" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Formal Offers &amp; Broker Mandates</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Review Proof-of-Funds backed acquisition offers and approve RERA realtor mandates with transparent basis-point splits.
-                  </p>
-                </div>
-
-                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Icon name="calendar" style={{ width: 18, height: 18, color: "var(--primary)" }} />
-                    <strong style={{ fontSize: 13.5 }}>Direct UPI &amp; Escrow Payouts</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-                    Control blocked dates, weekend tariffs, security deposits, and instant UPI/escrow settlement tracking.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <PortalAuthCard portal="owners" defaultNext="/host" />
-        </div>
-      </PortalShell>
+      <OwnersLandingPage
+        signedInUser={user}
+        onEnterWorkspace={() => setViewMode("workspace")}
+        onSignOut={async () => {
+          try {
+            await signOut();
+            showToast(t("toast.signedOut"));
+          } catch (e) {
+            showToast(e instanceof Error ? e.message : "Could not sign out.");
+          }
+        }}
+      />
     );
   }
 
@@ -220,6 +160,13 @@ export default function HostPage() {
       }
       headerActions={
         <div className="row wrap" style={{ gap: 8 }}>
+          <button
+            className="btn sm outline"
+            type="button"
+            onClick={() => setViewMode("landing")}
+          >
+            ← Owners Landing Page
+          </button>
           <Link className="btn sm" href="/host/new">
             <Icon name="plus" /> {t("host.add")}
           </Link>
