@@ -328,15 +328,15 @@ export default function BuyPage() {
         </div>
       </section>
 
-      {/* Realtor & Broker Callout */}
+      {/* Qualified Buyer Acquisition & KYC Desk */}
       <section className="section pad">
-        <div className="card stack" style={{ marginBottom: 14 }}>
+        <div className="card stack">
           <div className="between wrap" style={{ gap: 8 }}>
             <div>
-              <span className="pill forest">Buyer Acquisition &amp; KYC Desk · owners.9bhk.app</span>
-              <h3 style={{ fontSize: 18, marginTop: 6 }}>
+              <span className="pill forest">www.9bhk.app · Verified Buyer Desk</span>
+              <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: 20, marginTop: 6 }}>
                 Qualified Buyer Proof-of-Funds KYC, Formal Offers &amp; Private Vault
-              </h3>
+              </h2>
               <p className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
                 Verify your Buyer ID &amp; Proof of Funds to submit integer-paise acquisition offers and inspect watermarked legal title deeds.
               </p>
@@ -367,28 +367,6 @@ export default function BuyPage() {
               />
             </div>
           )}
-        </div>
-        <div className="card" style={{ background: "color-mix(in oklch, var(--primary) 8%, var(--surface))", border: "1px solid var(--moss)" }}>
-          <div className="between">
-            <p className="eyebrow" style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--forest)" }}>
-              {t("cmdk.realtorPortal")}
-            </p>
-            <span className="pill forest">{t("buy.clientSovereignty")}</span>
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 26, marginTop: 6 }}>
-            {t("buy.brokerQuestion")}
-          </h2>
-          <p className="muted" style={{ fontSize: 13, marginTop: 4, lineHeight: 1.45 }}>
-            {t("buy.brokerBody")}
-          </p>
-          <div className="row mt">
-            <Link href="/realtor" className="btn sm">
-              {t("buy.openWorkspace")}
-            </Link>
-            <Link href="/host/new?mode=sale" className="btn outline sm">
-              {t("buy.listForSale")}
-            </Link>
-          </div>
         </div>
       </section>
 

@@ -290,6 +290,103 @@ export function Icon({
           <path d="M7 9h.01M7 13h.01M7 17h.01M15.5 15.5h.01M15.5 18.5h.01" />
         </svg>
       );
+    case "pencil":
+      return (
+        <svg {...common}>
+          <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg>
+      );
+    case "briefcase":
+      return (
+        <svg {...common}>
+          <rect width="20" height="14" x="2" y="7" rx="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+          <path d="M2 12h20" />
+        </svg>
+      );
+    case "handshake":
+      return (
+        <svg {...common}>
+          <path d="m11 17 2 2a1 1 0 1 0 3-3" />
+          <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" />
+          <path d="m21 3 1 11h-2" />
+          <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" />
+          <path d="M3 4h8" />
+        </svg>
+      );
+    case "estate":
+      return (
+        <svg {...common}>
+          <path d="M3 21h18" />
+          <path d="M5 21V9l7-5 7 5v12" />
+          <path d="M9 21v-6a3 3 0 0 1 6 0v6" />
+          <path d="M9 10h6" />
+        </svg>
+      );
+    case "vault":
+      return (
+        <svg {...common}>
+          <rect width="18" height="18" x="3" y="3" rx="2.5" />
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 8v2M12 14v2M8 12h2M14 12h2" />
+        </svg>
+      );
+    case "gavel":
+      return (
+        <svg {...common}>
+          <path d="m14 13-7.5 7.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L11 10" />
+          <path d="m16 16 6-6" />
+          <path d="m8 8 6-6" />
+          <path d="m9 7 8 8" />
+          <path d="m21 11-8-8" />
+        </svg>
+      );
+    case "terminal":
+      return (
+        <svg {...common}>
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" x2="20" y1="19" y2="19" />
+        </svg>
+      );
+    case "badge-check":
+      return (
+        <svg {...common}>
+          <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    case "chart":
+      return (
+        <svg {...common}>
+          <path d="M3 3v18h18" />
+          <path d="M18 17V9" />
+          <path d="M13 17V5" />
+          <path d="M8 17v-3" />
+        </svg>
+      );
+    case "log-out":
+      return (
+        <svg {...common}>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" x2="9" y1="12" y2="12" />
+        </svg>
+      );
+    case "sliders":
+      return (
+        <svg {...common}>
+          <line x1="4" x2="4" y1="21" y2="14" />
+          <line x1="4" x2="4" y1="10" y2="3" />
+          <line x1="12" x2="12" y1="21" y2="12" />
+          <line x1="12" x2="12" y1="8" y2="3" />
+          <line x1="20" x2="20" y1="21" y2="16" />
+          <line x1="20" x2="20" y1="12" y2="3" />
+          <line x1="2" x2="6" y1="14" y2="14" />
+          <line x1="10" x2="14" y1="8" y2="8" />
+          <line x1="18" x2="22" y1="16" y2="16" />
+        </svg>
+      );
     default:
       return null;
   }

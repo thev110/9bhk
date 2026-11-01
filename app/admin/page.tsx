@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PageBar, Shell } from "@/components/shell";
+import { PortalShell, type PortalNavItem } from "@/components/portal-shell";
 import { BaseSheet } from "@/components/base-sheet";
 import { useStore } from "@/lib/store";
 import { inr, formatBytes, formatRange } from "@/lib/format";
@@ -36,7 +36,7 @@ const TAB_LABELS: Record<typeof TABS[number], DictKey> = { Overview: "admin.tabO
 const USAGE_EVENTS = ["property_view", "search", "filter", "wishlist", "inquiry", "booking_start", "booking_complete", "guide_view", "location_page_view"] as const;
 
 export default function AdminPage() {
-  const { showToast } = useStore();
+  const { user, signOut, showToast } = useStore();
   const { reload: reloadCatalog } = useCatalog();
   const t = useT();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
@@ -122,16 +122,36 @@ export default function AdminPage() {
     const url = URL.createObjectURL(new Blob([rows.map(row => row.map(cell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = "9bhk-bookings.csv"; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
   }
-  return <Shell><PageBar title={t("admin.pageBarTitle")} backHref="/profile" right={<span className="pill">{t("admin.staff")}</span>} />
-    <header className="page-head"><p className="eyebrow">{t("admin.restrictedWorkspace")}</p><h1>{t("admin.operationsConsole")}</h1></header>
-    <div className="pad"><div className="seg" role="tablist">{TABS.map(name => <button key={name} role="tab" aria-selected={tab === name} onClick={() => setTab(name)}>{t(TAB_LABELS[name])}</button>)}</div></div>
-    <div className="pad mt stack"><button className="btn outline sm" disabled={loading || busy} onClick={reload}>Refresh database records</button>{loading && <p role="status">Loading operations records…</p>}{error && <p role="alert">{error}</p>}
-      {tab === "Overview" && <><div className="stats">{[["Properties", properties.length], ["Users", users.length], ["Bookings", bookings.length], ["Pending listings", queue.length]].map(([label, count]) => <div className="stat" key={label}><p className="lb">{label}</p><p className="nb">{loading || error ? "—" : count}</p></div>)}</div>
-        <div className="card"><h3>Usage in the last seven days</h3>{usage.map(row => <div className="sumline" key={row.event}><span>{row.event.replace(/_/g, " ")}</span><strong>{row.count}</strong></div>)}</div>
-        <div className="card"><h3>Payout and refund requests</h3><p className="muted">Requests are persisted for financial review. A request does not mean that a transfer or refund has been completed.</p>
-          {payouts.map(row => <p key={row.id}>Payout · {row.host_id} · {inr(row.amount)} · {row.status}</p>)}{refunds.map(row => <p key={row.id}>Refund · {row.booking_id} · {inr(row.amount)} · {row.status}</p>)}{!payouts.length && !refunds.length && <p>No financial requests.</p>}
-        </div><div className="card"><h3>Support requests</h3>{!tickets.length && <p className="muted">No requests.</p>}{tickets.map(row => <article className="mt" key={row.id}><strong>{row.subject}</strong><p>{row.body}</p><p className="tiny muted">Booking {row.booking_id}</p><label className="field">Status<select className="ctrl" value={row.status} disabled={busy} onChange={e => perform(() => updateRow("bhk_support_tickets", row.id, { status: e.target.value }), "Support status saved.")}>{["open", "in_progress", "resolved"].map(status => <option key={status}>{status}</option>)}</select></label></article>)}</div>
-        <div className="card"><h3>Audit log</h3>{!audit.length && <p className="muted">No recorded staff changes.</p>}{audit.map(row => <p className="tiny" key={row.id}>{new Date(row.created_at).toLocaleString()} · {row.action} · {row.entity_type} · {row.entity_id} · {row.actor_id || "Server"}</p>)}</div>
+  const adminNavItems: PortalNavItem[] = [
+    { id: "Overview", label: t(TAB_LABELS.Overview), icon: "chart", onClick: () => setTab("Overview") },
+    { id: "Verification", label: t(TAB_LABELS.Verification), icon: "shield", badge: queue.length + kycDocs.filter(d => d.status === "pending").length, onClick: () => setTab("Verification") },
+    { id: "Properties", label: t(TAB_LABELS.Properties), icon: "estate", badge: properties.length, onClick: () => setTab("Properties") },
+    { id: "Bookings", label: t(TAB_LABELS.Bookings), icon: "calendar", badge: bookings.length, onClick: () => setTab("Bookings") },
+    { id: "Users", label: t(TAB_LABELS.Users), icon: "users", badge: users.length, onClick: () => setTab("Users") },
+    { id: "Reviews", label: t(TAB_LABELS.Reviews), icon: "star", onClick: () => setTab("Reviews") },
+  ];
+  return <PortalShell
+    portal="admin"
+    title={t("admin.operationsConsole")}
+    subtitle={t("admin.restrictedWorkspace")}
+    navItems={adminNavItems}
+    activeNav={tab}
+    userEmail={user?.email}
+    userName={user?.name}
+    onSignOut={async () => { await signOut(); window.location.reload(); }}
+    headerActions={<button className="btn outline sm" disabled={loading || busy} onClick={reload}>Refresh records</button>}
+  >
+    <div className="seg" role="tablist">{TABS.map(name => <button key={name} role="tab" aria-selected={tab === name} onClick={() => setTab(name)}>{t(TAB_LABELS[name])}</button>)}</div>
+    <div className="stack">{loading && <p role="status">Loading operations records…</p>}{error && <p role="alert">{error}</p>}
+      {tab === "Overview" && <><div className="portal-kpi-grid">{[["Properties", properties.length], ["Users", users.length], ["Bookings", bookings.length], ["Pending listings", queue.length]].map(([label, count]) => <div className="portal-kpi-card" key={label}><p className="lb">{label}</p><p className="nb">{loading || error ? "—" : count}</p></div>)}</div>
+        <div className="portal-grid-2col">
+          <div className="card"><h3>Usage in the last seven days</h3>{usage.map(row => <div className="sumline" key={row.event}><span>{row.event.replace(/_/g, " ")}</span><strong>{row.count}</strong></div>)}</div>
+          <div className="card"><h3>Payout and refund requests</h3><p className="muted">Requests are persisted for financial review. A request does not mean that a transfer or refund has been completed.</p>
+            {payouts.map(row => <p key={row.id}>Payout · {row.host_id} · {inr(row.amount)} · {row.status}</p>)}{refunds.map(row => <p key={row.id}>Refund · {row.booking_id} · {inr(row.amount)} · {row.status}</p>)}{!payouts.length && !refunds.length && <p>No financial requests.</p>}
+          </div>
+          <div className="card"><h3>Support requests</h3>{!tickets.length && <p className="muted">No requests.</p>}{tickets.map(row => <article className="mt" key={row.id}><strong>{row.subject}</strong><p>{row.body}</p><p className="tiny muted">Booking {row.booking_id}</p><label className="field">Status<select className="ctrl" value={row.status} disabled={busy} onChange={e => perform(() => updateRow("bhk_support_tickets", row.id, { status: e.target.value }), "Support status saved.")}>{["open", "in_progress", "resolved"].map(status => <option key={status}>{status}</option>)}</select></label></article>)}</div>
+          <div className="card"><h3>Audit log</h3>{!audit.length && <p className="muted">No recorded staff changes.</p>}{audit.map(row => <p className="tiny" key={row.id}>{new Date(row.created_at).toLocaleString()} · {row.action} · {row.entity_type} · {row.entity_id} · {row.actor_id || "Server"}</p>)}</div>
+        </div>
       </>}
       {tab === "Properties" && <>{properties.map(row => <article className="card" key={row.id}><h3>{row.name}</h3><p>{row.location} · {row.bedrooms} bedrooms · {row.status}</p><p className="muted">Host: {row.host_id || "Unassigned"}</p><strong>{inr(row.price)} / night</strong><div className="row mt"><button className="btn outline sm" disabled={busy || row.status !== "published"} onClick={() => perform(() => updateRow("bhk_properties", row.id, { status: "draft" }), "Listing unpublished.")}>Unpublish</button><button className="btn ghost sm" onClick={() => { setPriceId(row.id); setPrice(String(row.price)); }}>Edit price</button></div>{priceId === row.id && <div className="row mt"><input className="ctrl" aria-label="Nightly price" type="number" min="1" value={price} onChange={e => setPrice(e.target.value)} /><button className="btn" disabled={busy} onClick={() => perform(async () => { const amount = Number(price); if (!Number.isInteger(amount) || amount <= 0) throw new Error("Enter a positive whole-rupee nightly price."); await updateRow("bhk_properties", row.id, { price: amount }); setPriceId(null); }, "Price saved.")}>Save</button></div>}</article>)}</>}
       {(tab === "Reviews" || tab === "Verification") && <>
@@ -199,5 +219,5 @@ export default function AdminPage() {
       {tab === "Bookings" && <><button className="btn outline" disabled={loading || Boolean(error)} onClick={exportBookings}>Export bookings CSV</button>{bookings.map(row => <article className="card" key={row.id}><div className="between"><span className="pill">{row.status}</span><strong>{inr(row.total)}</strong></div><h3>{row.property_name}</h3><p>{row.code} · {row.guest_name}</p><p className="muted">{formatRange(row.check_in, row.check_out)} · Payment {row.payment_status} · Refund {row.refund_status}</p><div className="row"><button className="btn outline" onClick={() => setSelected(row)}>Details</button><button className="btn outline" disabled={busy || row.payment_status !== "paid" || row.refund_status !== "none"} onClick={() => perform(async () => { await operationRequest("/api/admin/refunds", { bookingCode: row.code }); }, "Refund request saved for financial review.")}>Request refund review</button></div></article>)}</>}
     </div>
     <BaseSheet open={Boolean(selected)} onOpenChange={value => { if (!value) setSelected(null); }} title="Booking record">{selected && <div className="stack"><h3>{selected.property_name}</h3><p>{selected.code} · {selected.guest_name}</p><p>{selected.guest_email} · {selected.guest_phone}</p><p>{formatRange(selected.check_in, selected.check_out)}</p><p>Payment reference: {selected.payment_ref || "None"}</p><p>Total: {inr(selected.total)}</p><p>Payment: {selected.payment_status} · Refund: {selected.refund_status}</p></div>}</BaseSheet>
-  </Shell>;
+  </PortalShell>;
 }

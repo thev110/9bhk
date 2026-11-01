@@ -130,6 +130,80 @@ export function resolveSubdomainLandingPath(
   return null;
 }
 
+/**
+ * Enforces strict cross-portal boundary redirects on production subdomains
+ * (`www.9bhk.app`, `realtor.9bhk.app`, `owners.9bhk.app`, `admin.9bhk.app`)
+ * and local subdomain aliases (`*.localhost`), while leaving plain `localhost`
+ * / `127.0.0.1` passthrough intact for local test runners (`seo:flows`, `seo:audit`).
+ */
+export function resolveCrossPortalRedirect(
+  host: string | null | undefined,
+  pathname: string,
+): string | null {
+  const clean = stripPort(host);
+  if (!clean) return null;
+
+  const isProdGuest = clean === "www.9bhk.app" || clean === "9bhk.app";
+  const portal = resolvePortalFromHost(host);
+
+  if (isProdGuest) {
+    if (pathname === "/realtor" || pathname.startsWith("/realtor/")) {
+      return "https://realtor.9bhk.app";
+    }
+    if (pathname === "/host" || pathname.startsWith("/host/")) {
+      return pathname === "/host" ? "https://owners.9bhk.app" : `https://owners.9bhk.app${pathname}`;
+    }
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      return "https://admin.9bhk.app";
+    }
+    return null;
+  }
+
+  const isGuestAuthOrProfile =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/profile" ||
+    pathname === "/onboarding";
+
+  if (portal === "realtor") {
+    if (isGuestAuthOrProfile) {
+      return clean.endsWith(".9bhk.app") ? "https://realtor.9bhk.app/" : "/";
+    }
+    if (pathname === "/host" || pathname.startsWith("/host/")) {
+      return "https://owners.9bhk.app";
+    }
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      return "https://admin.9bhk.app";
+    }
+  }
+
+  if (portal === "owners") {
+    if (isGuestAuthOrProfile) {
+      return clean.endsWith(".9bhk.app") ? "https://owners.9bhk.app/" : "/";
+    }
+    if (pathname === "/realtor" || pathname.startsWith("/realtor/")) {
+      return "https://realtor.9bhk.app";
+    }
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      return "https://admin.9bhk.app";
+    }
+  }
+
+  if (portal === "admin") {
+    if (
+      isGuestAuthOrProfile ||
+      pathname === "/realtor" ||
+      pathname.startsWith("/realtor/") ||
+      pathname === "/host" ||
+      pathname.startsWith("/host/")
+    ) {
+      return clean.endsWith(".9bhk.app") ? "https://admin.9bhk.app/" : "/";
+    }
+  }
+
+  return null;
+}
+
 /* ── 4-Category KYC Engine Specification ─────────────────────────────────── */
 
 export const KYC_CATEGORIES = ["guest", "realtor", "seller", "buyer"] as const;

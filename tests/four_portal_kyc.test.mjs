@@ -5,6 +5,7 @@ import {
   resolvePortalFromHost,
   isCanonicalPortalHost,
   resolveSubdomainLandingPath,
+  resolveCrossPortalRedirect,
   summarizeCategoryKyc,
 } from "../lib/portal-domains.ts";
 
@@ -29,6 +30,15 @@ test("4-subdomain host routing maps www, realtor, owners, and admin hosts accura
   assert.equal(resolveSubdomainLandingPath("owners.9bhk.app", "/"), "/host");
   assert.equal(resolveSubdomainLandingPath("admin.9bhk.app", "/"), "/admin");
   assert.equal(resolveSubdomainLandingPath("realtor.9bhk.app", "/buy"), null);
+
+  assert.equal(resolveCrossPortalRedirect("www.9bhk.app", "/realtor"), "https://realtor.9bhk.app");
+  assert.equal(resolveCrossPortalRedirect("www.9bhk.app", "/host"), "https://owners.9bhk.app");
+  assert.equal(resolveCrossPortalRedirect("www.9bhk.app", "/host/new"), "https://owners.9bhk.app/host/new");
+  assert.equal(resolveCrossPortalRedirect("www.9bhk.app", "/admin"), "https://admin.9bhk.app");
+  assert.equal(resolveCrossPortalRedirect("realtor.9bhk.app", "/login"), "https://realtor.9bhk.app/");
+  assert.equal(resolveCrossPortalRedirect("owners.9bhk.app", "/profile"), "https://owners.9bhk.app/");
+  assert.equal(resolveCrossPortalRedirect("admin.9bhk.app", "/login"), "https://admin.9bhk.app/");
+  assert.equal(resolveCrossPortalRedirect("127.0.0.1:3000", "/realtor"), null);
 });
 
 test("summarizeCategoryKyc enforces all mandatory documents per portal category", () => {

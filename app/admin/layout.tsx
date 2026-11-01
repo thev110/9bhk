@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { noindexMetadata } from "@/lib/seo/metadata";
 import { isAdminEmail } from "@/lib/admin";
 import { serverUserEmail } from "@/lib/supabase/server";
+import { AdminGateScreen } from "@/components/admin-gate-screen";
 
 /**
  * `/admin` — private area. `noindex, follow`.
@@ -42,6 +42,6 @@ export const metadata: Metadata = noindexMetadata(
  */
 export default async function PrivateLayout({ children }: { children: React.ReactNode }) {
   const email = await serverUserEmail();
-  if (!isAdminEmail(email)) redirect("/profile");
+  if (!isAdminEmail(email)) return <AdminGateScreen signedInEmail={email} />;
   return children;
 }

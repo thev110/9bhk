@@ -94,110 +94,116 @@ export default function OnboardingPage() {
             </p>
 
             <div className="stack" style={{ gap: 12, marginTop: 16 }}>
-              {/* Option 1: Buyer / Investor */}
-              <div
-                className={`card ${role === "buyer" ? "active-role" : ""}`}
-                onClick={() => setRole("buyer")}
-                style={{
-                  cursor: "pointer",
-                  border: role === "buyer" ? "2px solid var(--forest)" : "1px solid var(--border)",
-                  background: role === "buyer" ? "var(--surface)" : "var(--surface-2)",
-                  padding: "16px",
-                  borderRadius: "var(--r-md)",
-                  transition: "all .18s ease",
-                }}
-              >
-                <div className="between" style={{ alignItems: "center" }}>
-                  <div className="row" style={{ gap: 10, alignItems: "center" }}>
-                    <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
-                      <Icon name="compass" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+              {/* Option 1: Buyer / Guest (shown on www.9bhk.app) */}
+              {portalSubdomain === "guest" && (
+                <div
+                  className={`card ${role === "buyer" ? "active-role" : ""}`}
+                  onClick={() => setRole("buyer")}
+                  style={{
+                    cursor: "pointer",
+                    border: role === "buyer" ? "2px solid var(--forest)" : "1px solid var(--border)",
+                    background: role === "buyer" ? "var(--surface)" : "var(--surface-2)",
+                    padding: "16px",
+                    borderRadius: "var(--r-md)",
+                    transition: "all .18s ease",
+                  }}
+                >
+                  <div className="between" style={{ alignItems: "center" }}>
+                    <div className="row" style={{ gap: 10, alignItems: "center" }}>
+                      <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
+                        <Icon name="compass" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleBuyer")}</h3>
+                        <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
+                          {t("onboarding.roleBuyerBody")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleBuyer")}</h3>
-                      <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        {t("onboarding.roleBuyerBody")}
-                      </p>
-                    </div>
+                    <input
+                      type="radio"
+                      name="userRole"
+                      checked={role === "buyer"}
+                      onChange={() => setRole("buyer")}
+                      aria-label={t("onboarding.roleBuyer")}
+                    />
                   </div>
-                  <input
-                    type="radio"
-                    name="userRole"
-                    checked={role === "buyer"}
-                    onChange={() => setRole("buyer")}
-                    aria-label={t("onboarding.roleBuyer")}
-                  />
                 </div>
-              </div>
+              )}
 
-              {/* Option 2: Licensed Realtor / Broker */}
-              <div
-                className={`card ${role === "realtor" ? "active-role" : ""}`}
-                onClick={() => setRole("realtor")}
-                style={{
-                  cursor: "pointer",
-                  border: role === "realtor" ? "2px solid var(--forest)" : "1px solid var(--border)",
-                  background: role === "realtor" ? "var(--surface)" : "var(--surface-2)",
-                  padding: "16px",
-                  borderRadius: "var(--r-md)",
-                  transition: "all .18s ease",
-                }}
-              >
-                <div className="between" style={{ alignItems: "center" }}>
-                  <div className="row" style={{ gap: 10, alignItems: "center" }}>
-                    <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
-                      <Icon name="key" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+              {/* Option 2: Licensed Realtor / Broker (shown ONLY on realtor.9bhk.app) */}
+              {portalSubdomain === "realtor" && (
+                <div
+                  className={`card ${role === "realtor" ? "active-role" : ""}`}
+                  onClick={() => setRole("realtor")}
+                  style={{
+                    cursor: "pointer",
+                    border: role === "realtor" ? "2px solid var(--forest)" : "1px solid var(--border)",
+                    background: role === "realtor" ? "var(--surface)" : "var(--surface-2)",
+                    padding: "16px",
+                    borderRadius: "var(--r-md)",
+                    transition: "all .18s ease",
+                  }}
+                >
+                  <div className="between" style={{ alignItems: "center" }}>
+                    <div className="row" style={{ gap: 10, alignItems: "center" }}>
+                      <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
+                        <Icon name="briefcase" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleRealtor")}</h3>
+                        <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
+                          {t("onboarding.roleRealtorBody")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleRealtor")}</h3>
-                      <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        {t("onboarding.roleRealtorBody")}
-                      </p>
-                    </div>
+                    <input
+                      type="radio"
+                      name="userRole"
+                      checked={role === "realtor"}
+                      onChange={() => setRole("realtor")}
+                      aria-label={t("onboarding.roleRealtor")}
+                    />
                   </div>
-                  <input
-                    type="radio"
-                    name="userRole"
-                    checked={role === "realtor"}
-                    onChange={() => setRole("realtor")}
-                    aria-label={t("onboarding.roleRealtor")}
-                  />
                 </div>
-              </div>
+              )}
 
-              {/* Option 3: Beachfront Estate Owner / Seller */}
-              <div
-                className={`card ${role === "seller" ? "active-role" : ""}`}
-                onClick={() => setRole("seller")}
-                style={{
-                  cursor: "pointer",
-                  border: role === "seller" ? "2px solid var(--forest)" : "1px solid var(--border)",
-                  background: role === "seller" ? "var(--surface)" : "var(--surface-2)",
-                  padding: "16px",
-                  borderRadius: "var(--r-md)",
-                  transition: "all .18s ease",
-                }}
-              >
-                <div className="between" style={{ alignItems: "center" }}>
-                  <div className="row" style={{ gap: 10, alignItems: "center" }}>
-                    <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
-                      <Icon name="home" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+              {/* Option 3: Estate Owner / Seller (shown ONLY on owners.9bhk.app) */}
+              {portalSubdomain === "owners" && (
+                <div
+                  className={`card ${role === "seller" ? "active-role" : ""}`}
+                  onClick={() => setRole("seller")}
+                  style={{
+                    cursor: "pointer",
+                    border: role === "seller" ? "2px solid var(--forest)" : "1px solid var(--border)",
+                    background: role === "seller" ? "var(--surface)" : "var(--surface-2)",
+                    padding: "16px",
+                    borderRadius: "var(--r-md)",
+                    transition: "all .18s ease",
+                  }}
+                >
+                  <div className="between" style={{ alignItems: "center" }}>
+                    <div className="row" style={{ gap: 10, alignItems: "center" }}>
+                      <div style={{ padding: 8, borderRadius: "50%", background: "var(--surface-3)" }}>
+                        <Icon name="estate" style={{ width: 18, height: 18, color: "var(--forest)" }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleSeller")}</h3>
+                        <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
+                          {t("onboarding.roleSellerBody")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ fontSize: 16, margin: 0, fontWeight: 700 }}>{t("onboarding.roleSeller")}</h3>
-                      <p className="muted" style={{ fontSize: 12.5, margin: "2px 0 0" }}>
-                        {t("onboarding.roleSellerBody")}
-                      </p>
-                    </div>
+                    <input
+                      type="radio"
+                      name="userRole"
+                      checked={role === "seller"}
+                      onChange={() => setRole("seller")}
+                      aria-label={t("onboarding.roleSeller")}
+                    />
                   </div>
-                  <input
-                    type="radio"
-                    name="userRole"
-                    checked={role === "seller"}
-                    onChange={() => setRole("seller")}
-                    aria-label={t("onboarding.roleSeller")}
-                  />
                 </div>
-              </div>
+              )}
             </div>
 
             <button

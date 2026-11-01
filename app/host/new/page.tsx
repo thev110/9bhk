@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageBar, Shell } from "@/components/shell";
+import { PortalShell } from "@/components/portal-shell";
 import { Icon } from "@/components/icon";
 import { CITIES, formatBytes, inr } from "@/lib/format";
 import { MIN_BEDROOMS, SETTINGS, formatInrCrores, type Setting } from "@/lib/properties";
@@ -200,39 +200,48 @@ export default function ListingWizard() {
     }
   }
 
+  const ownerNavItems = [
+    { id: "estates", label: "My Estates", icon: "estate", href: "/host" },
+    { id: "publish", label: "Publish 3+ BHK", icon: "plus", href: "/host/new" },
+    { id: "bookings", label: "Bookings & Payouts", icon: "calendar", href: "/host/bookings" },
+  ];
+
   if (done) {
     return (
-      <Shell>
-        <PageBar title={t("host.newListing")} backHref="/host" />
-        <div className="pad mt stack">
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36 }}>{t("host.submittedTitle")}</h1>
+      <PortalShell
+        portal="owners"
+        title={t("host.submittedTitle")}
+        subtitle={t("host.newListing")}
+        navItems={ownerNavItems}
+        activeNav="publish"
+      >
+        <div className="card pad mt stack" style={{ maxWidth: 640 }}>
           <p>{t("host.savedBody", { name: form.name || t("host.untitledFarmhouse") })}</p>
           <button className="btn block" type="button" onClick={() => router.push("/host")}>
             {t("host.backToHosting")}
           </button>
         </div>
-      </Shell>
+      </PortalShell>
     );
   }
 
   const guestPays = form.price * 2 + form.cleaning;
 
   return (
-    <Shell>
-      <PageBar title={t("host.newListing")} backHref="/host" />
-      <div className="pad mt">
-        <p className="muted">
-          {t("host.sectionOf", { n: step + 1, total: 10, section: t(SECTIONS[step]) })}
-        </p>
+    <PortalShell
+      portal="owners"
+      title={t(TITLES[step])}
+      subtitle={t("host.sectionOf", { n: step + 1, total: 10, section: t(SECTIONS[step]) })}
+      navItems={ownerNavItems}
+      activeNav="publish"
+    >
+      <div className="pad mt" style={{ maxWidth: 820 }}>
         <div className="pbar mt">
           <i style={{ width: `${((step + 1) / 10) * 100}%` }} />
         </div>
-        <h1 className="mt" style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 32 }}>
-          {t(TITLES[step])}
-        </h1>
       </div>
 
-      <div className="pad mt stack">
+      <div className="pad mt stack" style={{ maxWidth: 820 }}>
         {step === 0 ? (
           <>
             <p className="muted">{t("host.stepBasics")}</p>
@@ -696,7 +705,7 @@ export default function ListingWizard() {
           </button>
         </div>
       </div>
-    </Shell>
+    </PortalShell>
   );
 }
 

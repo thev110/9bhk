@@ -10,17 +10,22 @@ import { CITIES } from "@/lib/format";
 import { SETTINGS, SETTING_LABEL } from "@/lib/properties";
 import { useT } from "@/lib/i18n";
 import { settingLabel } from "@/lib/i18n/vibes";
+import { resolvePortalFromHost, type PortalId } from "@/lib/portal-domains";
 
 export function CommandMenu() {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  const [portal, setPortal] = useState<PortalId>("guest");
   const router = useRouter();
   const { properties } = useCatalog();
-  const { setCity, showToast } = useStore();
+  const { setCity } = useStore();
   const t = useT();
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      setPortal(resolvePortalFromHost(window.location.host));
+    }
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -83,38 +88,58 @@ export function CommandMenu() {
             </Command.Group>
 
             <Command.Group heading={t("cmdk.groupPortals")}>
-              <Command.Item value="buy marketplace properties for sale acquisition" onSelect={() => run(() => router.push("/buy"))} className="cmdk-item">
-                <Icon name="award" />
-                <span>{t("cmdk.buyMarketplace")}</span>
-              </Command.Item>
-              <Command.Item value="realtor broker portal client onboarding mandates" onSelect={() => run(() => router.push("/realtor"))} className="cmdk-item">
-                <Icon name="key" />
-                <span>{t("cmdk.realtorPortal")}</span>
-              </Command.Item>
-              <Command.Item value="home explore group stays villas" onSelect={() => run(() => router.push("/"))} className="cmdk-item">
-                <Icon name="compass" />
-                <span>{t("cmdk.exploreStays")}</span>
-              </Command.Item>
-              <Command.Item value="host list estate sell property" onSelect={() => run(() => router.push("/host/new"))} className="cmdk-item">
-                <Icon name="home" />
-                <span>{t("cmdk.listEstate")}</span>
-              </Command.Item>
-              <Command.Item value="saved wishlists" onSelect={() => run(() => router.push("/saved"))} className="cmdk-item">
-                <Icon name="heart" />
-                <span>{t("cmdk.savedSanctuaries")}</span>
-              </Command.Item>
-              <Command.Item value="trips bookings" onSelect={() => run(() => router.push("/trips"))} className="cmdk-item">
-                <Icon name="map" />
-                <span>{t("cmdk.myTrips")}</span>
-              </Command.Item>
-              <Command.Item value="profile account" onSelect={() => run(() => router.push("/profile"))} className="cmdk-item">
-                <Icon name="user" />
-                <span>{t("cmdk.profileSettings")}</span>
-              </Command.Item>
-              <Command.Item value="admin operations console" onSelect={() => run(() => router.push("/admin"))} className="cmdk-item">
-                <Icon name="shield" />
-                <span>{t("cmdk.adminConsole")}</span>
-              </Command.Item>
+              {portal === "guest" && (
+                <>
+                  <Command.Item value="home explore group stays villas" onSelect={() => run(() => router.push("/"))} className="cmdk-item">
+                    <Icon name="compass" />
+                    <span>{t("cmdk.exploreStays")}</span>
+                  </Command.Item>
+                  <Command.Item value="buy marketplace properties for sale acquisition" onSelect={() => run(() => router.push("/buy"))} className="cmdk-item">
+                    <Icon name="award" />
+                    <span>{t("cmdk.buyMarketplace")}</span>
+                  </Command.Item>
+                  <Command.Item value="saved wishlists" onSelect={() => run(() => router.push("/saved"))} className="cmdk-item">
+                    <Icon name="heart" />
+                    <span>{t("cmdk.savedSanctuaries")}</span>
+                  </Command.Item>
+                  <Command.Item value="trips bookings" onSelect={() => run(() => router.push("/trips"))} className="cmdk-item">
+                    <Icon name="map" />
+                    <span>{t("cmdk.myTrips")}</span>
+                  </Command.Item>
+                  <Command.Item value="profile account" onSelect={() => run(() => router.push("/profile"))} className="cmdk-item">
+                    <Icon name="user" />
+                    <span>{t("cmdk.profileSettings")}</span>
+                  </Command.Item>
+                </>
+              )}
+              {portal === "realtor" && (
+                <Command.Item value="realtor broker portal client onboarding mandates" onSelect={() => run(() => router.push("/realtor"))} className="cmdk-item">
+                  <Icon name="briefcase" />
+                  <span>{t("cmdk.realtorPortal")}</span>
+                </Command.Item>
+              )}
+              {portal === "owners" && (
+                <>
+                  <Command.Item value="owners dashboard estates" onSelect={() => run(() => router.push("/host"))} className="cmdk-item">
+                    <Icon name="estate" />
+                    <span>Estate Owners Dashboard</span>
+                  </Command.Item>
+                  <Command.Item value="host list estate sell property" onSelect={() => run(() => router.push("/host/new"))} className="cmdk-item">
+                    <Icon name="plus" />
+                    <span>{t("cmdk.listEstate")}</span>
+                  </Command.Item>
+                  <Command.Item value="host bookings payouts" onSelect={() => run(() => router.push("/host/bookings"))} className="cmdk-item">
+                    <Icon name="calendar" />
+                    <span>Owner Bookings &amp; Payouts</span>
+                  </Command.Item>
+                </>
+              )}
+              {portal === "admin" && (
+                <Command.Item value="admin operations console" onSelect={() => run(() => router.push("/admin"))} className="cmdk-item">
+                  <Icon name="terminal" />
+                  <span>{t("cmdk.adminConsole")}</span>
+                </Command.Item>
+              )}
             </Command.Group>
 
             <Command.Group heading={t("cmdk.groupGarage")}>

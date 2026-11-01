@@ -8,9 +8,7 @@ import { CITIES } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { isAdminEmail } from "@/lib/admin";
 import { KycLockerCard } from "@/components/kyc-locker-card";
-import { PORTAL_HOSTS } from "@/lib/portal-domains";
 
 export default function ProfilePage() {
   const { user, signOut, updateUser, bookings, saved, showToast } = useStore();
@@ -41,8 +39,7 @@ export default function ProfilePage() {
   }
 
   const upcoming = bookings.filter((b) => b.status === "confirmed" || b.status === "awaiting").length;
-  const roleLabel =
-    user.role === "realtor" ? t("role.realtor") : user.role === "seller" ? t("role.seller") : t("role.buyer");
+  const roleLabel = t("role.buyer");
 
   return (
     <Shell nav="profile">
@@ -67,9 +64,6 @@ export default function ProfilePage() {
               <span className="pill forest" style={{ fontSize: 10, textTransform: "capitalize" }}>
                 {roleLabel}
               </span>
-              {user.agencyName ? (
-                <span className="pill" style={{ fontSize: 10 }}>{user.agencyName}</span>
-              ) : null}
             </div>
           </div>
         </div>
@@ -100,41 +94,18 @@ export default function ProfilePage() {
 
         <KycLockerCard category="guest" onToast={showToast} />
 
-        <div className="card stack" style={{ padding: 14 }}>
-          <div className="between wrap">
-            <strong>4-Subdomain Portal Architecture</strong>
-            <span className="pill forest" style={{ fontSize: 10 }}>Host-Only Isolated Sessions</span>
-          </div>
-          <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-            Each 9bhk category operates on an isolated portal with dedicated mandatory KYC verification:
-          </p>
-          <div className="row wrap" style={{ gap: 8 }}>
-            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.guest.host} · Stays</span>
-            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.realtor.host} · RERA Realtors</span>
-            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.owners.host} · Owners &amp; Buyers</span>
-            {isAdminEmail(user.email) ? (
-              <span className="pill warn" style={{ fontSize: 11 }}>{PORTAL_HOSTS.admin.host} · Staff KYC Desk</span>
-            ) : null}
-          </div>
-        </div>
-
         <div className="row wrap" style={{ gap: 10 }}>
-          <Link href="/realtor" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
-            <strong>{t("profile.realtorCard")}</strong>
-            <p className="muted" style={{ fontSize: 12 }}>{t("profile.realtorCardSub")}</p>
+          <Link href="/" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
+            <strong>Explore 3+ BHK Stays</strong>
+            <p className="muted" style={{ fontSize: 12 }}>Private villas, farmhouses &amp; coastal retreats</p>
           </Link>
-          <Link href="/host/new?mode=sale" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
-            <strong>{t("profile.sellCard")}</strong>
-            <p className="muted" style={{ fontSize: 12 }}>{t("profile.sellCardSub")}</p>
+          <Link href="/buy" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>
+            <strong>Acquire 3+ BHK Estates</strong>
+            <p className="muted" style={{ fontSize: 12 }}>Verified freehold estates &amp; trial stays</p>
           </Link>
         </div>
 
         <div className="menu">
-          <Link className="mi" href="/realtor">
-            <Icon name="users" />
-            <span className="lb">{t("profile.realtorBrokerPortal")}</span>
-            <span className="meta">{t("profile.clientOnboarding")}</span>
-          </Link>
           <button className="mi" type="button" onClick={() => { setForm(user); setEditing(true); }}>
             <Icon name="user" />
             <span className="lb">{t("profile.personalDetails")}</span>
@@ -157,16 +128,6 @@ export default function ProfilePage() {
             <Icon name="award" />
             <span className="lb">{t("profile.privacyTerms")}</span>
           </Link>
-          {/* Only the allow-listed operator sees a door to the console. For
-              everyone else the row does not exist, rather than sitting there
-              and bouncing them. */}
-          {isAdminEmail(user.email) ? (
-            <Link className="mi" href="/admin">
-              <Icon name="award" />
-              <span className="lb">{t("profile.adminWorkspace")}</span>
-              <span className="meta">{t("profile.staffOnly")}</span>
-            </Link>
-          ) : null}
         </div>
 
         <button
@@ -206,40 +167,6 @@ export default function ProfilePage() {
               <input className="ctrl" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </label>
             <label className="field">
-              <span>{t("profile.fieldRole")}</span>
-              <select
-                className="ctrl"
-                value={form.role || "buyer"}
-                onChange={(e) => setForm({ ...form, role: e.target.value as NonNullable<typeof form.role> })}
-              >
-                <option value="buyer">{t("role.buyerLong")}</option>
-                <option value="realtor">{t("role.realtorLong")}</option>
-                <option value="seller">{t("role.sellerLong")}</option>
-              </select>
-            </label>
-            {form.role === "realtor" ? (
-              <>
-                <label className="field">
-                  <span>{t("profile.fieldAgency")}</span>
-                  <input
-                    className="ctrl"
-                    value={form.agencyName || ""}
-                    placeholder={t("profile.agencyPlaceholder")}
-                    onChange={(e) => setForm({ ...form, agencyName: e.target.value })}
-                  />
-                </label>
-                <label className="field">
-                  <span>{t("profile.fieldRera")}</span>
-                  <input
-                    className="ctrl"
-                    value={form.reraNumber || ""}
-                    placeholder={t("profile.reraPlaceholder")}
-                    onChange={(e) => setForm({ ...form, reraNumber: e.target.value })}
-                  />
-                </label>
-              </>
-            ) : null}
-            <label className="field">
               <span>{t("profile.fieldHomeCity")}</span>
               <select className="ctrl" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}>
                 {[...CITIES, "Bengaluru"].map((c) => (
@@ -251,7 +178,7 @@ export default function ProfilePage() {
               className="btn block"
               type="button"
               onClick={async () => {
-                try { await updateUser(form); setEditing(false); showToast(t("toast.savedChanges")); }
+                try { await updateUser({ ...form, role: "buyer" }); setEditing(false); showToast(t("toast.savedChanges")); }
                 catch (e) { showToast(e instanceof Error ? e.message : "Profile was not saved."); }
               }}
             >

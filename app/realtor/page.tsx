@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { PageBar, Shell } from "@/components/shell";
 import { Icon } from "@/components/icon";
+import { PortalShell } from "@/components/portal-shell";
+import { PortalAuthCard } from "@/components/portal-auth-card";
 import { useStore, type RealtorClient, type RealtorProperty, isShowcaseEligible } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { BaseSheet } from "@/components/base-sheet";
@@ -16,8 +16,9 @@ import { KycLockerCard } from "@/components/kyc-locker-card";
 import { RealtorTieUpDesk } from "@/components/realtor-tieup-desk";
 
 export default function RealtorPortalPage() {
-  const router = useRouter();
   const {
+    ready,
+    sessionChecked,
     clients,
     addClient,
     removeClient,
@@ -32,17 +33,10 @@ export default function RealtorPortalPage() {
     removeRealtorProperty,
     user,
     updateUser,
-    ready,
-    sessionChecked,
+    signOut,
   } = useStore();
   const t = useT();
   const { properties } = useCatalog();
-
-  // Route protection: redirect unauthenticated visitors to login with return URL
-  useEffect(() => {
-    if (!ready || !sessionChecked || user) return;
-    router.replace(`/login?next=${encodeURIComponent("/realtor")}`);
-  }, [ready, sessionChecked, user, router]);
 
   const [activeTab, setActiveTab] = useState<"catalog" | "clients" | "tieups" | "kyc">("catalog");
   const [realtorKycVerified, setRealtorKycVerified] = useState(false);
@@ -240,139 +234,189 @@ export default function RealtorPortalPage() {
 
   if (!ready || !sessionChecked) {
     return (
-      <Shell>
-        <PageBar title={t("realtor.portalTitle")} backHref="/buy" />
+      <PortalShell
+        portal="realtor"
+        title={t("realtor.portalTitle")}
+        subtitle="realtor.9bhk.app · Loading Broker Session"
+        navItems={[]}
+        activeNav="catalog"
+      >
         <div className="pad center mt" style={{ padding: "80px 20px", textAlign: "center" }}>
           <p className="muted">Verifying broker credentials...</p>
         </div>
-      </Shell>
+      </PortalShell>
     );
   }
 
+  const realtorNavItems = [
+    {
+      id: "catalog",
+      label: "3+ BHK Catalog",
+      icon: "estate",
+      badge: properties.length,
+      onClick: () => setActiveTab("catalog"),
+    },
+    {
+      id: "clients",
+      label: "CRM Clients",
+      icon: "users",
+      badge: clientList.length,
+      onClick: () => setActiveTab("clients"),
+    },
+    {
+      id: "tieups",
+      label: "Co-Broker Tie-Ups",
+      icon: "handshake",
+      onClick: () => setActiveTab("tieups"),
+    },
+    {
+      id: "kyc",
+      label: "RERA KYC",
+      icon: "badge-check",
+      badge: realtorKycVerified ? "OK" : "Req",
+      onClick: () => setActiveTab("kyc"),
+    },
+  ];
+
   if (!user) {
     return (
-      <Shell>
-        <PageBar title={t("realtor.portalTitle")} backHref="/buy" />
-        <div className="pad mt" style={{ maxWidth: 540, margin: "40px auto" }}>
-          <div
-            className="card"
-            style={{
-              padding: 32,
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: "50%",
-                background: "color-mix(in oklch, var(--primary) 12%, var(--surface))",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--primary)",
-              }}
-            >
-              <Icon name="shield" style={{ width: 30, height: 30 }} />
-            </div>
-            <div>
-              <span className="pill warn">Authentication Required</span>
-              <h2 style={{ fontSize: 24, marginTop: 12, marginBottom: 8 }}>
-                Broker &amp; Distributor Workspace
-              </h2>
-              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5, margin: "0 auto", maxWidth: 440 }}>
-                This workspace is exclusive to certified real estate agents, brokers, and wealth advisors. Please sign in or create an account to access client mandate tracking, your digital catalog, and presentation mode.
-              </p>
-            </div>
-            <div className="stack" style={{ width: "100%", gap: 10, marginTop: 12 }}>
-              <Link className="btn accent block" href="/login?next=/realtor">
-                {t("auth.signIn")}
-              </Link>
-              <Link className="btn outline block" href="/signup?next=/realtor">
-                {t("auth.createAccount")}
-              </Link>
-              <Link
-                className="btn ghost sm"
-                href="/onboarding"
-                style={{ fontSize: 12, color: "var(--moss)", marginTop: 4 }}
+      <PortalShell
+        portal="realtor"
+        title="RERA Realtor & Co-Broking Terminal"
+        subtitle="Dedicated B2B brokerage platform for 3+ BHK villas, farmhouses, and coastal estates across ECR, OMR & South India."
+        navItems={[]}
+        activeNav="catalog"
+        statusBadge={<span className="pill forest">B2B Broker Network</span>}
+      >
+        <div className="portal-hero-grid">
+          <div className="stack" style={{ gap: 16 }}>
+            <div className="card stack" style={{ padding: 24 }}>
+              <div className="row wrap" style={{ gap: 8 }}>
+                <span className="pill forest">realtor.9bhk.app</span>
+                <span className="pill">RERA + PAN Verified Brokers Only</span>
+                <span className="pill">Basis-Point (bps) Split Ledger</span>
+              </div>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: 30,
+                  fontWeight: 600,
+                  lineHeight: 1.15,
+                  margin: "6px 0 4px",
+                  letterSpacing: "-.02em",
+                }}
               >
-                New to 9bhk? Onboard as a Certified Broker →
-              </Link>
+                Close 3+ BHK Coastal &amp; Estate Mandates With Verified Co-Brokers
+              </h2>
+              <p className="muted" style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
+                Built exclusively for licensed real estate advisors, wealth managers, and channel partners. Manage high-net-worth buyer mandates, share white-label 3+ BHK digital catalogs, and execute transparent Realtor-to-Realtor tie-ups.
+              </p>
+
+              <div className="portal-feature-grid" style={{ marginTop: 10 }}>
+                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Icon name="estate" style={{ width: 18, height: 18, color: "var(--primary)" }} />
+                    <strong style={{ fontSize: 13.5 }}>3+ BHK Showcase Catalog</strong>
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+                    Onboard your own 3+ BHK villas &amp; farmhouses or present 9bhk&apos;s verified inventory in Client Presentation Mode.
+                  </p>
+                </div>
+
+                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Icon name="handshake" style={{ width: 18, height: 18, color: "var(--primary)" }} />
+                    <strong style={{ fontSize: 13.5 }}>Realtor-to-Realtor Tie-Ups</strong>
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+                    Propose and lock co-broking splits in integer basis points (e.g., 200 bps) with full lead-sovereignty protection.
+                  </p>
+                </div>
+
+                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Icon name="users" style={{ width: 18, height: 18, color: "var(--primary)" }} />
+                    <strong style={{ fontSize: 13.5 }}>Client Mandate CRM</strong>
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+                    Register UHNW buyer requirements, supercar garage needs, and schedule accompanied private walkthroughs.
+                  </p>
+                </div>
+
+                <div className="card" style={{ padding: 14, background: "var(--surface-2)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Icon name="badge-check" style={{ width: 18, height: 18, color: "var(--primary)" }} />
+                    <strong style={{ fontSize: 13.5 }}>Mandatory RERA KYC Locker</strong>
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+                    Every realtor account is verified via State RERA Certificate, Broker PAN, and Agency GST/Letterhead proof.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+
+          <PortalAuthCard portal="realtor" defaultNext="/realtor" />
         </div>
-      </Shell>
+      </PortalShell>
     );
   }
 
   return (
-    <Shell>
-      <PageBar
-        title={t("realtor.portalTitle")}
-        backHref="/buy"
-        right={
-          <div className="row" style={{ gap: 8 }}>
-            <Link className="btn sm ghost" href="/profile" title="View Profile">
-              <Icon name="user" /> {user.name ? user.name.split(" ")[0] : "Profile"}
-            </Link>
-            <button
-              className={`btn sm ${presentationMode ? "accent" : "outline"}`}
-              type="button"
-              onClick={() => {
-                const next = !presentationMode;
-                setPresentationMode(next);
-                showToast(next ? t("realtor.toastPresentationOn") : t("realtor.toastPresentationOff"));
-              }}
-            >
-              {presentationMode ? t("realtor.presentationActive") : t("realtor.presentationMode")}
-            </button>
-          </div>
+    <PortalShell
+      portal="realtor"
+      title="Broker & Distributor Workspace"
+      subtitle={
+        agencyName
+          ? `${agencyName}${reraNumber ? ` · RERA: ${reraNumber}` : ""} · ${user.name}`
+          : `Signed in as ${user.name || user.email} · Configure your Agency & RERA profile`
+      }
+      navItems={realtorNavItems}
+      activeNav={activeTab}
+      userEmail={user.email}
+      userName={user.name}
+      onSignOut={async () => {
+        try {
+          await signOut();
+          showToast(t("toast.signedOut"));
+        } catch (e) {
+          showToast(e instanceof Error ? e.message : "Could not sign out.");
         }
-      />
-
-      {/* Header Banner */}
-      <header className="page-head">
-        <div className="between" style={{ alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
-          <div>
-            <p className="eyebrow">{t("realtor.workspaceEyebrow")}</p>
-            <h1 style={{ fontSize: 30, marginTop: 4 }}>Broker &amp; Distributor Workspace</h1>
-            <p className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
-              {agencyName ? (
-                <>
-                  <strong>{agencyName}</strong>
-                  {reraNumber ? t("realtor.agencyRera", { rera: reraNumber }) : ""}
-                  <span style={{ marginLeft: 8, opacity: 0.8 }}>· {user.name} ({user.email})</span>
-                </>
-              ) : (
-                <>
-                  <span>Signed in as <strong>{user.name}</strong> ({user.email}) · </span>
-                  <span style={{ fontStyle: "italic" }}>
-                    Agency details not configured · Tap &ldquo;Edit Profile&rdquo; to add your agency &amp; RERA number.
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
-          <div className="row" style={{ gap: 8 }}>
-            {user.verifiedBroker ? <span className="pill ok">{t("realtor.reraVerified")}</span> : reraNumber ? <span className="pill">Verification pending</span> : null}
-            <button
-              className="btn sm outline"
-              type="button"
-              onClick={() => {
-                setTempAgencyName(agencyName);
-                setTempReraNumber(reraNumber);
-                setEditProfileModalOpen(true);
-              }}
-            >
-              <Icon name="pencil" /> Edit Profile
-            </button>
-          </div>
+      }}
+      statusBadge={
+        user.verifiedBroker || realtorKycVerified ? (
+          <span className="pill ok">{t("realtor.reraVerified")}</span>
+        ) : (
+          <span className="pill warn">RERA KYC Required</span>
+        )
+      }
+      headerActions={
+        <div className="row wrap" style={{ gap: 8 }}>
+          <button
+            className="btn sm outline"
+            type="button"
+            onClick={() => {
+              setTempAgencyName(agencyName);
+              setTempReraNumber(reraNumber);
+              setEditProfileModalOpen(true);
+            }}
+          >
+            <Icon name="pencil" /> Agency Profile
+          </button>
+          <button
+            className={`btn sm ${presentationMode ? "accent" : "outline"}`}
+            type="button"
+            onClick={() => {
+              const next = !presentationMode;
+              setPresentationMode(next);
+              showToast(next ? t("realtor.toastPresentationOn") : t("realtor.toastPresentationOff"));
+            }}
+          >
+            {presentationMode ? t("realtor.presentationActive") : t("realtor.presentationMode")}
+          </button>
         </div>
-      </header>
+      }
+    >
 
       {/* Incomplete Agency Profile Banner */}
       {!agencyName && !reraNumber ? (
@@ -1341,6 +1385,6 @@ export default function RealtorPortalPage() {
           </div>
         </form>
       </BaseSheet>
-    </Shell>
+    </PortalShell>
   );
 }

@@ -160,6 +160,63 @@ export function PageBar({
   );
 }
 
+export function GuestDesktopRail({ current }: { current: "explore" | "buy" | "saved" | "trips" | "profile" }) {
+  const t = useT();
+  const items = [
+    { id: "explore", href: "/", label: t("nav.explore"), icon: "compass" },
+    { id: "buy", href: "/buy", label: t("nav.buy"), icon: "key" },
+    { id: "saved", href: "/saved", label: t("nav.saved"), icon: "heart" },
+    { id: "trips", href: "/trips", label: t("nav.trips"), icon: "map" },
+    { id: "profile", href: "/profile", label: t("nav.profile"), icon: "user" },
+  ] as const;
+
+  return (
+    <aside className="guest-desktop-rail" aria-label="Desktop primary navigation">
+      <div>
+        <Link href="/" className="guest-rail-brand">
+          <span className="brand-mark" style={{ overflow: "hidden", padding: 0 }}>
+            <Image
+              src="/logo-mark.png"
+              width={36}
+              height={36}
+              alt=""
+              sizes="36px"
+              priority
+              quality={80}
+            />
+          </span>
+          <div>
+            <span className="brand-name" style={{ display: "block", lineHeight: 1.1 }}>9bhk.app</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: "var(--muted)", letterSpacing: ".06em", textTransform: "uppercase" }}>
+              3+ BHK Stays &amp; Estates
+            </span>
+          </div>
+        </Link>
+        <nav className="guest-rail-nav" aria-label="Guest navigation">
+          {items.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="guest-rail-link"
+              aria-current={current === item.id ? "page" : undefined}
+            >
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <div className="guest-rail-footer">
+        <div style={{ fontWeight: 800, color: "var(--fg)", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+          <Icon name="shield" style={{ width: 14, height: 14, color: "var(--primary)" }} />
+          Whole-Property Verified
+        </div>
+        Private 3+ BHK villas, farmhouses &amp; beach estates across ECR, OMR &amp; coastal corridors.
+      </div>
+    </aside>
+  );
+}
+
 export function Shell({
   children,
   nav,
@@ -172,7 +229,8 @@ export function Shell({
   const mode = nav ? "nav" : dock;
   const contentClass = mode === "nav" ? "content" : mode === "bar" ? "content has-bar" : "content no-nav";
   return (
-    <div className="app">
+    <div className={`app${nav ? " has-desktop-rail" : ""}`}>
+      {nav ? <GuestDesktopRail current={nav} /> : null}
       <main className={contentClass}>{children}</main>
       {nav ? <TabBar current={nav} /> : null}
     </div>

@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { PageBar, Shell } from "@/components/shell";
+import { PortalShell } from "@/components/portal-shell";
 import { BaseSheet } from "@/components/base-sheet";
 import { formatRange, inr } from "@/lib/format";
 import { closureDates } from "@/lib/operations";
@@ -99,9 +99,20 @@ function HostBookings() {
   }
   const rows = bookings.filter(row => tab === "Cancelled" ? row.status === "cancelled" : tab === "Past" ? row.status === "completed" : ["awaiting", "confirmed"].includes(row.status));
   const open = bookings.find(row => row.id === openId);
-  return <Shell>
-    <PageBar title={t("host.bookings")} backHref="/host" />
-    <header className="page-head"><p className="eyebrow">{t("host.workspace")}</p><h1>{t("host.manageStays")}</h1></header>
+  const ownerNavItems = [
+    { id: "estates", label: "My Estates", icon: "estate", href: "/host" },
+    { id: "publish", label: "Publish 3+ BHK", icon: "plus", href: "/host/new" },
+    { id: "bookings", label: "Bookings & Payouts", icon: "calendar", href: "/host/bookings" },
+  ];
+  return <PortalShell
+    portal="owners"
+    title={t("host.manageStays")}
+    subtitle={`${t("host.workspace")} · ${t("host.bookings")}, calendar & payout requests`}
+    navItems={ownerNavItems}
+    activeNav="bookings"
+    userEmail={user?.email}
+    userName={user?.name}
+  >
     <div className="pad"><div className="seg" role="tablist">{["Upcoming", "Past", "Cancelled", "Calendar", "Earnings"].map(item => <button key={item} role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>{item}</button>)}</div></div>
     <div className="pad mt stack">
       {loading && <p role="status">Loading your bookings…</p>}{error && <p role="alert">{error}</p>}
@@ -135,6 +146,6 @@ function HostBookings() {
         {["awaiting", "confirmed"].includes(open.status) && <button className="btn outline" disabled={busy} onClick={() => perform(async () => { const result = await operationRequest<{ refundStatus: string }>(`/api/bookings/${encodeURIComponent(open.code)}/cancel`, {}); await reload(); setOpenId(null); showToast(result.refundStatus === "requested" ? "Cancelled. Refund request saved for review." : "Booking cancelled."); })}>Cancel reservation</button>}
       </div>}
     </BaseSheet>
-  </Shell>;
+  </PortalShell>;
 }
-export default function HostBookingsPage() { return <Suspense fallback={<Shell><p>Loading bookings…</p></Shell>}><HostBookings /></Suspense>; }
+export default function HostBookingsPage() { return <Suspense fallback={<div className="pad"><p>Loading bookings…</p></div>}><HostBookings /></Suspense>; }

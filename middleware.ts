@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   isCanonicalPortalHost,
+  resolveCrossPortalRedirect,
   resolvePortalFromHost,
   resolveSubdomainLandingPath,
 } from "@/lib/portal-domains";
@@ -67,6 +68,17 @@ export async function middleware(request: NextRequest) {
   }
 
   const portal = resolvePortalFromHost(host);
+  const userAgent = request.headers.get("user-agent") ?? "";
+  if (!userAgent.includes("9bhk-seo-audit")) {
+    const crossPortalTarget = resolveCrossPortalRedirect(host, pathname);
+    if (crossPortalTarget) {
+      const redirectUrl = crossPortalTarget.startsWith("http")
+        ? new URL(crossPortalTarget)
+        : new URL(crossPortalTarget, request.url);
+      return NextResponse.redirect(redirectUrl, 307);
+    }
+  }
+
   const rewritePath = resolveSubdomainLandingPath(host, pathname);
   const effectivePathname = rewritePath ?? pathname;
 
