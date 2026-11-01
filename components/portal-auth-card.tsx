@@ -230,29 +230,42 @@ export function PortalAuthCard({
       className="info-card"
       aria-label={copy.heading}
       style={{
-        padding: 22,
-        border: "1.5px solid var(--border-strong)",
-        boxShadow: "var(--shadow-md)",
+        padding: 28,
+        borderRadius: "var(--r-lg)",
+        border: "1px solid var(--border-strong)",
+        boxShadow: "var(--shadow-lg)",
         background: "var(--surface)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-        <span className="badge badge-Verify">{copy.badge}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)" }}>Supabase Auth + KYC Gate</span>
+        <span className="badge badge-verify">{copy.badge}</span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+          }}
+        >
+          Supabase Auth · KYC Gate
+        </span>
       </div>
 
       <h2
         style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: 22,
-          fontWeight: 600,
-          margin: "10px 0 4px",
-          letterSpacing: "-.02em",
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(24px, 2.4vw, 30px)",
+          fontWeight: 400,
+          lineHeight: 1.12,
+          margin: "14px 0 8px",
+          letterSpacing: "-0.015em",
+          color: "var(--forest-deep)",
         }}
       >
         {copy.heading}
       </h2>
-      <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--muted)", lineHeight: 1.5 }}>{copy.sub}</p>
+      <p style={{ margin: "0 0 18px", fontSize: 13.5, color: "var(--text-2)", lineHeight: 1.55 }}>{copy.sub}</p>
 
       {/* Google OAuth Primary Action */}
       <button
@@ -488,7 +501,7 @@ export function PortalAuthCard({
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} noValidate>
-          <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 10, textAlign: "center" }}>
+          <div style={{ fontSize: 12.5, color: "var(--text-2)", marginBottom: 10, textAlign: "center" }}>
             Enter the 6-digit code sent to <strong>{otpTarget}</strong>
           </div>
           <div style={{ marginBottom: 14 }}>
@@ -513,11 +526,11 @@ export function PortalAuthCard({
 
       <div
         style={{
-          marginTop: 14,
-          paddingTop: 12,
+          marginTop: 16,
+          paddingTop: 14,
           borderTop: "1px solid var(--border)",
-          fontSize: 11.5,
-          color: "var(--muted)",
+          fontSize: 12,
+          color: "var(--text-2)",
           display: "flex",
           alignItems: "center",
           gap: 8,

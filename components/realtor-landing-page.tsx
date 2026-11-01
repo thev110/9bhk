@@ -1,8 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { PortalAuthCard } from "@/components/portal-auth-card";
 import { Icon } from "@/components/icon";
+import { TwelveToolsBadge } from "@/components/seo/twelve-tools-badge";
+import { CreatorAttribution } from "@/components/creator-attribution";
 
 type ShowcaseMandate = {
   id: string;
@@ -11,67 +15,139 @@ type ShowcaseMandate = {
   setting: string;
   bedrooms: number;
   bathrooms: number;
+  maxGuests: number;
   landExtent: string;
   garageSpec: string;
   reserveCr: number;
   nightlyInr: number;
   listingBrokerBps: number;
   buyerBrokerBps: number;
+  reraId: string;
   image: string;
   architecturalNote: string;
 };
 
 const ACTIVE_MANDATES: ShowcaseMandate[] = [
   {
-    id: "bay-breakers-vault",
-    title: "Bay Breakers Vault",
-    corridor: "Kovalam Kunnu, East Coast Road",
-    setting: "Direct Oceanfront · 220 ft Shoreline",
-    bedrooms: 5,
-    bathrooms: 6,
+    id: "blue-horizon-ecr",
+    title: "Blue Horizon Seafront Compound",
+    corridor: "Kovalam – East Coast Road (ECR), Chennai",
+    setting: "Beachfront · Direct Bay of Bengal Access",
+    bedrooms: 6,
+    bathrooms: 7,
+    maxGuests: 16,
     landExtent: "1.4 Acres (Patta + CRZ-III Cleared)",
-    garageSpec: "Dehumidified Collector Vault · 6 Vehicles · 22 kW EV",
+    garageSpec: "Dehumidified Collector Vault · 6 Vehicles · Dual 22 kW EV",
     reserveCr: 18.5,
     nightlyInr: 95000,
     listingBrokerBps: 100,
     buyerBrokerBps: 100,
-    image: "/assets/prop-bay-breakers.jpg",
+    reraId: "TN/29/Building/0418/2026",
+    image: "/assets/prop-blue-horizon.jpg",
     architecturalNote:
-      "Poured board-formed concrete residence with private dune access, acoustic courtyard, and zero-gradient supercar ramp.",
+      "Six-suite poured concrete coastal compound with 18-metre lap pool, acoustic courtyard, private beach gate, and zero-gradient supercar ramp.",
   },
   {
-    id: "nilgiri-glasshouse",
-    title: "The Nilgiri Glasshouse",
-    corridor: "Coonoor Ridge, Nilgiris",
-    setting: "High-Altitude Tea Estate · 6,100 ft ASL",
-    bedrooms: 4,
-    bathrooms: 5,
-    landExtent: "2.8 Acres Private Shola Reserve",
-    garageSpec: "Heated Teak Portico · 4 Vehicles · Dual 22 kW Chargers",
+    id: "palm-grove-pavilion",
+    title: "Palm Grove Estate Pavilion",
+    corridor: "Injambakkam – Panaiyur Shore, ECR",
+    setting: "Coastal Casuarina & Palm Sanctuary",
+    bedrooms: 5,
+    bathrooms: 6,
+    maxGuests: 14,
+    landExtent: "18,600 sq.ft CMDA Freehold Plot",
+    garageSpec: "Enclosed Motor Court · 5 Vehicles · Chauffeur Quarters",
     reserveCr: 14.2,
     nightlyInr: 72000,
     listingBrokerBps: 125,
     buyerBrokerBps: 100,
-    image: "/assets/prop-nilgiri-glasshouse.jpg",
+    reraId: "TN/29/Building/0512/2026",
+    image: "/assets/prop-palm-grove.jpg",
     architecturalNote:
-      "Cantilevered structural steel and double-glazed thermal pavilion overlooking Ketti valley with staff quarters.",
+      "Double-height teak and lime-plaster residence framed by mature coconut palms, private lawn pavilion, and separate service kitchen.",
   },
   {
-    id: "casuarina-ridge",
-    title: "Casuarina Ridge Pavilion",
-    corridor: "Mahabalipuram Shore, ECR",
-    setting: "Coastal Casuarina Grove · 140 ft Frontage",
-    bedrooms: 6,
-    bathrooms: 7,
-    landExtent: "1.9 Acres Walled Compound",
-    garageSpec: "Enclosed Motor Court · 8 Vehicles · Washdown Bay",
+    id: "terracotta-courtyard",
+    title: "Terracotta Courtyard Manor",
+    corridor: "Mahabalipuram Heritage Belt, ECR",
+    setting: "Walled Chettinad-Modern Acreage",
+    bedrooms: 7,
+    bathrooms: 8,
+    maxGuests: 20,
+    landExtent: "2.1 Acres Walled Compound",
+    garageSpec: "Covered Collector Portico · 8 Vehicles · Washdown Bay",
     reserveCr: 24.0,
     nightlyInr: 115000,
     listingBrokerBps: 100,
     buyerBrokerBps: 125,
-    image: "/assets/prop-casuarina-ridge.jpg",
+    reraId: "TN/29/Building/0609/2026",
+    image: "/assets/prop-terracotta-courtyard.jpg",
     architecturalNote:
-      "Six-suite whole-family compound designed for multi-generational stays, private buyouts, and corporate retreats.",
+      "Seven-bedroom whole-family estate engineered for multi-generational buyouts, Trial-Stay-to-Buy evaluations, and family-office acquisitions.",
+  },
+  {
+    id: "lakeview-courtyard",
+    title: "Lakeview Shola Sanctuary",
+    corridor: "Coonoor – Kotagiri Ridge, Nilgiris",
+    setting: "High-Altitude Tea & Lake Outlook · 6,100 ft ASL",
+    bedrooms: 4,
+    bathrooms: 5,
+    maxGuests: 10,
+    landExtent: "1.8 Acres Private Ridge Patta",
+    garageSpec: "Heated Timber Garage · 4 Vehicles · 22 kW Charger",
+    reserveCr: 11.8,
+    nightlyInr: 58000,
+    listingBrokerBps: 100,
+    buyerBrokerBps: 100,
+    reraId: "TN/11/Building/0294/2026",
+    image: "/assets/prop-lakeview-courtyard.jpg",
+    architecturalNote:
+      "Cantilevered stone and thermal-glass mountain residence with wood-burning hearths, private orchard trails, and dedicated staff cottage.",
+  },
+];
+
+const PORTFOLIO_GRID = [
+  {
+    id: "guava-house",
+    title: "The Guava Orchard Villa",
+    location: "Muttukadu Backwaters, ECR",
+    bedrooms: 4,
+    bathrooms: 5,
+    land: "12,000 sq.ft Waterfront",
+    garage: "4-Car Covered Vault · EV Ready",
+    reserveCr: "₹9.80 Cr",
+    splitBps: "100 bps + 100 bps",
+    trialStay: "₹52,000 / night buyout",
+    image: "/assets/prop-guava-house.jpg",
+    tag: "Sale + Trial Stay",
+  },
+  {
+    id: "mango-orchard",
+    title: "Mango Orchard Farmstead",
+    location: "cheyyur – Alamparai Coast",
+    bedrooms: 6,
+    bathrooms: 7,
+    land: "3.2 Acres Organic Orchard",
+    garage: "6-Car Collector Barn · Helipad Clear",
+    reserveCr: "₹16.40 Cr",
+    splitBps: "125 bps + 100 bps",
+    trialStay: "₹84,000 / night buyout",
+    image: "/assets/prop-mango-orchard.jpg",
+    tag: "Exclusive Mandate",
+  },
+  {
+    id: "coconut-grove",
+    title: "Coconut Grove Coastal Estate",
+    location: "Neelankarai Beachside, Chennai",
+    bedrooms: 5,
+    bathrooms: 6,
+    land: "14,400 sq.ft (6 Grounds)",
+    garage: "5-Car Subterranean Ramp · 22 kW EV",
+    reserveCr: "₹28.50 Cr",
+    splitBps: "100 bps + 125 bps",
+    trialStay: "₹1,10,000 / night buyout",
+    image: "/assets/prop-coconut-grove.jpg",
+    tag: "Sovereign Freehold",
   },
 ];
 
@@ -113,269 +189,199 @@ export function RealtorLandingPage({
   const totalAllocationInr = listingShareInr + buyerShareInr;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#F6F3EC",
-        color: "#171614",
-        fontFamily: "var(--font-sans), system-ui, -apple-system, sans-serif",
-      }}
-    >
-      {/* Top Architectural Registry Bar */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 40,
-          background: "rgba(246, 243, 236, 0.94)",
-          backdropFilter: "blur(12px)",
-          borderBottom: "1px solid #D8D1C2",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1380,
-            margin: "0 auto",
-            padding: "14px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 8,
-                background: "#13201C",
-                color: "#F6F3EC",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 700,
-                fontFamily: "var(--font-serif), Georgia, serif",
-                fontSize: 16,
-              }}
-            >
-              9R
-            </div>
-            <div>
-              <strong style={{ fontSize: 15, display: "block", letterSpacing: "-0.01em" }}>
-                realtor.9bhk.app
-              </strong>
-              <span style={{ fontSize: 12, color: "#4E4A43" }}>
-                RERA Co-Broking &amp; Private Estate Mandate Registry
-              </span>
-            </div>
+    <div className="seo-shell">
+      {/* Native 9bhk Header */}
+      <header className="seo-header">
+        <div className="seo-header-inner">
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <Link href="/" className="seo-brand" aria-label="9bhk home">
+              <Image
+                src="/logo-mark.png"
+                alt="9bhk"
+                width={32}
+                height={32}
+                className="seo-brand-mark"
+                priority
+              />
+              <span className="seo-brand-title">9bhk</span>
+              <span className="seo-brand-sub">realtor.9bhk.app</span>
+            </Link>
+            <span className="badge badge-verify" style={{ fontSize: 11 }}>
+              RERA Co-Broking &amp; Mandate Terminal
+            </span>
           </div>
 
-          <nav
-            aria-label="Realtor landing sections"
-            style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}
-          >
-            <a
-              href="#active-mandates"
-              style={{ fontSize: 13.5, fontWeight: 500, color: "#171614", textDecoration: "none" }}
-            >
-              Active 3+ BHK Dossiers
+          <nav className="seo-nav" aria-label="Realtor portal navigation">
+            <a href="#active-mandates" className="seo-nav-link">
+              3+ BHK Mandates
             </a>
-            <a
-              href="#bps-ledger"
-              style={{ fontSize: 13.5, fontWeight: 500, color: "#171614", textDecoration: "none" }}
-            >
-              Basis-Point Split Ledger
+            <a href="#bps-ledger" className="seo-nav-link">
+              Basis-Point Calculator
             </a>
-            <a
-              href="#protocol-schedule"
-              style={{ fontSize: 13.5, fontWeight: 500, color: "#171614", textDecoration: "none" }}
-            >
-              Co-Broking Schedule
+            <a href="#mandate-portfolio" className="seo-nav-link">
+              Sale Dossiers
             </a>
-          </nav>
+            <a href="#protocol-schedule" className="seo-nav-link">
+              Registry Rules
+            </a>
+            <Link href="/stays" className="seo-nav-link">
+              Guest Catalog
+            </Link>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {signedInUser ? (
               <>
-                <span style={{ fontSize: 12.5, color: "#4E4A43" }}>
-                  {signedInUser.email || signedInUser.name}
-                </span>
                 {onEnterWorkspace && (
-                  <button
-                    type="button"
-                    onClick={onEnterWorkspace}
-                    style={{
-                      padding: "10px 18px",
-                      borderRadius: 8,
-                      border: "1px solid #13201C",
-                      background: "#13201C",
-                      color: "#F6F3EC",
-                      fontSize: 13.5,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Open Broker Terminal
+                  <button type="button" onClick={onEnterWorkspace} className="seo-nav-cta">
+                    Open Broker Workspace ({signedInUser.name || signedInUser.email})
                   </button>
                 )}
                 {onSignOut && (
                   <button
                     type="button"
                     onClick={onSignOut}
-                    style={{
-                      padding: "9px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #C8C0B0",
-                      background: "transparent",
-                      color: "#171614",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
+                    className="btn btn-outline btn-sm"
+                    style={{ marginLeft: 4 }}
                   >
                     Sign Out
                   </button>
                 )}
               </>
             ) : (
-              <a
-                href="#broker-auth-desk"
-                style={{
-                  padding: "10px 18px",
-                  borderRadius: 8,
-                  background: "#13201C",
-                  color: "#F6F3EC",
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  textDecoration: "none",
-                }}
-              >
-                Register or Sign In
+              <a href="#broker-auth-desk" className="seo-nav-cta">
+                Register / Sign In
               </a>
             )}
-          </div>
+          </nav>
         </div>
       </header>
 
-      {/* First Viewport: Editorial Headline + Live Architectural Mandate Plate + Broker Auth Desk */}
-      <main>
+      <main className="seo-main" style={{ maxWidth: 1320 }}>
+        {/* Breadcrumb */}
+        <nav className="seo-breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li>
+              <Link href="/">9bhk.app</Link>
+            </li>
+            <li className="seo-breadcrumb-sep" aria-hidden="true">
+              /
+            </li>
+            <li aria-current="page">realtor.9bhk.app · RERA Broker &amp; Mandate Registry</li>
+          </ol>
+        </nav>
+
+        {/* Hero Grid: Left Editorial + Interactive Photo Showcase | Right Sticky Auth Desk */}
         <section
           id="active-mandates"
           style={{
-            maxWidth: 1380,
-            margin: "0 auto",
-            padding: "44px 24px 56px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 440px), 1fr))",
+            gap: 32,
+            alignItems: "start",
+            padding: "16px 0 36px",
+            borderBottom: "1px solid var(--border)",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-              gap: 36,
-              alignItems: "start",
-            }}
-          >
-            {/* Left Column: Editorial Thesis + Interactive Estate Mandate Plate */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-              <div>
-                <h1
-                  style={{
-                    fontFamily: "var(--font-serif), Georgia, serif",
-                    fontSize: "clamp(2.1rem, 3.6vw, 3.35rem)",
-                    lineHeight: 1.08,
-                    letterSpacing: "-0.025em",
-                    fontWeight: 600,
-                    margin: "0 0 16px",
-                    color: "#13201C",
-                    maxWidth: "24ch",
-                  }}
-                >
-                  Co-broker three-to-nine bedroom estates across ECR, the Nilgiris, and Chennai with registered RERA protection.
-                </h1>
-                <p
-                  style={{
-                    fontSize: 16,
-                    lineHeight: 1.65,
-                    color: "#3F3B35",
-                    maxWidth: "66ch",
-                    margin: 0,
-                  }}
-                >
-                  A standalone brokerage terminal for licensed real estate advisors, family-office representatives, and wealth managers. Present unbranded three-plus bedroom residences to your clients, lock ninety-day accompanied site-visit attribution, and settle co-broking allocations in integer basis points.
-                </p>
-
-                {signedInUser && onEnterWorkspace && (
-                  <div
-                    style={{
-                      marginTop: 20,
-                      padding: "16px 20px",
-                      background: "#E8EFEA",
-                      border: "1px solid #9BB5A6",
-                      borderRadius: 10,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 16,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div>
-                      <strong style={{ fontSize: 14, color: "#13201C", display: "block" }}>
-                        Active session detected ({signedInUser.email || signedInUser.name})
-                      </strong>
-                      <span style={{ fontSize: 13, color: "#2D473B" }}>
-                        Switch directly into your 3+ BHK Catalog, CRM Client Mandates, Co-Broker Tie-Ups, and RERA KYC Locker.
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={onEnterWorkspace}
-                      style={{
-                        padding: "11px 20px",
-                        borderRadius: 8,
-                        border: "none",
-                        background: "#13201C",
-                        color: "#F6F3EC",
-                        fontSize: 13.5,
-                        fontWeight: 600,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Launch Broker Workspace
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Interactive Architectural Mandate Dossier */}
-              <div
+          {/* Left Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+            <div>
+              <span className="seo-eyebrow">
+                RERA Co-Broking Registry · Strictly 3 to 9 BHK Whole Estates
+              </span>
+              <h1
+                className="seo-h1"
                 style={{
-                  background: "#FCFBF7",
-                  border: "1px solid #D5CEC0",
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  boxShadow: "0 14px 34px rgba(19, 32, 28, 0.07)",
+                  fontSize: "clamp(32px, 4.2vw, 52px)",
+                  maxWidth: "22ch",
+                  marginTop: 8,
                 }}
               >
-                <div
-                  style={{
-                    padding: "12px 18px",
-                    borderBottom: "1px solid #E5DFD3",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 10,
-                    flexWrap: "wrap",
-                    background: "#F2EDE2",
-                  }}
-                >
-                  <strong style={{ fontSize: 13, color: "#13201C" }}>
-                    Live 3+ BHK Co-Broking Mandate Dossier
+                Co-broker flagship villas, coastal estates, and private retreats with protected RERA splits.
+              </h1>
+              <p className="seo-lede" style={{ marginTop: 12 }}>
+                Built exclusively for RERA-registered real estate advisors, wealth managers, and family-office representatives. Share unbranded 3+ BHK client links, lock 90-day accompanied site-visit attribution, and settle co-broking allocations in transparent integer basis points (<code>bps</code>).
+              </p>
+            </div>
+
+            {signedInUser && onEnterWorkspace && (
+              <div
+                className="info-card"
+                style={{
+                  background: "var(--ok-soft)",
+                  borderColor: "var(--ok)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <strong style={{ display: "block", fontSize: 14, color: "var(--forest-deep)" }}>
+                    Signed in as {signedInUser.email || signedInUser.name}
                   </strong>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {ACTIVE_MANDATES.map((m, idx) => (
+                  <span style={{ fontSize: 12.5, color: "var(--moss)" }}>
+                    Enter your Realtor Workspace to manage 3+ BHK mandates, CRM leads, and co-broking tie-ups.
+                  </span>
+                </div>
+                <button type="button" className="btn btn-primary btn-sm" onClick={onEnterWorkspace}>
+                  Enter Broker Workspace →
+                </button>
+              </div>
+            )}
+
+            {/* 4-Cell Architectural Stat Strip */}
+            <div className="seo-stats" style={{ margin: 0 }}>
+              <div className="seo-stat">
+                <div className="seo-stat-val">3–9 BHK</div>
+                <div className="seo-stat-lbl">Whole Estates Only · Zero 1–2 BHK Noise</div>
+              </div>
+              <div className="seo-stat">
+                <div className="seo-stat-val">90 Days</div>
+                <div className="seo-stat-lbl">Cryptographic Site-Visit Lead Lock</div>
+              </div>
+              <div className="seo-stat">
+                <div className="seo-stat-val">100–250 bps</div>
+                <div className="seo-stat-lbl">Integer Basis-Point Escrow Ledgers</div>
+              </div>
+              <div className="seo-stat">
+                <div className="seo-stat-val">4–8 Cars</div>
+                <div className="seo-stat-lbl">Verified Motor Courts &amp; EV Chargers</div>
+              </div>
+            </div>
+
+            {/* Interactive Featured Mandate Photo Card */}
+            <div
+              className="p-card"
+              style={{
+                borderRadius: "var(--r-lg)",
+                border: "1px solid var(--border-strong)",
+                boxShadow: "var(--sh-md)",
+                background: "var(--surface)",
+              }}
+            >
+              {/* Switcher Header */}
+              <div
+                style={{
+                  padding: "14px 18px",
+                  borderBottom: "1px solid var(--border)",
+                  background: "var(--surface-2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Icon name="verified" style={{ width: 16, height: 16, color: "var(--forest)" }} />
+                  <strong style={{ fontSize: 12.5, letterSpacing: "0.02em", color: "var(--forest-deep)" }}>
+                    Featured 3+ BHK Co-Broking Dossier Preview
+                  </strong>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {ACTIVE_MANDATES.map((m, idx) => {
+                    const active = idx === selectedMandateIdx;
+                    return (
                       <button
                         key={m.id}
                         type="button"
@@ -383,497 +389,527 @@ export function RealtorLandingPage({
                           setSelectedMandateIdx(idx);
                           setDealValueCr(m.reserveCr);
                         }}
+                        className={active ? "chip is-on" : "chip"}
                         style={{
                           padding: "6px 12px",
-                          borderRadius: 6,
-                          border:
-                            idx === selectedMandateIdx
-                              ? "1px solid #13201C"
-                              : "1px solid #C8C0B0",
-                          background: idx === selectedMandateIdx ? "#13201C" : "#FCFBF7",
-                          color: idx === selectedMandateIdx ? "#F6F3EC" : "#171614",
-                          fontSize: 12,
-                          fontWeight: 600,
-                          cursor: "pointer",
+                          fontSize: 11.5,
+                          minHeight: 30,
                         }}
                       >
-                        {m.title}
+                        {m.bedrooms} BHK · {m.title.split(" ")[0]}
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Real Property Photograph with Overlaid Glass Pills */}
+              <div
+                style={{
+                  position: "relative",
+                  aspectRatio: "16 / 9",
+                  width: "100%",
+                  overflow: "hidden",
+                  background: "var(--forest-deep)",
+                }}
+              >
+                <Image
+                  src={activeMandate.image}
+                  alt={`${activeMandate.title} — ${activeMandate.corridor}`}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 680px"
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(180deg, rgba(16,37,30,0.32) 0%, rgba(16,37,30,0.04) 45%, rgba(16,37,30,0.82) 100%)",
+                  }}
+                />
+
+                {/* Top Overlay Badges */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    left: 14,
+                    right: 14,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span className="badge badge-setting">{activeMandate.setting}</span>
+                  <span
+                    style={{
+                      padding: "5px 11px",
+                      borderRadius: "var(--r-pill)",
+                      background: "rgba(16, 37, 30, 0.84)",
+                      color: "var(--warm-white)",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-mono)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    RERA: {activeMandate.reraId}
+                  </span>
                 </div>
 
+                {/* Bottom Overlay Title + Reserve */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 14,
+                    left: 16,
+                    right: 16,
+                    display: "flex",
+                    alignItems: "flex-end",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    flexWrap: "wrap",
+                    color: "var(--warm-white)",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "clamp(22px, 2.6vw, 30px)",
+                        fontWeight: 400,
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {activeMandate.title}
+                    </div>
+                    <div style={{ fontSize: 12.5, opacity: 0.9, marginTop: 2 }}>
+                      {activeMandate.corridor} · {activeMandate.bedrooms} Bedrooms · {activeMandate.bathrooms} Baths · Up to {activeMandate.maxGuests} Guests
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: 26,
+                        fontWeight: 400,
+                        lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      ₹{activeMandate.reserveCr.toFixed(2)} Cr
+                    </div>
+                    <div style={{ fontSize: 11, opacity: 0.85, marginTop: 3 }}>
+                      Co-Broking Pool: {activeMandate.listingBrokerBps} + {activeMandate.buyerBrokerBps} bps
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Architectural Specs Footer */}
+              <div style={{ padding: 18 }}>
+                <p style={{ margin: "0 0 14px", fontSize: 13.5, color: "var(--moss)", lineHeight: 1.55 }}>
+                  {activeMandate.architecturalNote}
+                </p>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gap: 12,
+                    paddingTop: 12,
+                    borderTop: "1px solid var(--border)",
+                    fontSize: 12.5,
                   }}
                 >
-                  <div style={{ position: "relative", minHeight: 270, background: "#13201C" }}>
-                    <img
-                      src={activeMandate.image}
-                      alt={activeMandate.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        minHeight: 270,
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: 12,
-                        left: 12,
-                        right: 12,
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        background: "rgba(19, 32, 28, 0.88)",
-                        color: "#F6F3EC",
-                        fontSize: 12,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 8,
-                      }}
-                    >
-                      <span>{activeMandate.setting}</span>
-                      <strong style={{ fontVariantNumeric: "tabular-nums" }}>
-                        {activeMandate.bedrooms} BHK
-                      </strong>
-                    </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>
+                      LAND &amp; TITLE EXTENT
+                    </span>
+                    <strong style={{ color: "var(--fg)" }}>{activeMandate.landExtent}</strong>
                   </div>
-
-                  <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div>
-                      <h2
-                        style={{
-                          fontFamily: "var(--font-serif), Georgia, serif",
-                          fontSize: 22,
-                          margin: "0 0 4px",
-                          color: "#13201C",
-                        }}
-                      >
-                        {activeMandate.title}
-                      </h2>
-                      <p style={{ fontSize: 13, color: "#4E4A43", margin: 0 }}>
-                        {activeMandate.corridor}
-                      </p>
-                    </div>
-
-                    <p style={{ fontSize: 13, lineHeight: 1.55, color: "#3F3B35", margin: 0 }}>
-                      {activeMandate.architecturalNote}
-                    </p>
-
-                    <dl
-                      style={{
-                        margin: 0,
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "10px 14px",
-                        paddingTop: 10,
-                        borderTop: "1px solid #E5DFD3",
-                        fontSize: 12.5,
-                      }}
-                    >
-                      <div>
-                        <dt style={{ color: "#4E4A43" }}>Acquisition Guide</dt>
-                        <dd
-                          style={{
-                            margin: "2px 0 0",
-                            fontWeight: 700,
-                            fontSize: 15,
-                            color: "#13201C",
-                            fontVariantNumeric: "tabular-nums",
-                          }}
-                        >
-                          ₹{activeMandate.reserveCr.toFixed(2)} Cr
-                        </dd>
-                      </div>
-                      <div>
-                        <dt style={{ color: "#4E4A43" }}>Co-Broker Allocation</dt>
-                        <dd
-                          style={{
-                            margin: "2px 0 0",
-                            fontWeight: 700,
-                            fontSize: 15,
-                            color: "#1E4D3B",
-                            fontVariantNumeric: "tabular-nums",
-                          }}
-                        >
-                          {activeMandate.listingBrokerBps} bps + {activeMandate.buyerBrokerBps} bps
-                        </dd>
-                      </div>
-                      <div>
-                        <dt style={{ color: "#4E4A43" }}>Land &amp; Title</dt>
-                        <dd style={{ margin: "2px 0 0", fontWeight: 600, color: "#171614" }}>
-                          {activeMandate.landExtent}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt style={{ color: "#4E4A43" }}>Motor Vault</dt>
-                        <dd style={{ margin: "2px 0 0", fontWeight: 600, color: "#171614" }}>
-                          {activeMandate.garageSpec}
-                        </dd>
-                      </div>
-                    </dl>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>
+                      SUPERCAR &amp; MOTOR VAULT
+                    </span>
+                    <strong style={{ color: "var(--fg)" }}>{activeMandate.garageSpec}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "var(--muted)", display: "block", fontSize: 11 }}>
+                      TRIAL-STAY BUYOUT TARIFF
+                    </span>
+                    <strong style={{ color: "var(--forest)" }}>
+                      ₹{activeMandate.nightlyInr.toLocaleString("en-IN")} / night (Credited on Sale)
+                    </strong>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Right Column: Inline Realtor Registration & Sign-In Desk */}
-            <div id="broker-auth-desk" style={{ position: "sticky", top: 84 }}>
-              <PortalAuthCard
-                portal="realtor"
-                defaultNext="/realtor"
-                onAuthenticated={onEnterWorkspace}
-              />
+          {/* Right Column: Sticky Realtor Auth & Onboarding Desk */}
+          <div id="broker-auth-desk" style={{ position: "sticky", top: 86 }}>
+            <PortalAuthCard
+              portal="realtor"
+              defaultNext="/realtor"
+              onAuthenticated={onEnterWorkspace}
+            />
+
+            {/* Quick Unbranded Client Preview Callout */}
+            <div
+              className="info-card"
+              style={{
+                marginTop: 14,
+                padding: "16px 18px",
+                background: "var(--surface-2)",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 12,
+              }}
+            >
+              <Icon name="shield" style={{ width: 18, height: 18, color: "var(--forest)", flexShrink: 0, marginTop: 2 }} />
+              <div style={{ fontSize: 12.5, color: "var(--moss)", lineHeight: 1.5 }}>
+                <strong style={{ color: "var(--fg)", display: "block", marginBottom: 2 }}>
+                  Zero Client Circumvention Architecture
+                </strong>
+                When you share a <code>?mode=client</code> presentation dossier from your workspace, 9bhk strips platform contact forms and pins your brokerage RERA header to every estate sheet.
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Committed Full-Bleed Dark Cypress Band: Interactive Basis-Point (bps) Co-Broking Split Ledger */}
-        <section
-          id="bps-ledger"
-          style={{
-            background: "#13201C",
-            color: "#F6F3EC",
-            padding: "56px 24px",
-            borderTop: "1px solid #263B34",
-            borderBottom: "1px solid #263B34",
-          }}
-        >
-          <div style={{ maxWidth: 1380, margin: "0 auto" }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: 36,
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <h2
-                  style={{
-                    fontFamily: "var(--font-serif), Georgia, serif",
-                    fontSize: "clamp(1.75rem, 2.6vw, 2.4rem)",
-                    lineHeight: 1.15,
-                    margin: "0 0 14px",
-                    color: "#F6F3EC",
-                  }}
-                >
-                  Simulate your integer basis-point allocation before proposing a broker tie-up.
-                </h2>
-                <p
-                  style={{
-                    fontSize: 15,
-                    lineHeight: 1.65,
-                    color: "#C9D4CE",
-                    maxWidth: "60ch",
-                    margin: "0 0 24px",
-                  }}
-                >
-                  Every co-broking agreement on realtor.9bhk.app is recorded in integer basis points (100 bps equals one hundredth of the mandate value) and locked in the database before buyer identity disclosure. Adjust the estate value and split structure to inspect the exact Rupee settlement.
-                </p>
+        {/* Live 3+ BHK Mandate Portfolio Grid with Real Photography */}
+        <section id="mandate-portfolio" className="seo-section">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
+            <div>
+              <span className="seo-eyebrow">Active Co-Broking Inventory</span>
+              <h2 className="seo-h2" style={{ margin: "6px 0 0" }}>
+                Representative 3+ BHK Sale &amp; Trial-Stay Mandates
+              </h2>
+            </div>
+            <a href="#broker-auth-desk" className="btn btn-outline btn-sm">
+              Unlock Full 32-Estate Broker Catalog →
+            </a>
+          </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <label style={{ display: "block" }}>
-                    <span
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: 13.5,
-                        fontWeight: 600,
-                        color: "#E5ECE8",
-                        marginBottom: 8,
-                      }}
-                    >
-                      <span>Estate Sale Mandate Value</span>
-                      <strong style={{ fontVariantNumeric: "tabular-nums", color: "#E6B872" }}>
-                        ₹{dealValueCr.toFixed(1)} Crore
-                      </strong>
-                    </span>
-                    <input
-                      type="range"
-                      min={5}
-                      max={45}
-                      step={0.5}
-                      value={dealValueCr}
-                      onChange={(e) => setDealValueCr(Number(e.target.value))}
-                      style={{ width: "100%", accentColor: "#E6B872", cursor: "pointer" }}
-                    />
-                  </label>
-
-                  <div>
-                    <span
-                      style={{
-                        display: "block",
-                        fontSize: 13.5,
-                        fontWeight: 600,
-                        color: "#E5ECE8",
-                        marginBottom: 8,
-                      }}
-                    >
-                      Tripartite Basis-Point Split Structure
-                    </span>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {SPLIT_PRESETS.map((preset, idx) => (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          onClick={() => setSplitPresetIdx(idx)}
-                          style={{
-                            textAlign: "left",
-                            padding: "11px 14px",
-                            borderRadius: 8,
-                            border:
-                              idx === splitPresetIdx
-                                ? "1px solid #E6B872"
-                                : "1px solid #2B423A",
-                            background: idx === splitPresetIdx ? "#1C302A" : "#162621",
-                            color: "#F6F3EC",
-                            fontSize: 13,
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>{preset.label}</span>
-                          <strong
-                            style={{
-                              color: "#E6B872",
-                              fontVariantNumeric: "tabular-nums",
-                            }}
-                          >
-                            {preset.listingBps + preset.buyerBps} bps total
-                          </strong>
-                        </button>
-                      ))}
+          <div className="seo-grid">
+            {PORTFOLIO_GRID.map((item) => (
+              <article key={item.id} className="seo-card">
+                <div className="seo-card-media">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 380px"
+                    className="seo-card-img"
+                  />
+                  <span className="seo-card-tag">{item.tag}</span>
+                  <span className="seo-card-BHK">{item.bedrooms} BHK</span>
+                </div>
+                <div className="seo-card-body">
+                  <div className="seo-card-loc">
+                    <Icon name="pin" style={{ width: 13, height: 13 }} />
+                    <span>{item.location}</span>
+                  </div>
+                  <h3 className="seo-card-title">{item.title}</h3>
+                  <div className="seo-card-facts">
+                    <span>{item.land}</span>
+                    <span>·</span>
+                    <span>{item.garage}</span>
+                  </div>
+                  <div className="seo-card-foot">
+                    <div>
+                      <div className="seo-card-price">{item.reserveCr}</div>
+                      <span className="seo-card-price-sub">{item.trialStay}</span>
                     </div>
+                    <span className="badge badge-verify" style={{ fontFamily: "var(--font-mono)" }}>
+                      {item.splitBps}
+                    </span>
                   </div>
                 </div>
-              </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
-              {/* Settlement Breakdown Sheet */}
-              <div
+        {/* Forest Architectural Banner: Interactive Basis-Point (bps) Co-Broking Split Calculator */}
+        <section
+          id="bps-ledger"
+          className="seo-cta"
+          style={{
+            margin: "36px 0",
+            padding: "clamp(28px, 4vw, 44px)",
+            display: "block",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 380px), 1fr))",
+              gap: 32,
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <span
                 style={{
-                  background: "#192B25",
-                  border: "1px solid #314B42",
-                  borderRadius: 12,
-                  padding: 28,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--sand)",
                 }}
               >
-                <h3
+                Transparent Integer Basis-Point Ledger
+              </span>
+              <h2
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(28px, 3.2vw, 40px)",
+                  fontWeight: 400,
+                  lineHeight: 1.1,
+                  margin: "8px 0 12px",
+                  color: "var(--warm-white)",
+                }}
+              >
+                Simulate your co-broking split in integer basis points before proposing a tie-up.
+              </h2>
+              <p style={{ color: "rgba(252,251,248,0.82)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 22px" }}>
+                Every brokerage tie-up on <code>realtor.9bhk.app</code> is denominated in integer basis points (<code>100 bps</code> equals one hundredth of the mandate consideration) and locked in PostgreSQL before buyer disclosure.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <label style={{ display: "block" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      color: "var(--warm-white)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <span>Estate Mandate Consideration</span>
+                    <span style={{ fontFamily: "var(--font-mono)", color: "var(--sand)" }}>
+                      ₹{dealValueCr.toFixed(1)} Crore
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={5}
+                    max={45}
+                    step={0.5}
+                    value={dealValueCr}
+                    onChange={(e) => setDealValueCr(Number(e.target.value))}
+                    style={{ width: "100%", accentColor: "var(--terracotta)", cursor: "pointer" }}
+                  />
+                </label>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {SPLIT_PRESETS.map((preset, idx) => {
+                    const active = idx === splitPresetIdx;
+                    return (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setSplitPresetIdx(idx)}
+                        style={{
+                          textAlign: "left",
+                          padding: "11px 14px",
+                          borderRadius: "var(--r-md)",
+                          border: active
+                            ? "1.5px solid var(--sand)"
+                            : "1px solid rgba(252,251,248,0.18)",
+                          background: active
+                            ? "rgba(252,251,248,0.14)"
+                            : "rgba(16,37,30,0.45)",
+                          color: "var(--warm-white)",
+                          fontSize: 13,
+                          fontWeight: 600,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <span>{preset.label}</span>
+                        <span style={{ fontFamily: "var(--font-mono)", color: "var(--sand)", fontSize: 12 }}>
+                          {preset.listingBps + preset.buyerBps} bps pool
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Ledger Breakdown Sheet */}
+            <div
+              style={{
+                background: "var(--warm-white)",
+                color: "var(--fg)",
+                borderRadius: "var(--r-lg)",
+                padding: 26,
+                boxShadow: "var(--sh-float)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <span className="badge badge-verify">Escrow Split Voucher Preview</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--muted)" }}>
+                  10,000 bps = 100 units
+                </span>
+              </div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: 26,
+                  fontWeight: 400,
+                  margin: "0 0 16px",
+                  color: "var(--forest-deep)",
+                }}
+              >
+                Tripartite Co-Broking Allocation
+              </h3>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13.5 }}>
+                <div
                   style={{
-                    fontFamily: "var(--font-serif), Georgia, serif",
-                    fontSize: 20,
-                    margin: "0 0 18px",
-                    color: "#F6F3EC",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    paddingBottom: 10,
+                    borderBottom: "1px solid var(--border)",
                   }}
                 >
-                  Escrow Co-Broking Allocation Sheet
-                </h3>
+                  <span style={{ color: "var(--moss)" }}>Gross Sale Consideration</span>
+                  <strong style={{ fontFamily: "var(--font-mono)" }}>₹{dealValueCr.toFixed(2)} Cr</strong>
+                </div>
 
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: 14,
-                    fontVariantNumeric: "tabular-nums",
+                    justifyContent: "space-between",
+                    paddingBottom: 10,
+                    borderBottom: "1px solid var(--border)",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      paddingBottom: 12,
-                      borderBottom: "1px solid #2B423A",
-                      fontSize: 14,
-                    }}
-                  >
-                    <span style={{ color: "#C9D4CE" }}>Gross Estate Consideration</span>
-                    <strong>₹{dealValueCr.toFixed(2)} Cr</strong>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      paddingBottom: 12,
-                      borderBottom: "1px solid #2B423A",
-                      fontSize: 14,
-                    }}
-                  >
-                    <span style={{ color: "#C9D4CE" }}>
-                      Listing Mandate Holder ({activeSplit.listingBps} bps)
-                    </span>
-                    <strong style={{ color: "#9CE2B9" }}>
-                      {formatLakhsAndCrores(listingShareInr)}
-                    </strong>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      paddingBottom: 12,
-                      borderBottom: "1px solid #2B423A",
-                      fontSize: 14,
-                    }}
-                  >
-                    <span style={{ color: "#C9D4CE" }}>
-                      Buyer Introducer Broker ({activeSplit.buyerBps} bps)
-                    </span>
-                    <strong style={{ color: "#E6B872" }}>
-                      {formatLakhsAndCrores(buyerShareInr)}
-                    </strong>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      paddingTop: 4,
-                      fontSize: 16,
-                    }}
-                  >
-                    <span>Total Co-Broking Pool ({activeSplit.listingBps + activeSplit.buyerBps} bps)</span>
-                    <strong style={{ color: "#F6F3EC" }}>
-                      {formatLakhsAndCrores(totalAllocationInr)}
-                    </strong>
-                  </div>
+                  <span style={{ color: "var(--moss)" }}>
+                    Listing Mandate Broker ({activeSplit.listingBps} bps)
+                  </span>
+                  <strong style={{ fontFamily: "var(--font-mono)", color: "var(--forest)" }}>
+                    {formatLakhsAndCrores(listingShareInr)}
+                  </strong>
                 </div>
 
-                <p
+                <div
                   style={{
-                    margin: "20px 0 0",
-                    paddingTop: 14,
-                    borderTop: "1px solid #2B423A",
-                    fontSize: 12.5,
-                    lineHeight: 1.55,
-                    color: "#B4C2BA",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    paddingBottom: 10,
+                    borderBottom: "1px solid var(--border)",
                   }}
                 >
-                  Lead Sovereignty Guarantee: Once a buyer requirement is matched and a tie-up is accepted in the ledger, the introducing broker&apos;s attribution is cryptographically bound to the property for 90 calendar days.
-                </p>
+                  <span style={{ color: "var(--moss)" }}>
+                    Buyer Introducer Broker ({activeSplit.buyerBps} bps)
+                  </span>
+                  <strong style={{ fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>
+                    {formatLakhsAndCrores(buyerShareInr)}
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    paddingTop: 4,
+                    fontSize: 15,
+                  }}
+                >
+                  <strong>Total Broker Allocation ({activeSplit.listingBps + activeSplit.buyerBps} bps)</strong>
+                  <strong style={{ fontFamily: "var(--font-mono)", color: "var(--forest-deep)" }}>
+                    {formatLakhsAndCrores(totalAllocationInr)}
+                  </strong>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 18,
+                  padding: "12px 14px",
+                  borderRadius: "var(--r-md)",
+                  background: "var(--surface-2)",
+                  fontSize: 12,
+                  color: "var(--moss)",
+                  lineHeight: 1.5,
+                }}
+              >
+                Both RERA broker IDs and PAN numbers are bound to the digital tie-up agreement prior to scheduling an accompanied client site visit.
               </div>
             </div>
           </div>
         </section>
 
-        {/* Architectural Schedule Table (No SaaS Card Grid) */}
-        <section
-          id="protocol-schedule"
-          style={{
-            maxWidth: 1380,
-            margin: "0 auto",
-            padding: "56px 24px 72px",
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "var(--font-serif), Georgia, serif",
-              fontSize: "clamp(1.65rem, 2.4vw, 2.2rem)",
-              margin: "0 0 10px",
-              color: "#13201C",
-            }}
-          >
-            How the Realtor Registry separates broker operations from the public guest catalog
+        {/* Architectural Comparison & FAQ */}
+        <section id="protocol-schedule" className="seo-section">
+          <span className="seo-eyebrow">Portal Governance</span>
+          <h2 className="seo-h2" style={{ marginTop: 6 }}>
+            Why RERA Brokers Operate on a Dedicated Subdomain
           </h2>
-          <p
-            style={{
-              fontSize: 15,
-              lineHeight: 1.6,
-              color: "#4E4A43",
-              maxWidth: "68ch",
-              margin: "0 0 28px",
-            }}
-          >
-            Each 9bhk subdomain operates with strict role boundaries and dedicated KYC verification. Here is what changes when you operate on realtor.9bhk.app.
-          </p>
-
-          <div
-            style={{
-              background: "#FCFBF7",
-              border: "1px solid #D5CEC0",
-              borderRadius: 12,
-              overflowX: "auto",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: 13.5,
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: "1.5px solid #13201C", background: "#F2EDE2" }}>
-                  <th style={{ padding: "14px 18px", fontWeight: 700, color: "#13201C" }}>
-                    Operational Capability
-                  </th>
-                  <th style={{ padding: "14px 18px", fontWeight: 700, color: "#4E4A43" }}>
-                    Public Marketplace (www.9bhk.app)
-                  </th>
-                  <th style={{ padding: "14px 18px", fontWeight: 700, color: "#1E4D3B" }}>
-                    RERA Broker Terminal (realtor.9bhk.app)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: "1px solid #E5DFD3" }}>
-                  <td style={{ padding: "14px 18px", fontWeight: 600 }}>
-                    3+ BHK Whole-Property Showcase Floor
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#4E4A43" }}>
-                    Displays only staff-reviewed 3+ BHK villas, farmhouses &amp; coastal estates.
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#171614" }}>
-                    Onboard 3+ BHK mandates to the marketplace, plus manage private under-3-BHK inventory via direct client links.
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: "1px solid #E5DFD3" }}>
-                  <td style={{ padding: "14px 18px", fontWeight: 600 }}>
-                    Client Presentation Mode
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#4E4A43" }}>
-                    Shows direct platform checkout and public host details.
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#171614" }}>
-                    Hides internal brokerage notes and displays your RERA agency masthead for live iPad or boardroom walkthroughs.
-                  </td>
-                </tr>
-                <tr style={{ borderBottom: "1px solid #E5DFD3" }}>
-                  <td style={{ padding: "14px 18px", fontWeight: 600 }}>
-                    Realtor-to-Realtor Tie-Up Ledger
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#4E4A43" }}>
-                    Not visible on consumer domain.
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#171614" }}>
-                    Propose, counter, and accept integer basis-point splits (`bhk_realtor_tieups`) with other RERA-verified brokers.
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ padding: "14px 18px", fontWeight: 600 }}>
-                    Mandatory KYC Verification Gate
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#4E4A43" }}>
-                    Government Photo ID for arrival pass (`guest_id`).
-                  </td>
-                  <td style={{ padding: "14px 18px", color: "#171614" }}>
-                    State RERA Registration Certificate (`rera_certificate`), Broker PAN (`realtor_pan`), and Agency Proof (`agency_proof`).
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="seo-faq" style={{ marginTop: 18 }}>
+            <details open>
+              <summary>How does realtor.9bhk.app protect my client introductions?</summary>
+              <p>
+                Every buyer requirement logged in your CRM desk generates a timestamped hash. When you initiate a co-broking tie-up with a listing mandate holder or estate owner, your brokerage holds a 90-day accompanied site-visit attribution lock across both trial stays and freehold acquisitions.
+              </p>
+            </details>
+            <details>
+              <summary>Why are brokerage splits recorded in basis points (bps)?</summary>
+              <p>
+                Integer basis points (where 100 bps equals one hundredth of the transaction value) eliminate floating-point rounding discrepancies in multi-crore escrow settlements and tripartite mandate agreements.
+              </p>
+            </details>
+            <details>
+              <summary>Can a guest account access realtor.9bhk.app tools?</summary>
+              <p>
+                No. Each 9bhk portal enforces strict account isolation. Operating on <code>realtor.9bhk.app</code> requires a dedicated Realtor account with State RERA registration and PAN verification reviewed by <code>admin.9bhk.app</code>.
+              </p>
+            </details>
           </div>
         </section>
       </main>
+
+      {/* Native 9bhk Footer */}
+      <footer className="seo-footer">
+        <div className="seo-footer-inner">
+          <div>
+            <strong>realtor.9bhk.app</strong> · RERA Realtor &amp; Mandate Registry · Strictly 3+ BHK Whole Properties
+          </div>
+          <div className="seo-footer-links">
+            <Link href="/">Guest Catalog (www)</Link>
+            <Link href="/host">Estate Owners (owners)</Link>
+            <Link href="/admin">Compliance Gate (admin)</Link>
+            <Link href="/stays">All 3+ BHK Stays</Link>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+              paddingTop: 10,
+              borderTop: "1px solid var(--border)",
+            }}
+          >
+            <CreatorAttribution variant="footer" />
+            <TwelveToolsBadge />
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
