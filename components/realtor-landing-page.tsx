@@ -24,6 +24,8 @@ type ShowcaseMandate = {
   buyerBrokerBps: number;
   reraId: string;
   image: string;
+  imageWidth: number;
+  imageHeight: number;
   architecturalNote: string;
 };
 
@@ -44,6 +46,8 @@ const ACTIVE_MANDATES: ShowcaseMandate[] = [
     buyerBrokerBps: 100,
     reraId: "TN/29/Building/0418/2026",
     image: "/assets/prop-blue-horizon.jpg",
+    imageWidth: 640,
+    imageHeight: 640,
     architecturalNote:
       "Six-suite poured concrete coastal compound with 18-metre lap pool, acoustic courtyard, private beach gate, and zero-gradient supercar ramp.",
   },
@@ -63,6 +67,8 @@ const ACTIVE_MANDATES: ShowcaseMandate[] = [
     buyerBrokerBps: 100,
     reraId: "TN/29/Building/0512/2026",
     image: "/assets/prop-palm-grove.jpg",
+    imageWidth: 800,
+    imageHeight: 1000,
     architecturalNote:
       "Double-height teak and lime-plaster residence framed by mature coconut palms, private lawn pavilion, and separate service kitchen.",
   },
@@ -82,6 +88,8 @@ const ACTIVE_MANDATES: ShowcaseMandate[] = [
     buyerBrokerBps: 125,
     reraId: "TN/29/Building/0609/2026",
     image: "/assets/prop-terracotta-courtyard.jpg",
+    imageWidth: 1080,
+    imageHeight: 720,
     architecturalNote:
       "Seven-bedroom whole-family estate engineered for multi-generational buyouts, Trial-Stay-to-Buy evaluations, and family-office acquisitions.",
   },
@@ -101,6 +109,8 @@ const ACTIVE_MANDATES: ShowcaseMandate[] = [
     buyerBrokerBps: 100,
     reraId: "TN/11/Building/0294/2026",
     image: "/assets/prop-lakeview-courtyard.jpg",
+    imageWidth: 640,
+    imageHeight: 640,
     architecturalNote:
       "Cantilevered stone and thermal-glass mountain residence with wood-burning hearths, private orchard trails, and dedicated staff cottage.",
   },
@@ -189,7 +199,14 @@ export function RealtorLandingPage({
   const totalAllocationInr = listingShareInr + buyerShareInr;
 
   return (
-    <div className="seo-shell">
+    <div
+      className="seo-page"
+      style={{ "--seo-max": "1320px" } as React.CSSProperties}
+    >
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+
       {/* Native 9bhk Header */}
       <header className="seo-header">
         <div className="seo-header-inner">
@@ -206,23 +223,26 @@ export function RealtorLandingPage({
               <span className="seo-brand-title">9bhk</span>
               <span className="seo-brand-sub">realtor.9bhk.app</span>
             </Link>
-            <span className="badge badge-verify" style={{ fontSize: 11 }}>
+            <span className="seo-header-badge">
               RERA Co-Broking &amp; Mandate Terminal
             </span>
           </div>
 
           <nav className="seo-nav" aria-label="Realtor portal navigation">
-            <a href="#active-mandates" className="seo-nav-link">
-              3+ BHK Mandates
-            </a>
-            <a href="#bps-ledger" className="seo-nav-link">
-              Basis-Point Calculator
+            <a href="#features" className="seo-nav-link">
+              The desk
             </a>
             <a href="#mandate-portfolio" className="seo-nav-link">
-              Sale Dossiers
+              Mandates
+            </a>
+            <a href="#bps-ledger" className="seo-nav-link">
+              Calculator
+            </a>
+            <a href="#pricing" className="seo-nav-link">
+              Pricing
             </a>
             <a href="#protocol-schedule" className="seo-nav-link">
-              Registry Rules
+              FAQ
             </a>
             <Link href="/stays" className="seo-nav-link">
               Guest Catalog
@@ -232,14 +252,14 @@ export function RealtorLandingPage({
               <>
                 {onEnterWorkspace && (
                   <button type="button" onClick={onEnterWorkspace} className="seo-nav-cta">
-                    Open Broker Workspace ({signedInUser.name || signedInUser.email})
+                    Open Broker Workspace →
                   </button>
                 )}
                 {onSignOut && (
                   <button
                     type="button"
                     onClick={onSignOut}
-                    className="btn btn-outline btn-sm"
+                    className="btn outline sm"
                     style={{ marginLeft: 4 }}
                   >
                     Sign Out
@@ -255,7 +275,7 @@ export function RealtorLandingPage({
         </div>
       </header>
 
-      <main className="seo-main" style={{ maxWidth: 1320 }}>
+      <main className="seo-main" id="main-content" tabIndex={-1} style={{ maxWidth: 1320 }}>
         {/* Breadcrumb */}
         <nav className="seo-breadcrumb" aria-label="Breadcrumb">
           <ol>
@@ -290,25 +310,38 @@ export function RealtorLandingPage({
               <h1
                 className="seo-h1"
                 style={{
-                  fontSize: "clamp(32px, 4.2vw, 52px)",
-                  maxWidth: "22ch",
+                  fontSize: "clamp(32px, 4.4vw, 54px)",
+                  maxWidth: "18ch",
                   marginTop: 8,
                 }}
               >
-                Co-broker flagship villas, coastal estates, and private retreats with protected RERA splits.
+                The broker desk for India&rsquo;s 3+ BHK estates.
               </h1>
               <p className="seo-lede" style={{ marginTop: 12 }}>
-                Built exclusively for RERA-registered real estate advisors, wealth managers, and family-office representatives. Share unbranded 3+ BHK client links, lock 90-day accompanied site-visit attribution, and settle co-broking allocations in transparent integer basis points (<code>bps</code>).
+                Send unbranded client dossiers, lock 90-day accompanied site-visit attribution, and settle co-broking allocations in integer basis points (<code>bps</code>) &mdash; on one RERA-verified terminal built strictly for 3 to 9 BHK whole estates.
               </p>
+              <div className="rl-hero-actions">
+                {signedInUser && onEnterWorkspace ? (
+                  <button type="button" className="btn" onClick={onEnterWorkspace}>
+                    Open Broker Workspace &rarr;
+                  </button>
+                ) : (
+                  <a className="btn" href="#broker-auth-desk">
+                    Start the broker desk &rarr;
+                  </a>
+                )}
+                <a className="btn outline" href="#bps-ledger">
+                  Open the split calculator
+                </a>
+              </div>
             </div>
 
             {signedInUser && onEnterWorkspace && (
               <div
-                className="info-card"
+                className="seo-note"
                 style={{
                   background: "var(--ok-soft)",
                   borderColor: "var(--ok)",
-                  display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 16,
@@ -323,62 +356,41 @@ export function RealtorLandingPage({
                     Enter your Realtor Workspace to manage 3+ BHK mandates, CRM leads, and co-broking tie-ups.
                   </span>
                 </div>
-                <button type="button" className="btn btn-primary btn-sm" onClick={onEnterWorkspace}>
+                <button type="button" className="btn sm" onClick={onEnterWorkspace}>
                   Enter Broker Workspace →
                 </button>
               </div>
             )}
 
             {/* 4-Cell Architectural Stat Strip */}
-            <div className="seo-stats" style={{ margin: 0 }}>
-              <div className="seo-stat">
-                <div className="seo-stat-val">3–9 BHK</div>
-                <div className="seo-stat-lbl">Whole Estates Only · Zero 1–2 BHK Noise</div>
-              </div>
-              <div className="seo-stat">
-                <div className="seo-stat-val">90 Days</div>
-                <div className="seo-stat-lbl">Cryptographic Site-Visit Lead Lock</div>
-              </div>
-              <div className="seo-stat">
-                <div className="seo-stat-val">100–250 bps</div>
-                <div className="seo-stat-lbl">Integer Basis-Point Escrow Ledgers</div>
-              </div>
-              <div className="seo-stat">
-                <div className="seo-stat-val">4–8 Cars</div>
-                <div className="seo-stat-lbl">Verified Motor Courts &amp; EV Chargers</div>
-              </div>
-            </div>
+            <ul className="seo-stats" style={{ margin: 0 }}>
+              <li>
+                <span className="seo-stat-value">3–9 BHK</span>
+                <span className="seo-stat-label">Whole estates only</span>
+              </li>
+              <li>
+                <span className="seo-stat-value">90 Days</span>
+                <span className="seo-stat-label">Site-visit lead lock</span>
+              </li>
+              <li>
+                <span className="seo-stat-value">100–250 bps</span>
+                <span className="seo-stat-label">Integer escrow ledgers</span>
+              </li>
+              <li>
+                <span className="seo-stat-value">4–8 Cars</span>
+                <span className="seo-stat-label">Verified motor courts</span>
+              </li>
+            </ul>
 
             {/* Interactive Featured Mandate Photo Card */}
-            <div
-              className="p-card"
-              style={{
-                borderRadius: "var(--r-lg)",
-                border: "1px solid var(--border-strong)",
-                boxShadow: "var(--sh-md)",
-                background: "var(--surface)",
-              }}
-            >
+            <div className="seo-dossier">
               {/* Switcher Header */}
-              <div
-                style={{
-                  padding: "14px 18px",
-                  borderBottom: "1px solid var(--border)",
-                  background: "var(--surface-2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 10,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="seo-dossier-head">
+                <div className="seo-dossier-title">
                   <Icon name="verified" style={{ width: 16, height: 16, color: "var(--forest)" }} />
-                  <strong style={{ fontSize: 12.5, letterSpacing: "0.02em", color: "var(--forest-deep)" }}>
-                    Featured 3+ BHK Co-Broking Dossier Preview
-                  </strong>
+                  <span>Featured 3+ BHK Co-Broking Dossier Preview</span>
                 </div>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <div className="seo-dossier-chips">
                   {ACTIVE_MANDATES.map((m, idx) => {
                     const active = idx === selectedMandateIdx;
                     return (
@@ -389,12 +401,8 @@ export function RealtorLandingPage({
                           setSelectedMandateIdx(idx);
                           setDealValueCr(m.reserveCr);
                         }}
-                        className={active ? "chip is-on" : "chip"}
-                        style={{
-                          padding: "6px 12px",
-                          fontSize: 11.5,
-                          minHeight: 30,
-                        }}
+                        aria-pressed={active}
+                        className={active ? "chip seo-chip is-active" : "chip seo-chip"}
                       >
                         {m.bedrooms} BHK · {m.title.split(" ")[0]}
                       </button>
@@ -405,12 +413,9 @@ export function RealtorLandingPage({
 
               {/* Real Property Photograph with Overlaid Glass Pills */}
               <div
+                className="seo-dossier-media"
                 style={{
-                  position: "relative",
-                  aspectRatio: "16 / 9",
-                  width: "100%",
-                  overflow: "hidden",
-                  background: "var(--forest-deep)",
+                  aspectRatio: `${activeMandate.imageWidth} / ${activeMandate.imageHeight}`,
                 }}
               >
                 <Image
@@ -444,19 +449,8 @@ export function RealtorLandingPage({
                     flexWrap: "wrap",
                   }}
                 >
-                  <span className="badge badge-setting">{activeMandate.setting}</span>
-                  <span
-                    style={{
-                      padding: "5px 11px",
-                      borderRadius: "var(--r-pill)",
-                      background: "rgba(16, 37, 30, 0.84)",
-                      color: "var(--warm-white)",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      fontFamily: "var(--font-mono)",
-                      backdropFilter: "blur(8px)",
-                    }}
-                  >
+                  <span className="seo-overlay-pill">{activeMandate.setting}</span>
+                  <span className="seo-overlay-pill is-mono">
                     RERA: {activeMandate.reraId}
                   </span>
                 </div>
@@ -551,7 +545,7 @@ export function RealtorLandingPage({
           </div>
 
           {/* Right Column: Sticky Realtor Auth & Onboarding Desk */}
-          <div id="broker-auth-desk" style={{ position: "sticky", top: 86 }}>
+          <div id="broker-auth-desk" className="seo-auth-desk">
             <PortalAuthCard
               portal="realtor"
               defaultNext="/realtor"
@@ -560,15 +554,8 @@ export function RealtorLandingPage({
 
             {/* Quick Unbranded Client Preview Callout */}
             <div
-              className="info-card"
-              style={{
-                marginTop: 14,
-                padding: "16px 18px",
-                background: "var(--surface-2)",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 12,
-              }}
+              className="seo-note"
+              style={{ marginTop: 14 }}
             >
               <Icon name="shield" style={{ width: 18, height: 18, color: "var(--forest)", flexShrink: 0, marginTop: 2 }} />
               <div style={{ fontSize: 12.5, color: "var(--moss)", lineHeight: 1.5 }}>
@@ -581,6 +568,59 @@ export function RealtorLandingPage({
           </div>
         </section>
 
+        {/* Capability grid — what the desk actually does */}
+        <section id="features" className="seo-section">
+          <div className="rl-section-head">
+            <span className="seo-eyebrow">The desk</span>
+            <h2 className="seo-h2" style={{ margin: "6px 0 8px" }}>
+              Everything a co-broking mandate needs, minus the spreadsheet.
+            </h2>
+            <p className="seo-section-lede" style={{ marginBottom: 0 }}>
+              One terminal for the whole mandate lifecycle: the estate book, the
+              client-facing sheet, the tie-up ledger, and the documents that
+              unlock it.
+            </p>
+          </div>
+
+          <div className="rl-features">
+            <article className="rl-feature">
+              <span className="rl-feature-num">01 &middot; Mandate book</span>
+              <h3>Dossiers, not a listings feed</h3>
+              <p>
+                Each entry carries land extent, motor vault, RERA ID, and the
+                reserve in crore. Only 3 to 9 BHK whole estates ever enter the
+                book.
+              </p>
+            </article>
+            <article className="rl-feature">
+              <span className="rl-feature-num">02 &middot; Client links</span>
+              <h3>Unbranded client presentations</h3>
+              <p>
+                Share a <code>?mode=client</code> sheet that strips platform
+                contact forms and pins your brokerage RERA header to every
+                estate page.
+              </p>
+            </article>
+            <article className="rl-feature">
+              <span className="rl-feature-num">03 &middot; Tie-up ledger</span>
+              <h3>Integer bps, locked early</h3>
+              <p>
+                Agree co-broking allocations in basis points and lock the ledger
+                before buyer disclosure, so nothing is renegotiated at
+                settlement.
+              </p>
+            </article>
+            <article className="rl-feature">
+              <span className="rl-feature-num">04 &middot; Compliance</span>
+              <h3>One verified KYC locker</h3>
+              <p>
+                RERA certificate, PAN, and GST sit in a single locker, reviewed
+                through the compliance gate before a mandate unlocks.
+              </p>
+            </article>
+          </div>
+        </section>
+
         {/* Live 3+ BHK Mandate Portfolio Grid with Real Photography */}
         <section id="mandate-portfolio" className="seo-section">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
@@ -590,18 +630,18 @@ export function RealtorLandingPage({
                 Representative 3+ BHK Sale &amp; Trial-Stay Mandates
               </h2>
             </div>
-            <a href="#broker-auth-desk" className="btn btn-outline btn-sm">
-              Unlock Full 32-Estate Broker Catalog →
+            <a href="#broker-auth-desk" className="btn outline sm">
+              Open the full mandate book →
             </a>
           </div>
 
           <div className="seo-grid">
             {PORTFOLIO_GRID.map((item) => (
-              <article key={item.id} className="seo-card">
+              <article key={item.id} className="seo-card seo-card-static">
                 <div className="seo-card-media">
                   <Image
                     src={item.image}
-                    alt={item.title}
+                    alt={`${item.title} — ${item.location}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 380px"
                     className="seo-card-img"
@@ -622,12 +662,10 @@ export function RealtorLandingPage({
                   </div>
                   <div className="seo-card-foot">
                     <div>
-                      <div className="seo-card-price">{item.reserveCr}</div>
-                      <span className="seo-card-price-sub">{item.trialStay}</span>
+                      <div className="seo-price">{item.reserveCr}</div>
+                      <span className="seo-price-sub">{item.trialStay}</span>
                     </div>
-                    <span className="badge badge-verify" style={{ fontFamily: "var(--font-mono)" }}>
-                      {item.splitBps}
-                    </span>
+                    <span className="seo-bps-pill">{item.splitBps}</span>
                   </div>
                 </div>
               </article>
@@ -704,6 +742,8 @@ export function RealtorLandingPage({
                     max={45}
                     step={0.5}
                     value={dealValueCr}
+                    aria-label="Estate mandate consideration in crore"
+                    aria-valuetext={`₹${dealValueCr.toFixed(1)} crore`}
                     onChange={(e) => setDealValueCr(Number(e.target.value))}
                     style={{ width: "100%", accentColor: "var(--terracotta)", cursor: "pointer" }}
                   />
@@ -717,9 +757,10 @@ export function RealtorLandingPage({
                         key={preset.label}
                         type="button"
                         onClick={() => setSplitPresetIdx(idx)}
+                        aria-pressed={active}
                         style={{
                           textAlign: "left",
-                          padding: "11px 14px",
+                          padding: "13px 14px",
                           borderRadius: "var(--r-md)",
                           border: active
                             ? "1.5px solid var(--sand)"
@@ -757,10 +798,10 @@ export function RealtorLandingPage({
                 boxShadow: "var(--sh-float)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <span className="badge badge-verify">Escrow Split Voucher Preview</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
+                <span className="seo-bps-pill">Escrow Split Voucher Preview</span>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--muted)" }}>
-                  10,000 bps = 100 units
+                  Integer bps · zero rounding
                 </span>
               </div>
               <h3
@@ -852,6 +893,68 @@ export function RealtorLandingPage({
           </div>
         </section>
 
+        {/* Membership pricing — one honest tier */}
+        <section id="pricing" className="seo-section">
+          <div className="rl-section-head rl-center">
+            <span className="seo-eyebrow">Membership</span>
+            <h2 className="seo-h2" style={{ margin: "6px 0 8px" }}>
+              One desk. One monthly fee.
+            </h2>
+            <p className="seo-section-lede" style={{ marginBottom: 0 }}>
+              The workspace is billed as a flat broker membership. Co-broking
+              allocations are agreed between the named brokers and recorded on
+              the ledger in basis points.
+            </p>
+          </div>
+
+          <div className="rl-price-card">
+            <div className="rl-price-main">
+              <span className="seo-bps-pill">Verified Broker Membership</span>
+              <div className="rl-price-figure">
+                ₹500<span>/ month</span>
+              </div>
+              <p className="rl-price-sub">
+                Billed monthly in INR. Requires State RERA registration and PAN
+                verification through the compliance gate.
+              </p>
+              {signedInUser && onEnterWorkspace ? (
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ marginTop: 8 }}
+                  onClick={onEnterWorkspace}
+                >
+                  Open Broker Workspace &rarr;
+                </button>
+              ) : (
+                <a className="btn" style={{ marginTop: 8 }} href="#broker-auth-desk">
+                  Activate the broker desk &rarr;
+                </a>
+              )}
+              <p className="rl-price-sub" style={{ marginTop: 4 }}>
+                Already registered? Sign in from the desk on this page.
+              </p>
+            </div>
+
+            <div className="rl-price-includes">
+              <h3>Included every month</h3>
+              <ul className="rl-price-list">
+                <li>Full 3+ BHK mandate book with RERA dossiers</li>
+                <li>Unbranded <code>?mode=client</code> presentation links</li>
+                <li>90-day accompanied site-visit lock</li>
+                <li>CRM requirement pipeline and client roster</li>
+                <li>Basis-point tie-up ledgers with escrow preview</li>
+                <li>RERA, PAN, and GST document locker</li>
+              </ul>
+            </div>
+          </div>
+          <p className="rl-price-note">
+            Membership is a workspace fee, not a brokerage share. Any co-broking
+            split is a separate agreement between the named RERA brokers and is
+            stored on the tie-up ledger in <code>bps</code>.
+          </p>
+        </section>
+
         {/* Architectural Comparison & FAQ */}
         <section id="protocol-schedule" className="seo-section">
           <span className="seo-eyebrow">Portal Governance</span>
@@ -859,25 +962,72 @@ export function RealtorLandingPage({
             Why RERA Brokers Operate on a Dedicated Subdomain
           </h2>
           <div className="seo-faq" style={{ marginTop: 18 }}>
-            <details open>
-              <summary>How does realtor.9bhk.app protect my client introductions?</summary>
-              <p>
-                Every buyer requirement logged in your CRM desk generates a timestamped hash. When you initiate a co-broking tie-up with a listing mandate holder or estate owner, your brokerage holds a 90-day accompanied site-visit attribution lock across both trial stays and freehold acquisitions.
-              </p>
-            </details>
-            <details>
-              <summary>Why are brokerage splits recorded in basis points (bps)?</summary>
-              <p>
-                Integer basis points (where 100 bps equals one hundredth of the transaction value) eliminate floating-point rounding discrepancies in multi-crore escrow settlements and tripartite mandate agreements.
-              </p>
-            </details>
-            <details>
-              <summary>Can a guest account access realtor.9bhk.app tools?</summary>
-              <p>
-                No. Each 9bhk portal enforces strict account isolation. Operating on <code>realtor.9bhk.app</code> requires a dedicated Realtor account with State RERA registration and PAN verification reviewed by <code>admin.9bhk.app</code>.
-              </p>
-            </details>
+            <div className="seo-faq-list">
+              <details className="seo-faq-item" open>
+                <summary>
+                  <span>How does realtor.9bhk.app protect my client introductions?</span>
+                  <span className="seo-faq-mark" aria-hidden="true" />
+                </summary>
+                <div className="seo-faq-answer">
+                  <p>
+                    Every buyer requirement logged in your CRM desk generates a timestamped hash. When you initiate a co-broking tie-up with a listing mandate holder or estate owner, your brokerage holds a 90-day accompanied site-visit attribution lock across both trial stays and freehold acquisitions.
+                  </p>
+                </div>
+              </details>
+              <details className="seo-faq-item">
+                <summary>
+                  <span>Why are brokerage splits recorded in basis points (bps)?</span>
+                  <span className="seo-faq-mark" aria-hidden="true" />
+                </summary>
+                <div className="seo-faq-answer">
+                  <p>
+                    Integer basis points (where 100 bps equals one hundredth of the transaction value) eliminate floating-point rounding discrepancies in multi-crore escrow settlements and tripartite mandate agreements.
+                  </p>
+                </div>
+              </details>
+              <details className="seo-faq-item">
+                <summary>
+                  <span>What does the ₹500 monthly membership cover?</span>
+                  <span className="seo-faq-mark" aria-hidden="true" />
+                </summary>
+                <div className="seo-faq-answer">
+                  <p>
+                    It unlocks the full 3+ BHK mandate book, unbranded client presentation links, the 90-day accompanied site-visit lock, the CRM requirement pipeline, basis-point tie-up ledgers, and the document locker. It is a workspace fee, so co-broking allocations remain a separate agreement between the named brokers.
+                  </p>
+                </div>
+              </details>
+              <details className="seo-faq-item">
+                <summary>
+                  <span>Can a guest account access realtor.9bhk.app tools?</span>
+                  <span className="seo-faq-mark" aria-hidden="true" />
+                </summary>
+                <div className="seo-faq-answer">
+                  <p>
+                    No. Each 9bhk portal enforces strict account isolation. Operating on <code>realtor.9bhk.app</code> requires a dedicated Realtor account with State RERA registration and PAN verification reviewed by <code>admin.9bhk.app</code>.
+                  </p>
+                </div>
+              </details>
+            </div>
           </div>
+        </section>
+
+        {/* Closing CTA band */}
+        <section className="seo-closing">
+          <span className="seo-eyebrow">Your next mandate</span>
+          <h2>Bring the next 3+ BHK mandate to a desk that settles in bps.</h2>
+          <p>
+            Register your brokerage once, clear the RERA and PAN gate, and the
+            estate book, client sheets, and tie-up ledgers open together.
+          </p>
+          {signedInUser && onEnterWorkspace ? (
+            <button type="button" className="seo-btn" onClick={onEnterWorkspace}>
+              Open Broker Workspace
+            </button>
+          ) : (
+            <a className="seo-btn" href="#broker-auth-desk">
+              Register your brokerage
+            </a>
+          )}
         </section>
       </main>
 

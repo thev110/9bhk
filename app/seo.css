@@ -1793,3 +1793,345 @@
     border-radius: var(--r-lg);
   }
 }
+
+/* ==========================================================================
+   Realtor landing — shared surface polish
+   The realtor landing page renders its own header, dossier, mandate cards,
+   calculator and footer. These rules give those blocks the same typographic
+   and structural behaviour as the rest of the editorial surfaces, using the
+   existing tokens only.
+   ========================================================================== */
+
+.seo-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.018em;
+  color: var(--forest-deep);
+  text-wrap: balance;
+}
+.seo-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--forest-deep);
+}
+
+/* ── header identity ─────────────────────────────────────────────────── */
+.seo-brand-title {
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+.seo-brand-sub {
+  padding-left: 9px;
+  border-left: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--moss);
+}
+.seo-header-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in oklch, var(--sage) 42%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in oklch, var(--sage) 18%, var(--surface));
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.seo-header nav a.seo-nav-cta,
+.seo-header nav button.seo-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.seo-header nav a.seo-nav-cta:hover,
+.seo-header nav button.seo-nav-cta:hover {
+  background: var(--primary-press);
+  color: var(--on-primary);
+}
+.seo-header nav a.seo-nav-cta:focus-visible,
+.seo-header nav button.seo-nav-cta:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* ── breadcrumb ──────────────────────────────────────────────────────── */
+.seo-breadcrumb {
+  padding: 16px 0 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.seo-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.seo-breadcrumb a {
+  color: var(--moss);
+  font-weight: 700;
+  text-decoration: none;
+}
+.seo-breadcrumb a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.seo-breadcrumb-sep {
+  color: var(--sage);
+}
+.seo-breadcrumb [aria-current="page"] {
+  font-weight: 600;
+}
+
+/* ── featured mandate dossier ────────────────────────────────────────── */
+.seo-dossier {
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--sh-md);
+}
+.seo-dossier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.seo-dossier-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--forest-deep);
+}
+.seo-dossier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.seo-dossier-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--forest-deep);
+}
+.seo-dossier-media img {
+  display: block;
+}
+.seo-overlay-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 5px 11px;
+  border: 1px solid color-mix(in oklch, var(--sand) 30%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in oklch, var(--forest-deep) 84%, transparent);
+  color: var(--warm-white);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.seo-overlay-pill.is-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}
+.chip.seo-chip {
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 11.5px;
+}
+.chip.seo-chip.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+/* ── auth rail + notes ───────────────────────────────────────────────── */
+.seo-auth-desk {
+  position: sticky;
+  top: 88px;
+  scroll-margin-top: 96px;
+}
+.seo-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--moss);
+}
+.seo-note strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--fg);
+}
+#active-mandates,
+#mandate-portfolio,
+#bps-ledger,
+#protocol-schedule {
+  scroll-margin-top: 96px;
+}
+
+/* ── mandate cards ───────────────────────────────────────────────────── */
+.seo-card-BHK {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 9px;
+  border-radius: var(--r-pill);
+  background: color-mix(in oklch, var(--warm-white) 92%, transparent);
+  color: var(--forest-deep);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.seo-card-loc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--moss);
+}
+.seo-card-loc svg {
+  color: var(--sage);
+}
+.seo-card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.seo-price {
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.1;
+  color: var(--forest-deep);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.seo-price-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.seo-bps-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in oklch, var(--sage) 38%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in oklch, var(--sage) 16%, var(--surface));
+  color: var(--forest);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+/* These mandate cards are informational; the hover lift belongs to cards that
+   actually open something. Keep them calm and honest. */
+.seo-card.seo-card-static:hover {
+  border-color: var(--border);
+  box-shadow: none;
+  transform: none;
+}
+.seo-card.seo-card-static:hover .seo-card-media img {
+  transform: none;
+}
+
+/* ── footer ──────────────────────────────────────────────────────────── */
+.seo-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  max-width: var(--seo-max);
+  margin-inline: auto;
+  padding: 28px 24px 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.seo-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+.seo-footer-links a {
+  font-size: 13px;
+}
+
+/* ── narrow screens ──────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .seo-auth-desk {
+    position: static;
+    top: auto;
+  }
+}
+@media (max-width: 519px) {
+  .seo-brand-sub {
+    display: none;
+  }
+  .seo-footer-inner {
+    padding-inline: 18px;
+  }
+  .seo-header nav a.seo-nav-cta,
+  .seo-header nav button.seo-nav-cta {
+    max-width: 100%;
+    font-size: 12.5px;
+    padding: 0 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seo-header nav a.seo-nav-cta,
+  .seo-header nav button.seo-nav-cta {
+    transition: none;
+  }
+}
