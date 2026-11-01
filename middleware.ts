@@ -1,47 +1,45 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  isCanonicalPortalHost,
+  resolvePortalFromHost,
+  resolveSubdomainLandingPath,
+} from "@/lib/portal-domains";
 import { PRIVATE_ROUTE_PREFIXES, SITE_URL } from "@/lib/seo/site";
 
 /**
  * Edge middleware.
  *
- * Two jobs, both of which have to work on routes whose page component is a
- * client component and therefore cannot export `metadata`:
+ * Three jobs:
  *
- *  1. **`X-Robots-Tag: noindex, nofollow` on application-private routes.**
- *     `/admin`, `/profile`, `/trips`, `/saved`, `/host/*`, `/login`, `/signup`,
- *     `/book/*`, `/split/*` and the rest are all `"use client"` pages. Adding a
- *     `generateMetadata` to each one would mean converting a dozen screens to
- *     server components for a single header. A header works on all of them at
- *     once, including on 404s and on any future route added under those
- *     prefixes.
+ *  1. **4-Subdomain Portal Routing & Canonical Host Enforcement.**
+ *     Recognizes `www.9bhk.app` (Guest), `realtor.9bhk.app` (Realtor),
+ *     `owners.9bhk.app` (Owners & Buyers), and `admin.9bhk.app` (Staff Admin),
+ *     plus local `*.localhost` equivalents. Rewrites `/` on dedicated portal
+ *     subdomains to their workspace root (`/realtor`, `/host`, `/admin`) while
+ *     redirecting unknown hosts to `CANONICAL_HOST`.
  *
- *     This is belt-and-braces with `robots.txt`, and deliberately so:
- *     `Disallow` stops a crawl but does **not** prevent indexing from an
- *     external link, so a shared profile URL can still appear in results with a
- *     "no indexed page description" message. `noindex` is the only thing that
- *     actually removes it, and it is ignored if the page is blocked — which is
- *     why the private prefixes are *not* blocked for the page owner. They are
- *     blocked for everyone else, and noindexed for the crawler that does reach
- *     them.
+ *  2. **Strict Host-Only Auth Cookies Per Subdomain.**
+ *     Strips any `domain` attribute when refreshing Supabase SSR cookies so
+ *     sessions never bleed across `www`, `realtor`, `owners`, and `admin`.
  *
- *  2. **Canonical host enforcement.** Every non-`*.vercel.app` host that is not
- *     the canonical one is redirected to it, so the apex and the bare domain can
- *     never be served as a second copy of the same pages. Vercel's own domain
- *     redirect already handles the apex in front of this function; the check
- *     here is the backstop that survives a domain reconfiguration.
- *
- * Response headers live in `next.config.ts` instead, so they are applied at the
- * CDN layer to every path — including the static chunks this matcher skips —
- * and are not duplicated by two writers.
+ *  3. **`X-Robots-Tag: noindex, nofollow, noarchive` on Private & Portal Routes.**
+ *     Every non-guest portal subdomain (`realtor`, `owners`, `admin`) and every
+ *     application-private pathname receives `X-Robots-Tag: noindex, nofollow, noarchive`.
  */
 
 const CANONICAL_HOST = new URL(SITE_URL).host;
 
 /** Hosts that must never be bounced: local dev, and Vercel's own aliases. */
 function isPassthroughHost(host: string): boolean {
-  if (host.endsWith(".vercel.app")) return true;
-  if (host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("[::1]")) {
+  const clean = host.trim().toLowerCase().replace(/:\d+$/, "");
+  if (clean.endsWith(".vercel.app")) return true;
+  if (
+    clean === "localhost" ||
+    clean.endsWith(".localhost") ||
+    clean === "127.0.0.1" ||
+    clean === "[::1]"
+  ) {
     return true;
   }
   return process.env.NODE_ENV === "development";
@@ -55,32 +53,62 @@ function isPrivate(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const host = request.headers.get("host");
-  if (host && host !== CANONICAL_HOST && !isPassthroughHost(host)) {
+
+  if (
+    host &&
+    !isCanonicalPortalHost(host, CANONICAL_HOST) &&
+    !isPassthroughHost(host)
+  ) {
     const target = request.nextUrl.clone();
     target.host = CANONICAL_HOST;
     target.protocol = "https:";
     return NextResponse.redirect(target, 308);
   }
 
-  let response = NextResponse.next({ request });
+  const portal = resolvePortalFromHost(host);
+  const rewritePath = resolveSubdomainLandingPath(host, pathname);
+  const effectivePathname = rewritePath ?? pathname;
+
+  const makeResponse = () => {
+    if (rewritePath) {
+      const targetUrl = request.nextUrl.clone();
+      targetUrl.pathname = rewritePath;
+      return NextResponse.rewrite(targetUrl, { request });
+    }
+    return NextResponse.next({ request });
+  };
+
+  let response = makeResponse();
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (url && key && !/\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2?|css|js|map|txt|xml)$/i.test(pathname)) {
-    const supabase = createServerClient(url, key, { cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll(values) {
-        values.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        values.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+  if (
+    url &&
+    key &&
+    !/\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2?|css|js|map|txt|xml)$/i.test(pathname)
+  ) {
+    const supabase = createServerClient(url, key, {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll(values) {
+          values.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = makeResponse();
+          values.forEach(({ name, value, options }) => {
+            const { domain: _ignoredDomain, ...hostOnlyOptions } = options ?? {};
+            response.cookies.set(name, value, hostOnlyOptions);
+          });
+        },
       },
-    } });
+    });
     await supabase.auth.getUser();
   }
-  if (isPrivate(pathname)) {
+
+  if (portal !== "guest" || isPrivate(effectivePathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
+  response.headers.set("x-9bhk-portal", portal);
+
   return response;
 }
 

@@ -370,7 +370,7 @@ async function main() {
     "/contact",
     "/legal/terms",
     "/property/bay-breakers-vault",
-    "/property/palm-grove",
+    "/property/ooty-pine-court",
     "/guides/ecr-weekend-stays",
     "/locations/ecr",
   ];

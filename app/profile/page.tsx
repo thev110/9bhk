@@ -9,6 +9,8 @@ import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { isAdminEmail } from "@/lib/admin";
+import { KycLockerCard } from "@/components/kyc-locker-card";
+import { PORTAL_HOSTS } from "@/lib/portal-domains";
 
 export default function ProfilePage() {
   const { user, signOut, updateUser, bookings, saved, showToast } = useStore();
@@ -95,6 +97,26 @@ export default function ProfilePage() {
         ) : null}
 
         <LanguageSwitcher />
+
+        <KycLockerCard category="guest" onToast={showToast} />
+
+        <div className="card stack" style={{ padding: 14 }}>
+          <div className="between wrap">
+            <strong>4-Subdomain Portal Architecture</strong>
+            <span className="pill forest" style={{ fontSize: 10 }}>Host-Only Isolated Sessions</span>
+          </div>
+          <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+            Each 9bhk category operates on an isolated portal with dedicated mandatory KYC verification:
+          </p>
+          <div className="row wrap" style={{ gap: 8 }}>
+            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.guest.host} · Stays</span>
+            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.realtor.host} · RERA Realtors</span>
+            <span className="pill" style={{ fontSize: 11 }}>{PORTAL_HOSTS.owners.host} · Owners &amp; Buyers</span>
+            {isAdminEmail(user.email) ? (
+              <span className="pill warn" style={{ fontSize: 11 }}>{PORTAL_HOSTS.admin.host} · Staff KYC Desk</span>
+            ) : null}
+          </div>
+        </div>
 
         <div className="row wrap" style={{ gap: 10 }}>
           <Link href="/realtor" className="card" style={{ flex: 1, minWidth: 140, textDecoration: "none" }}>

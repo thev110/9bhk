@@ -1,4 +1,4 @@
-﻿/* Product-flow regression check.
+/* Product-flow regression check.
    Booking, auth, dashboard, filters and APIs must still work after the SEO
    upgrade. Interactive code lives in the client bundle rather than the SSR
    HTML, so this asserts the route responds AND that the JavaScript it depends
@@ -12,7 +12,7 @@ const ROUTES = [
   ["/", 200], ["/search", 200], ["/buy", 200], ["/saved", 200],
   ["/property/bay-breakers-vault", 200], ["/book/bay-breakers-vault", 200],
   ["/login", 200], ["/signup", 200], ["/profile", 200], ["/trips", 200],
-  ["/realtor", 200], ["/host/new", 200], ["/host/bookings", 200],
+  ["/realtor", "auth"], ["/host", "auth"], ["/host/new", "auth"], ["/host/bookings", "auth"],
   ["/notifications", 200],
   ["/admin", "auth"],            /* 2xx or an auth redirect both count */
   ["/splash", "redirect"], ["/onboarding", "redirect"],

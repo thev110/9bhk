@@ -20,6 +20,8 @@ import { BaseSheet } from "@/components/base-sheet";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { settingLabel } from "@/lib/i18n/vibes";
+import { KycLockerCard } from "@/components/kyc-locker-card";
+import { OwnerOperationsDesk } from "@/components/owner-operations-desk";
 
 function BrokerBanner() {
   const searchParams = useSearchParams();
@@ -73,6 +75,8 @@ export default function BuyPage() {
   const [buyerAgency, setBuyerAgency] = useState("");
   const [isRealtor, setIsRealtor] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [buyerKycVerified, setBuyerKycVerified] = useState(false);
+  const [buyerDeskOpen, setBuyerDeskOpen] = useState(false);
 
   const salesProperties = useMemo(() => {
     return properties.filter((p) => {
@@ -326,6 +330,44 @@ export default function BuyPage() {
 
       {/* Realtor & Broker Callout */}
       <section className="section pad">
+        <div className="card stack" style={{ marginBottom: 14 }}>
+          <div className="between wrap" style={{ gap: 8 }}>
+            <div>
+              <span className="pill forest">Buyer Acquisition &amp; KYC Desk · owners.9bhk.app</span>
+              <h3 style={{ fontSize: 18, marginTop: 6 }}>
+                Qualified Buyer Proof-of-Funds KYC, Formal Offers &amp; Private Vault
+              </h3>
+              <p className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+                Verify your Buyer ID &amp; Proof of Funds to submit integer-paise acquisition offers and inspect watermarked legal title deeds.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn accent sm"
+              onClick={() => setBuyerDeskOpen((prev) => !prev)}
+            >
+              {buyerDeskOpen ? "Hide Buyer Deal Desk" : "Open Buyer KYC & Offer Desk"}
+            </button>
+          </div>
+          {buyerDeskOpen && (
+            <div className="stack" style={{ marginTop: 10 }}>
+              <KycLockerCard
+                category="buyer"
+                onVerifiedChange={setBuyerKycVerified}
+                onToast={showToast}
+              />
+              <OwnerOperationsDesk
+                mode="buyer"
+                isKycVerified={buyerKycVerified}
+                properties={salesProperties.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                }))}
+                onToast={showToast}
+              />
+            </div>
+          )}
+        </div>
         <div className="card" style={{ background: "color-mix(in oklch, var(--primary) 8%, var(--surface))", border: "1px solid var(--moss)" }}>
           <div className="between">
             <p className="eyebrow" style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--forest)" }}>

@@ -1,7 +1,24 @@
+import {
+  KYC_CATEGORIES,
+  KYC_DOCUMENT_KINDS,
+  REQUIRED_KYC_DOCUMENTS,
+  summarizeCategoryKyc,
+  type KycCategory,
+  type KycDocumentKind,
+} from "@/lib/portal-domains";
 import { browserSupabase } from "@/lib/supabase/browser";
 
+export {
+  KYC_CATEGORIES,
+  KYC_DOCUMENT_KINDS,
+  REQUIRED_KYC_DOCUMENTS,
+  summarizeCategoryKyc,
+  type KycCategory,
+  type KycDocumentKind,
+};
+
 /**
- * Verification documents: what a host uploads, and what staff read back.
+ * Verification documents: what a host or portal participant uploads, and what staff read back.
  *
  * Files live in the **private** `verification-docs` bucket, so a document is
  * never reachable by guessing a URL — the only way to open one is a signed URL
@@ -26,6 +43,21 @@ export type PropertyDocument = {
   status: DocumentStatus;
   note?: string;
   createdAt: string;
+};
+
+export type KycDocument = {
+  id: string;
+  userId: string;
+  category: KycCategory;
+  kind: KycDocumentKind;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  path: string;
+  status: DocumentStatus;
+  note?: string;
+  createdAt: string;
+  updatedAt?: string;
 };
 
 /** Matches the bucket's own 15 MB limit, so the client refuses early. */
@@ -86,6 +118,41 @@ function fromRow(row: DocumentRow): PropertyDocument {
 
 const DOCUMENT_COLUMNS =
   "id, property_id, kind, storage_path, file_name, mime_type, size_bytes, status, note, created_at";
+
+type KycDocumentRow = {
+  id: string;
+  user_id: string;
+  category: string;
+  kind: string;
+  storage_path: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  status: string;
+  note: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+function fromKycRow(row: KycDocumentRow): KycDocument {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    category: row.category as KycCategory,
+    kind: row.kind as KycDocumentKind,
+    fileName: row.file_name,
+    mimeType: row.mime_type,
+    sizeBytes: Number(row.size_bytes),
+    path: row.storage_path,
+    status: row.status as DocumentStatus,
+    note: row.note ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at ?? undefined,
+  };
+}
+
+const KYC_DOCUMENT_COLUMNS =
+  "id, user_id, category, kind, storage_path, file_name, mime_type, size_bytes, status, note, created_at, updated_at";
 
 /**
  * Upload one document and index it against the listing.
@@ -252,6 +319,117 @@ export async function reviewDocument(input: {
       reviewed_by: data.user?.id ?? null,
       reviewed_at: new Date().toISOString(),
     })
-    .eq("id", input.id).select("id").single();
+    .eq("id", input.id)
+    .select("id")
+    .single();
+  return !error;
+}
+
+/**
+ * Upload one 4-category KYC document (`guest`, `realtor`, `seller`, `buyer`)
+ * into the private `verification-docs` bucket and upsert its slot in `bhk_kyc_documents`.
+ */
+export async function uploadKycDocument(input: {
+  category: KycCategory;
+  kind: KycDocumentKind;
+  file: File;
+}): Promise<KycDocument> {
+  const supabase = browserSupabase();
+  if (!supabase) throw new Error("Supabase is not configured");
+
+  const validation = validateDocument(input.file);
+  if (validation) throw new Error(validation);
+
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) throw new Error("Sign in before uploading verification documents");
+
+  const extension = input.file.name.includes(".")
+    ? input.file.name.split(".").pop()?.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "bin"
+    : "bin";
+  const path = `${data.user.id}/kyc-${input.category}-${input.kind}-${crypto.randomUUID()}.${extension}`;
+
+  const upload = await supabase.storage.from("verification-docs").upload(path, input.file, {
+    contentType: input.file.type,
+    upsert: false,
+  });
+  if (upload.error) throw upload.error;
+
+  const { data: row, error } = await supabase
+    .from("bhk_kyc_documents")
+    .upsert(
+      {
+        user_id: data.user.id,
+        category: input.category,
+        kind: input.kind,
+        storage_path: path,
+        file_name: input.file.name,
+        mime_type: input.file.type,
+        size_bytes: input.file.size,
+      },
+      { onConflict: "user_id,category,kind" },
+    )
+    .select(KYC_DOCUMENT_COLUMNS)
+    .single();
+
+  if (error) throw error;
+  return fromKycRow(row as unknown as KycDocumentRow);
+}
+
+/** List the signed-in user's own KYC documents, optionally filtered by category. */
+export async function listMyKycDocuments(category?: KycCategory): Promise<KycDocument[]> {
+  const supabase = browserSupabase();
+  if (!supabase) return [];
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return [];
+
+  let query = supabase
+    .from("bhk_kyc_documents")
+    .select(KYC_DOCUMENT_COLUMNS)
+    .eq("user_id", auth.user.id)
+    .order("created_at", { ascending: true });
+
+  if (category) {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  if (!data) return [];
+  return (data as unknown as KycDocumentRow[]).map(fromKycRow);
+}
+
+/** Staff queue: list all 4-category KYC documents across all users. */
+export async function listAllKycDocumentsForStaff(): Promise<KycDocument[]> {
+  const supabase = browserSupabase();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("bhk_kyc_documents")
+    .select(KYC_DOCUMENT_COLUMNS)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  if (!data) return [];
+  return (data as unknown as KycDocumentRow[]).map(fromKycRow);
+}
+
+/** Staff verdict on a 4-category KYC document. */
+export async function reviewKycDocument(input: {
+  id: string;
+  status: Exclude<DocumentStatus, "pending">;
+  note?: string;
+}): Promise<boolean> {
+  const supabase = browserSupabase();
+  if (!supabase) return false;
+  const { data } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("bhk_kyc_documents")
+    .update({
+      status: input.status,
+      note: input.note?.trim() || null,
+      reviewed_by: data.user?.id ?? null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", input.id)
+    .select("id")
+    .single();
   return !error;
 }

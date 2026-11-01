@@ -8,7 +8,16 @@ import { inr, formatBytes, formatRange } from "@/lib/format";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { operationRequest } from "@/lib/supabase/community";
 import { decideListing, loadReviewQueue, type ReviewListing } from "@/lib/supabase/review";
-import { openDocument, downloadDocument, reviewDocument, type PropertyDocument } from "@/lib/supabase/documents";
+import {
+  openDocument,
+  downloadDocument,
+  reviewDocument,
+  listAllKycDocumentsForStaff,
+  reviewKycDocument,
+  type PropertyDocument,
+  type KycDocument,
+  type KycCategory,
+} from "@/lib/supabase/documents";
 import { useCatalog } from "@/lib/catalog";
 import { useT } from "@/lib/i18n";
 import type { DictKey } from "@/lib/i18n/en";
@@ -40,6 +49,8 @@ export default function AdminPage() {
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
   const [refunds, setRefunds] = useState<RefundRow[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [kycDocs, setKycDocs] = useState<KycDocument[]>([]);
+  const [kycFilter, setKycFilter] = useState<"all" | KycCategory>("all");
   const [usage, setUsage] = useState<Array<{ event: string; count: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,7 +64,7 @@ export default function AdminPage() {
     if (!db) { setError("Online services are not configured."); setLoading(false); return; }
     setLoading(true);
     try {
-      const [propertyRows, profileRows, bookingRows, waiting, reviewRows, supportRows, payoutRows, refundRows, auditRows, usageRows] = await Promise.all([
+      const [propertyRows, profileRows, bookingRows, waiting, reviewRows, supportRows, payoutRows, refundRows, auditRows, usageRows, kycRows] = await Promise.all([
         db.from("bhk_properties").select("id,name,status,host_id,price,bedrooms,location,verification_status,image_urls").order("created_at", { ascending: false }),
         db.from("bhk_profiles").select("id,full_name,email,phone,created_at,role,verified_broker").order("created_at", { ascending: false }),
         db.from("bhk_bookings").select("*").order("created_at", { ascending: false }),
@@ -69,10 +80,11 @@ export default function AdminPage() {
           if (result.error) throw result.error;
           return { event, count: result.count || 0 };
         })),
+        listAllKycDocumentsForStaff().catch(() => [] as KycDocument[]),
       ]);
       for (const result of [propertyRows, profileRows, bookingRows, reviewRows, supportRows, payoutRows, refundRows, auditRows]) if (result.error) throw result.error;
       setProperties(propertyRows.data ?? []); setUsers(profileRows.data ?? []); setBookings(bookingRows.data ?? []); setQueue(waiting); setReviews(reviewRows.data ?? []);
-      setTickets(supportRows.data ?? []); setPayouts(payoutRows.data ?? []); setRefunds(refundRows.data ?? []); setAudit(auditRows.data ?? []); setError("");
+      setTickets(supportRows.data ?? []); setPayouts(payoutRows.data ?? []); setRefunds(refundRows.data ?? []); setAudit(auditRows.data ?? []); setKycDocs(kycRows); setError("");
       setUsage(usageRows);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load operations data."); }
     finally { setLoading(false); }
@@ -100,6 +112,10 @@ export default function AdminPage() {
     if (status === "rejected" && !notes[doc.id]?.trim()) throw new Error("Add a reason for rejecting this document.");
     if (!await reviewDocument({ id: doc.id, status, note: notes[doc.id] })) throw new Error("Could not save document review.");
   }
+  async function kycVerdict(doc: KycDocument, status: "verified" | "rejected") {
+    if (status === "rejected" && !notes[doc.id]?.trim()) throw new Error("Add a reason for rejecting this KYC document.");
+    if (!await reviewKycDocument({ id: doc.id, status, note: notes[doc.id] })) throw new Error("Could not save KYC document review.");
+  }
   function exportBookings() {
     const cell = (value: unknown) => `"${String(value ?? "").replace(/^[=+@-]/, "'$&").replace(/"/g, '""')}"`;
     const rows = [["Code", "Property", "Guest", "Check-in", "Check-out", "Total", "Status", "Payment", "Refund"], ...bookings.map(b => [b.code, b.property_name, b.guest_name, b.check_in, b.check_out, b.total, b.status, b.payment_status, b.refund_status])];
@@ -118,7 +134,62 @@ export default function AdminPage() {
         <div className="card"><h3>Audit log</h3>{!audit.length && <p className="muted">No recorded staff changes.</p>}{audit.map(row => <p className="tiny" key={row.id}>{new Date(row.created_at).toLocaleString()} · {row.action} · {row.entity_type} · {row.entity_id} · {row.actor_id || "Server"}</p>)}</div>
       </>}
       {tab === "Properties" && <>{properties.map(row => <article className="card" key={row.id}><h3>{row.name}</h3><p>{row.location} · {row.bedrooms} bedrooms · {row.status}</p><p className="muted">Host: {row.host_id || "Unassigned"}</p><strong>{inr(row.price)} / night</strong><div className="row mt"><button className="btn outline sm" disabled={busy || row.status !== "published"} onClick={() => perform(() => updateRow("bhk_properties", row.id, { status: "draft" }), "Listing unpublished.")}>Unpublish</button><button className="btn ghost sm" onClick={() => { setPriceId(row.id); setPrice(String(row.price)); }}>Edit price</button></div>{priceId === row.id && <div className="row mt"><input className="ctrl" aria-label="Nightly price" type="number" min="1" value={price} onChange={e => setPrice(e.target.value)} /><button className="btn" disabled={busy} onClick={() => perform(async () => { const amount = Number(price); if (!Number.isInteger(amount) || amount <= 0) throw new Error("Enter a positive whole-rupee nightly price."); await updateRow("bhk_properties", row.id, { price: amount }); setPriceId(null); }, "Price saved.")}>Save</button></div>}</article>)}</>}
-      {(tab === "Reviews" || tab === "Verification") && <><h2>Listing submissions</h2>{!loading && !queue.length && <p className="muted">No pending submissions.</p>}{queue.map(item => <article className="card stack" key={item.id}><h3>{item.name}</h3><p>{item.meta} · {item.price}</p><p className="muted">{item.host}</p><div className="gal">{item.images.map((image, i) => <img key={`${image}-${i}`} src={image} alt={`${item.name} photo ${i + 1}`} loading="lazy" />)}</div>
+      {(tab === "Reviews" || tab === "Verification") && <>
+        <div className="card stack">
+          <div className="between wrap">
+            <div>
+              <h2>4-Category Account KYC Verification Desk ({kycDocs.length})</h2>
+              <p className="muted" style={{ fontSize: 12.5 }}>
+                Review mandatory identity, RERA certificate, title deed, and proof-of-funds documents across all four portals (www, realtor, owners, admin).
+              </p>
+            </div>
+            <div className="row wrap" style={{ gap: 6 }}>
+              {(["all", "realtor", "seller", "buyer", "guest"] as const).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`btn sm ${kycFilter === cat ? "accent" : "outline"}`}
+                  onClick={() => setKycFilter(cat)}
+                >
+                  {cat.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          {!loading && kycDocs.filter(d => kycFilter === "all" || d.category === kycFilter).length === 0 && (
+            <p className="muted">No KYC documents in this category filter.</p>
+          )}
+          {kycDocs
+            .filter(d => kycFilter === "all" || d.category === kycFilter)
+            .map(doc => {
+              const owner = users.find(u => u.id === doc.userId);
+              return (
+                <article className="card stack" key={doc.id} style={{ background: "var(--surface-2)" }}>
+                  <div className="between wrap">
+                    <div>
+                      <strong>{doc.category.toUpperCase()} · {doc.kind.replace(/_/g, " ")}</strong>
+                      <p className="muted" style={{ fontSize: 12 }}>
+                        Account: {owner?.full_name || "User"} ({owner?.email || doc.userId}) · {doc.fileName} · {formatBytes(doc.sizeBytes)}
+                      </p>
+                    </div>
+                    <span className={`pill ${doc.status === "verified" ? "ok" : doc.status === "rejected" ? "danger" : "warn"}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                  <div className="row wrap" style={{ gap: 8 }}>
+                    <button className="btn outline sm" onClick={() => perform(async () => { if (!await openDocument(doc.path)) throw new Error("Could not open KYC document."); }, "Signed KYC preview opened.")}>Open (5-min Signed Link)</button>
+                    <button className="btn ghost sm" onClick={() => perform(async () => { if (!await downloadDocument(doc)) throw new Error("Could not download KYC document."); }, "KYC document downloaded.")}>Download</button>
+                  </div>
+                  <label className="field">KYC Reviewer Note<input className="ctrl" value={notes[doc.id] || doc.note || ""} onChange={e => setNotes(curr => ({ ...curr, [doc.id]: e.target.value }))} /></label>
+                  <div className="row wrap" style={{ gap: 8 }}>
+                    <button className="btn sm" disabled={busy} onClick={() => perform(() => kycVerdict(doc, "verified"), "Account KYC document verified.")}>Verify KYC</button>
+                    <button className="btn outline sm" disabled={busy} onClick={() => perform(() => kycVerdict(doc, "rejected"), "Account KYC document rejected.")}>Reject KYC</button>
+                  </div>
+                </article>
+              );
+            })}
+        </div>
+        <h2>Listing submissions</h2>{!loading && !queue.length && <p className="muted">No pending submissions.</p>}{queue.map(item => <article className="card stack" key={item.id}><h3>{item.name}</h3><p>{item.meta} · {item.price}</p><p className="muted">{item.host}</p><div className="gal">{item.images.map((image, i) => <img key={`${image}-${i}`} src={image} alt={`${item.name} photo ${i + 1}`} loading="lazy" />)}</div>
         {item.documents.map(doc => <div className="card stack" key={doc.id}><strong>{doc.kind.replace(/_/g, " ")}</strong><p>{doc.fileName} · {formatBytes(doc.sizeBytes)} · {doc.status}</p><div className="row"><button className="btn outline sm" onClick={() => perform(async () => { if (!await openDocument(doc.path)) throw new Error("Could not open document."); }, "Document link opened.")}>Open</button><button className="btn ghost sm" onClick={() => perform(async () => { if (!await downloadDocument(doc)) throw new Error("Could not download document."); }, "Document downloaded.")}>Download</button></div><label className="field">Reviewer note<input className="ctrl" value={notes[doc.id] || ""} onChange={e => setNotes(curr => ({ ...curr, [doc.id]: e.target.value }))} /></label><div className="row"><button className="btn sm" disabled={busy} onClick={() => perform(() => documentVerdict(doc, "verified"), "Document verified.")}>Verify</button><button className="btn outline sm" disabled={busy} onClick={() => perform(() => documentVerdict(doc, "rejected"), "Document rejected.")}>Reject</button></div></div>)}
         <label className="field">Listing decision note<textarea className="ctrl" value={notes[item.id] || ""} onChange={e => setNotes(curr => ({ ...curr, [item.id]: e.target.value }))} /></label><div className="row wrap">{["approve", "changes", "reject"].map(action => <button key={action} className="btn outline sm" disabled={busy} onClick={() => perform(() => decide(item, action as "approve" | "changes" | "reject"), "Listing decision saved.")}>{action === "approve" ? "Approve and publish" : action === "changes" ? "Request changes" : "Reject"}</button>)}</div>
       </article>)}

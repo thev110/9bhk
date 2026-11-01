@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { defaultUser, useStore, type UserRole } from "@/lib/store";
 import { Icon } from "@/components/icon";
 import { useT } from "@/lib/i18n";
+import { PORTAL_HOSTS, resolvePortalFromHost, type PortalId } from "@/lib/portal-domains";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -14,6 +15,18 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<"role" | "details" | "complete">("role");
   const [role, setRole] = useState<UserRole>("buyer");
+  const [portalSubdomain, setPortalSubdomain] = useState<PortalId>("guest");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const detected = resolvePortalFromHost(window.location.host);
+    setPortalSubdomain(detected);
+    if (detected === "realtor") {
+      setRole("realtor");
+    } else if (detected === "owners") {
+      setRole("seller");
+    }
+  }, []);
   
   // Common details
   const [name, setName] = useState("");
@@ -65,9 +78,14 @@ export default function OnboardingPage() {
 
         {step === "role" && (
           <div className="stack mt" style={{ marginTop: 24 }}>
-            <span className="pill forest" style={{ alignSelf: "flex-start" }}>
-              {t("onboarding.marketplacePill")}
-            </span>
+            <div className="row wrap" style={{ gap: 8 }}>
+              <span className="pill forest" style={{ alignSelf: "flex-start" }}>
+                {t("onboarding.marketplacePill")}
+              </span>
+              <span className="pill" style={{ fontSize: 11 }}>
+                Active Portal: {PORTAL_HOSTS[portalSubdomain].host}
+              </span>
+            </div>
             <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 36, lineHeight: 1.1 }}>
               {t("onboarding.heroTitle")}
             </h1>

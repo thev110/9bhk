@@ -12,6 +12,8 @@ import { useCatalog } from "@/lib/catalog";
 import { CITIES, inr } from "@/lib/format";
 import { formatInrCrores, type Property } from "@/lib/properties";
 import { RazorpayCheckout, type RazorpayPaymentSuccess } from "@/components/RazorpayCheckout";
+import { KycLockerCard } from "@/components/kyc-locker-card";
+import { RealtorTieUpDesk } from "@/components/realtor-tieup-desk";
 
 export default function RealtorPortalPage() {
   const router = useRouter();
@@ -42,7 +44,8 @@ export default function RealtorPortalPage() {
     router.replace(`/login?next=${encodeURIComponent("/realtor")}`);
   }, [ready, sessionChecked, user, router]);
 
-  const [activeTab, setActiveTab] = useState<"catalog" | "clients">("catalog");
+  const [activeTab, setActiveTab] = useState<"catalog" | "clients" | "tieups" | "kyc">("catalog");
+  const [realtorKycVerified, setRealtorKycVerified] = useState(false);
   const [addClientModalOpen, setAddClientModalOpen] = useState(false);
   const [addPropertyModalOpen, setAddPropertyModalOpen] = useState(false);
   const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
@@ -533,9 +536,9 @@ export default function RealtorPortalPage() {
         </div>
       </div>
 
-      {/* View Switcher: Catalog vs Clients */}
+      {/* View Switcher: Catalog vs Clients vs Tie-Ups vs KYC */}
       <div className="pad mt">
-        <div className="seg">
+        <div className="seg" style={{ flexWrap: "wrap" }}>
           <button
             type="button"
             aria-selected={activeTab === "catalog"}
@@ -549,6 +552,20 @@ export default function RealtorPortalPage() {
             onClick={() => setActiveTab("clients")}
           >
             Client List ({clientList.length})
+          </button>
+          <button
+            type="button"
+            aria-selected={activeTab === "tieups"}
+            onClick={() => setActiveTab("tieups")}
+          >
+            Realtor Tie-Ups &amp; Mandates
+          </button>
+          <button
+            type="button"
+            aria-selected={activeTab === "kyc"}
+            onClick={() => setActiveTab("kyc")}
+          >
+            RERA KYC Locker
           </button>
         </div>
       </div>
@@ -881,6 +898,33 @@ export default function RealtorPortalPage() {
               ))}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {/* ── TAB 3: REALTOR-TO-REALTOR TIE-UPS, MANDATES & VIEWINGS ────────── */}
+      {activeTab === "tieups" ? (
+        <div className="pad mt stack">
+          <RealtorTieUpDesk
+            userId={user.id || user.email}
+            isKycVerified={Boolean(user.verifiedBroker || realtorKycVerified)}
+            properties={properties.map((p) => ({
+              id: p.id,
+              name: p.name,
+              location: p.location,
+            }))}
+            onToast={showToast}
+          />
+        </div>
+      ) : null}
+
+      {/* ── TAB 4: MANDATORY RERA BROKER KYC LOCKER ───────────────────────── */}
+      {activeTab === "kyc" ? (
+        <div className="pad mt stack">
+          <KycLockerCard
+            category="realtor"
+            onVerifiedChange={setRealtorKycVerified}
+            onToast={showToast}
+          />
         </div>
       ) : null}
 

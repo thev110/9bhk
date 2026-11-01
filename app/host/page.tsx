@@ -7,6 +7,8 @@ import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { inr } from "@/lib/format";
 import { loadHostBookings, loadHostProperties, type HostProperty } from "@/lib/supabase/properties";
+import { KycLockerCard } from "@/components/kyc-locker-card";
+import { OwnerOperationsDesk } from "@/components/owner-operations-desk";
 
 export default function HostPage() {
   const { draft, user, updateUser, showToast } = useStore();
@@ -18,6 +20,7 @@ export default function HostPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [sellerKycVerified, setSellerKycVerified] = useState(false);
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -67,6 +70,13 @@ export default function HostPage() {
       {!loading && !error && properties.length === 0 && !draft && <div className="card"><h3>{t("host.emptyTitle")}</h3><p className="muted">{t("host.emptyBody")}</p><Link className="btn mt" href="/host/new">{t("host.listYourFarmhouse")}</Link></div>}
       <h2>{t("host.hostingTools")}</h2><div className="menu"><Link className="mi" href="/host/bookings"><span className="lb">{t("host.bookings")}</span><span className="meta">{loading ? "—" : upcoming}</span></Link>
         <Link className="mi" href="/host/bookings?tab=calendar">Calendar and pricing</Link><Link className="mi" href="/host/bookings?tab=earnings">{t("host.earnings")}</Link></div>
+      <KycLockerCard category="seller" onVerifiedChange={setSellerKycVerified} onToast={showToast} />
+      <OwnerOperationsDesk
+        mode="seller"
+        isKycVerified={sellerKycVerified}
+        properties={properties.map(p => ({ id: p.id, name: p.name }))}
+        onToast={showToast}
+      />
     </div>
   </Shell>;
 }
